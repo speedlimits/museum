@@ -148,7 +148,7 @@ class CsvToSql:
         location = Sirikata.ObjLoc()
         self.protovec(location.position, row, 'pos')
         if (row['orient_w']):
-            self.protovec(location.orientation, row, 'orient')
+           self.protovec(location.orientation, row, 'orient')
         else:
             # Convert from angle
             phi = float(row['orient_x'])*math.pi/180.

@@ -1170,6 +1170,8 @@ void HostedObject::receivedPropertyUpdate(
             params.colMsg = parsedProperty.collide_msg();
             params.colMask = parsedProperty.collide_mask();
             params.hull = parsedProperty.hull();
+            params.name = proxymesh->getPhysical().name;        /// otherwise setPhysical will wipe it
+            std::cout << "dbm debug calling setPhysical(1) with name =" << params.name << std::endl;
             proxymesh->setPhysical(params);
         }
     }
@@ -1193,6 +1195,7 @@ void HostedObject::receivedPropertyUpdate(
         if (proxymesh && parsedProperty.has_value()) {
             PhysicalParameters params = proxymesh->getPhysical();
             params.name = parsedProperty.value();
+            std::cout << "dbm debug calling setPhysical(2) with name=" << params.name << std::endl;
             proxymesh->setPhysical(params);
         }
     }

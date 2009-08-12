@@ -49,8 +49,8 @@ using namespace std;
 using std::tr1::placeholders::_1;
 static int core_plugin_refcount = 0;
 
-//#define DEBUG_OUTPUT(x) x
-#define DEBUG_OUTPUT(x)
+#define DEBUG_OUTPUT(x) x
+//#define DEBUG_OUTPUT(x)
 
 SIRIKATA_PLUGIN_EXPORT_C void init() {
     using namespace Sirikata;
@@ -103,8 +103,9 @@ void BulletObj::meshChanged (const URI &newMesh) {
 }
 
 void BulletObj::setPhysical (const PhysicalParameters &pp) {
-    DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " mesh: " << mMeshname << endl);
-    mName = pp.name;
+    DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " name: " << pp.name << endl);
+//    if (pp.name != "")
+        mName = pp.name;            /// that's a hack -- should reparameterize this function properly
     mHull = pp.hull;
     colMask = pp.colMask;
     colMsg = pp.colMsg;
@@ -389,6 +390,7 @@ bool BulletSystem::tick() {
         lasttime = now;
         if ((now-mStartTime) > 10.0) {
             for (unsigned int i=0; i<objects.size(); i++) {
+                cout << "dbm debug A " << objects[i]->mName << endl;
                 if (objects[i]->mActive) {
                     if (objects[i]->mName.substr(0,6) == "Avatar") {
                         double dist;
