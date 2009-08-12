@@ -446,6 +446,8 @@ class BulletSystem: public TimeSteppedQueryableSimulation {
     btCollisionShape* groundShape;
     btRigidBody* groundBody;
 
+    BulletObj* mLastQuery;
+
 
 public:
     BulletSystem();
