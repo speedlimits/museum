@@ -39,6 +39,7 @@
 #include "btBulletDynamicsCommon.h"
 #include "btBulletCollisionCommon.h"
 #include "BulletSystem.hpp"
+#include <oscplugin/osc.h>
 #include "Bullet_Sirikata.pbj.hpp"
 #include "Bullet_Physics.pbj.hpp"
 #include "util/RoutableMessageBody.hpp"
@@ -367,10 +368,16 @@ void BulletSystem::removePhysicalObject(BulletObj* obj) {
     }
 }
 
+float distSqV3(Vector3f v1, Vector3f v2) {
+    return ( (v1.x-v2.x)*(v1.x-v2.x) + (v1.y-v2.y)*(v1.y-v2.y) + (v1.z-v2.z)*(v1.z-v2.z) );
+}
+
 bool BulletSystem::tick() {
     static Task::AbsTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     static int mode = 0;
+    static Vector3f lastAvatarLinearVel = Vector3f();
+    static string lastPathSection="path_00_00";
     Task::AbsTime now = Task::AbsTime::now();
     Task::DeltaTime delta;
     positionOrientation po;
@@ -383,8 +390,45 @@ bool BulletSystem::tick() {
         if ((now-mStartTime) > 10.0) {
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
-                    if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
-                            objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
+                    if (objects[i]->mName.substr(0,6) == "Avatar") {
+                        double dist;
+                        Vector3f norm;
+                        SpaceObjectReference sor;
+                        string queryName="path_00_00";
+                        if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
+                            queryName=mLastQuery->mName;
+                            cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
+                            << " object: " << queryName << endl;
+                        }
+                        else {
+                            cout << "dbm debug: queryRay returns nothing" << endl;
+                        }
+                        if (queryName != lastPathSection) {
+                            cout << "dbm debug OSC event: stepped off " << lastPathSection << " and onto " << queryName << endl;
+                            lastPathSection = queryName;
+                        }
+                            /// OSC stuff:
+                        Vector3d pos = objects[i]->mMeshptr->getPosition();
+                        oscplugin::mito_data data;
+                        
+                        istringstream suser(objects[i]->mName.substr(7));
+                        suser >> data.user_id;
+                        
+                        istringstream spath(queryName.substr(5,2));
+                        spath >> data.path_id;
+                        
+                        istringstream scell(queryName.substr(8));
+                        scell >> data.cell_id;
+                        
+                        data.global_x=pos.x;
+                        data.global_y=pos.y;
+                        data.global_z=pos.z;
+                        data.relative_x=0;
+                        data.relative_y=0;
+                        oscplugin::sendOSCmessage(data);
+                    }
+                    else if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
+                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
                         /// if object has been moved, reset bullet position accordingly
                         DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
                                      << " meshpos: " << objects[i]->mMeshptr->getPosition()
@@ -402,6 +446,18 @@ bool BulletSystem::tick() {
 
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
+                    if (objects[i]->mName.substr(0,6) != "Avatar") {
+                        po = objects[i]->getBulletState();
+                        DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
+                                     << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl);
+                        cout << "    dbm: object, " << objects[i]->mName << ", delta, "
+                        << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl;
+                        Location loc;
+                        loc.setPosition(po.p);
+                        loc.setOrientation(po.o);
+                        objects[i]->mMeshptr->setLocation(now, loc);
+                    }
+					else {
                     po = objects[i]->getBulletState();
                     DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
                                  << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl;)
@@ -410,6 +466,7 @@ bool BulletSystem::tick() {
                     loc.setOrientation(po.o);
                     objects[i]->mMeshptr->setLocation(now, loc);
                 }
+				}
             }
 
             /// test queryRay
@@ -598,9 +655,10 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     Transfer::TransferManager* tm = (Transfer::TransferManager*)mTempTferManager->as<void*>();
     this->transferManager = tm;
 
-    gravity = Vector3d(0, -9.8, 0);
+//    gravity = Vector3d(0, -9.8, 0);
+    gravity = Vector3d(0, 0, 0);
     //groundlevel = 3044.0;
-    groundlevel = 0.0;
+    groundlevel = -1000.0;
     btTransform groundTransform;
     btDefaultMotionState* mMotionState;
     btVector3 worldAabbMin(-10000,-10000,-10000);
@@ -703,6 +761,7 @@ struct  raycastCallback : public btCollisionWorld::RayResultCallback {
         return rayResult.m_hitFraction;
     }
 };
+
 bool BulletSystem::forwardMessagesTo(MessageService*ms) {
 	messageServices.push_back(ms);
 	return true;
@@ -755,6 +814,7 @@ bool BulletSystem::queryRay(const Vector3d& position,
         if (obj) {
             /// if not found, it's probably the ground body
             returnName = obj->mMeshptr->getObjectReference();
+            mLastQuery = obj;
         }
         return true;
     }
@@ -762,6 +822,5 @@ bool BulletSystem::queryRay(const Vector3d& position,
         return false;
     }
 }
-
 
 }//namespace sirikata
