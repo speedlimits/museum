@@ -104,8 +104,7 @@ void BulletObj::meshChanged (const URI &newMesh) {
 
 void BulletObj::setPhysical (const PhysicalParameters &pp) {
     DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " name: " << pp.name << endl);
-//    if (pp.name != "")
-        mName = pp.name;            /// that's a hack -- should reparameterize this function properly
+    mName = pp.name;
     mHull = pp.hull;
     colMask = pp.colMask;
     colMsg = pp.colMsg;
