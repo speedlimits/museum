@@ -387,7 +387,7 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > 10.0) {
+        if ((now-mStartTime) > Duration::seconds(10.0)) {
             for (unsigned int i=0; i<objects.size(); i++) {
                 cout << "dbm debug A " << objects[i]->mName << endl;
                 if (objects[i]->mActive) {
@@ -443,7 +443,7 @@ bool BulletSystem::tick() {
                     }
                 }
             }
-            dynamicsWorld->stepSimulation(delta,10);
+            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
 
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {

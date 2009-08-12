@@ -53,32 +53,53 @@ namespace Task {
  * @see AbsTime
  */
 class SIRIKATA_EXPORT DeltaTime {
-	int64 mDeltaTime;
-    	/// Construct from a floating point number of seconds.
-	DeltaTime(double s):mDeltaTime((int64)(s*1000000.)){
+    int64 mDeltaTime;
 
-	}
-    DeltaTime(int64 us):mDeltaTime(us) {
+    explicit DeltaTime(int64 us)
+        : mDeltaTime(us)
+    {
     }
 public:
-    DeltaTime():mDeltaTime(0){}
+    DeltaTime()
+        : mDeltaTime(0)
+    {
+    }
+
     inline double operator/ (const DeltaTime&other)const {
         return (double)(mDeltaTime/other.mDeltaTime)+(double)(mDeltaTime%other.mDeltaTime)/(double)other.mDeltaTime;
     }
-    inline DeltaTime operator/(float rhs) const {
-        return DeltaTime((int64)((double)mDeltaTime / (double)rhs));
+
+    inline DeltaTime operator/(float32 rhs) const {
+        return DeltaTime((int64)((float64)mDeltaTime / (float64)rhs));
     }
-    inline DeltaTime operator/(double rhs) const {
-        return DeltaTime((int64)((double)mDeltaTime / (double)rhs));
+    inline void operator/=(float32 rhs) {
+        mDeltaTime = (int64)((float64)mDeltaTime / (float64)rhs);
     }
-    operator double()const {
-        return (double)mDeltaTime/1000000.;
+    inline DeltaTime operator/(float64 rhs) const {
+        return DeltaTime((int64)((float64)mDeltaTime / (float64)rhs));
     }
+    inline void operator/=(float64 rhs) {
+        mDeltaTime = (int64)((float64)mDeltaTime / (float64)rhs);
+    }
+
+    inline DeltaTime operator*(float32 rhs) const {
+        return DeltaTime((int64)((float64)mDeltaTime * (float64)rhs));
+    }
+    inline void operator*=(float32 rhs) {
+        mDeltaTime = (int64)((float64)mDeltaTime * (float64)rhs);
+    }
+    inline DeltaTime operator*(float64 rhs) const {
+        return DeltaTime((int64)((float64)mDeltaTime * (float64)rhs));
+    }
+    inline void operator*=(float64 rhs) {
+        mDeltaTime = (int64)((float64)mDeltaTime * (float64)rhs);
+    }
+
     static DeltaTime seconds(double s) {
-        return DeltaTime(s);
+        return DeltaTime((int64)(s/1000000.));
     }
     static DeltaTime milliseconds(double ms) {
-        return DeltaTime(ms/1000.);
+        return DeltaTime((int64)(ms*1000.));
     }
     static DeltaTime milliseconds(int64 ms) {
         return DeltaTime(ms*1000);
@@ -109,6 +130,10 @@ public:
 	/// Arethmetic operator-- add two DeltaTime values.
 	inline DeltaTime operator+= (const DeltaTime &other) {
 		return DeltaTime(mDeltaTime += other.mDeltaTime);
+	}
+	/// Arethmetic operator-- subtract two DeltaTime values.
+	inline DeltaTime operator-= (const DeltaTime &other) {
+		return DeltaTime(mDeltaTime -= other.mDeltaTime);
 	}
 	/// Arethmetic operator-- negate a DeltaTime.
 	inline DeltaTime operator- () const {
