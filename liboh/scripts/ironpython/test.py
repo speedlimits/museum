@@ -10,13 +10,8 @@ print dir(HostedObject)
 
 import util
 
-class exampleclass:
-    def __init__(self):
-        self.val=0
-    def func(self,otherval):
-        self.val+=otherval
-        print self.val
-        return self.val;
+class exampleclass(object):
+
     def reallyProcessRPC(self,serialheader,name,serialarg):
         print "Got an RPC named",name
         header = pbHead.Header()
@@ -49,6 +44,7 @@ class exampleclass:
                 dbQuery.send(HostedObject, myhdr)
             if proxcall.proximity_event == pbSiri.ProxCall.EXITED_PROXIMITY:
                 pass
+
     def sawAnotherObject(self,persistence,header,retstatus):
         print "PY: sawAnotherObject called"
         if header.HasField('return_status') or retstatus:
@@ -75,12 +71,14 @@ class exampleclass:
             header.destination_object=util.tupleFromUUID(self.objid);
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
+
     def processRPC(self,header,name,arg):
         try:
             self.reallyProcessRPC(header,name,arg)
         except:
             print "Error processing RPC",name
             traceback.print_exc()
+
     def setPosition(self,position=None,orientation=None,velocity=None,angular_speed=None,axis=None,force=False):
         objloc = pbSiri.ObjLoc()
         if position is not None:
@@ -114,6 +112,7 @@ class exampleclass:
         header.destination_space = util.tupleFromUUID(self.spaceid)
         header.destination_object = util.tupleFromUUID(self.objid)
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+
     def sendNewProx(self):
         print "sendprox2"
         try:
@@ -139,6 +138,7 @@ class exampleclass:
 
     def processMessage(self,header,body):
         print "Got a message"
+
     def tick(self,tim):
         x=str(tim)
         print "Current time is "+x;
