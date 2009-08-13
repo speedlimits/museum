@@ -426,6 +426,11 @@ bool BulletSystem::tick() {
                         data.global_z=pos.z;
                         data.relative_x=0;
                         data.relative_y=0;
+                        cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z 
+                                << " user: " << data.user_id
+                                << " path: " << data.path_id
+                                << " cell: " << data.cell_id
+                                << endl;
                         oscplugin::sendOSCmessage(data);
                     }
                     else if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
