@@ -302,6 +302,9 @@ void BulletObj::buildBulletBody(const unsigned char* meshdata, int meshbytes) {
         body->setCollisionFlags( body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
         body->setActivationState(DISABLE_DEACTIVATION);
     }
+    else {
+        body->setAngularFactor(0);
+    }
     system->dynamicsWorld->addRigidBody(body);
     mBulletBodyPtr=body;
     mActive=true;
@@ -323,7 +326,7 @@ void BulletObj::requestLocation(TemporalValue<Location>::Time timeStamp, const P
             assert(false);
         }
         axis *= reqLoc.angular_speed();
-        btVector3 btangvel(axis.x, axis.y, axis.z);
+        btVector3 btangvel = btVector3(axis.x, axis.y, axis.z);
         mBulletBodyPtr->setAngularVelocity(btangvel);
     }
 }

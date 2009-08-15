@@ -598,7 +598,8 @@ private:
         const Quaternion &orient = loc.getOrientation();
         Protocol::ObjLoc rloc;
         rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * .5);
-        rloc.set_angular_speed(0);        
+        rloc.set_angular_speed(0);
+        std::cout << "dbm debug: moveAction: " << dir << ", " << amount << std::endl;
         cam->requestLocation(now, rloc);
     }
     void rotateAction(Vector3f about, float amount) {
@@ -613,6 +614,7 @@ private:
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(about);
         rloc.set_angular_speed(amount);
+        std::cout << "dbm debug: rotateAction: " << about << ", " << amount << std::endl;
         cam->requestLocation(now, rloc);
     }
 
@@ -635,6 +637,7 @@ private:
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
         rloc.set_angular_speed(dir*amount);
+        std::cout << "dbm debug: stableRotateAction: " << raxis << ", " << dir*amount << std::endl;
         cam->requestLocation(now, rloc);
     }
 

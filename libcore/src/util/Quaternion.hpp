@@ -42,7 +42,7 @@ namespace QuaternionImpl {
 class Quaternion:public Vector4<float> {
 public:
     typedef float scalar;
-private:
+//private:
     Quaternion(const Vector4<scalar>&value):Vector4<scalar>(value){
 
     }
@@ -106,7 +106,7 @@ private:
             *apkQuat[k] = (kRot(k,i)+kRot(i,k))*fRoot;
         }
     }
-public:
+//public:
     Quaternion(){}
     class XYZW{};
     class WXYZ{};
