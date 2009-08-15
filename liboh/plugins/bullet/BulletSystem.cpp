@@ -49,8 +49,8 @@ using namespace std;
 using std::tr1::placeholders::_1;
 static int core_plugin_refcount = 0;
 
-#define DEBUG_OUTPUT(x) x
-//#define DEBUG_OUTPUT(x)
+//#define DEBUG_OUTPUT(x) x
+#define DEBUG_OUTPUT(x)
 
 SIRIKATA_PLUGIN_EXPORT_C void init() {
     using namespace Sirikata;
@@ -103,7 +103,7 @@ void BulletObj::meshChanged (const URI &newMesh) {
 }
 
 void BulletObj::setPhysical (const PhysicalParameters &pp) {
-    DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " name: " << pp.name << endl);
+    DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " mesh: " << mMeshname << endl);
     mName = pp.name;
     mHull = pp.hull;
     colMask = pp.colMask;
@@ -112,6 +112,7 @@ void BulletObj::setPhysical (const PhysicalParameters &pp) {
     case PhysicalParameters::Disabled:
         DEBUG_OUTPUT(cout << "  dbm: debug setPhysical: Disabled" << endl);
         mActive = false;
+        mMeshptr->setLocationAuthority(0);
         mDynamic = false;
         break;
     case PhysicalParameters::Static:
@@ -138,6 +139,7 @@ void BulletObj::setPhysical (const PhysicalParameters &pp) {
         po.o = mMeshptr->getOrientation();
         Vector3f size = mMeshptr->getScale();
         system->addPhysicalObject(this, po, pp.density, pp.friction, pp.bounce, pp.hull, size.x, size.y, size.z);
+        mMeshptr->setLocationAuthority(this);
     }
 }
 
@@ -301,10 +303,34 @@ void BulletObj::buildBulletBody(const unsigned char* meshdata, int meshbytes) {
         body->setCollisionFlags( body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
         body->setActivationState(DISABLE_DEACTIVATION);
     }
+    else {
+        body->setAngularFactor(0);
+    }
     system->dynamicsWorld->addRigidBody(body);
     mBulletBodyPtr=body;
     mActive=true;
     system->bt2siri[body]=this;
+}
+
+void BulletObj::requestLocation(TemporalValue<Location>::Time timeStamp, const Protocol::ObjLoc& reqLoc) {
+    if (reqLoc.has_velocity()) {
+        btVector3 btvel(reqLoc.velocity().x, reqLoc.velocity().y, reqLoc.velocity().z);
+        mBulletBodyPtr->setLinearVelocity(btvel);
+    }
+    if (reqLoc.has_angular_speed()) {
+        Vector3f axis(0,1,0);
+        if (reqLoc.has_rotational_axis()) {
+            axis = reqLoc.rotational_axis();
+        }
+        else if (reqLoc.angular_speed() != 0) {
+            cout << "ERROR -- please don't specify an angular speed without an axis" << endl;
+            assert(false);
+        }
+        axis = mMeshptr->getOrientation() * axis;
+        axis *= reqLoc.angular_speed();
+        btVector3 btangvel = btVector3(axis.x, axis.y, axis.z);
+        mBulletBodyPtr->setAngularVelocity(btangvel);
+    }
 }
 
 Task::EventResponse BulletSystem::downloadFinished(Task::EventPtr evbase, BulletObj* bullobj) {
@@ -376,7 +402,6 @@ bool BulletSystem::tick() {
     static Task::AbsTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     static int mode = 0;
-    static Vector3f lastAvatarLinearVel = Vector3f();
     static string lastPathSection="path_00_00";
     Task::AbsTime now = Task::AbsTime::now();
     Task::DeltaTime delta;
@@ -389,7 +414,6 @@ bool BulletSystem::tick() {
         lasttime = now;
         if ((now-mStartTime) > Duration::seconds(20.0)) {
             for (unsigned int i=0; i<objects.size(); i++) {
-                cout << "dbm debug A " << objects[i]->mName << endl;
                 if (objects[i]->mActive) {
                     if (objects[i]->mName.substr(0,6) == "Avatar") {
                         double dist;
@@ -433,8 +457,8 @@ bool BulletSystem::tick() {
                                 << endl;
                         oscplugin::sendOSCmessage(data);
                     }
-                    else if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
-                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
+                    if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
+                            objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
                         /// if object has been moved, reset bullet position accordingly
                         DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
                                      << " meshpos: " << objects[i]->mMeshptr->getPosition()
@@ -452,17 +476,13 @@ bool BulletSystem::tick() {
 
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
-                    if (objects[i]->mName.substr(0,6) != "Avatar") {
-                        po = objects[i]->getBulletState();
-                        DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
-                                     << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl);
-                        cout << "    dbm: object, " << objects[i]->mName << ", delta, "
-                        << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl;
-                        Location loc;
-                        loc.setPosition(po.p);
-                        loc.setOrientation(po.o);
-                        objects[i]->mMeshptr->setLocation(now, loc);
-                    }
+                    po = objects[i]->getBulletState();
+                    DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
+                                 << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl;)
+                    Location loc (objects[i]->mMeshptr->globalLocation(now));
+                    loc.setPosition(po.p);
+                    loc.setOrientation(po.o);
+                    objects[i]->mMeshptr->setLocation(now, loc);
                 }
             }
 
@@ -654,8 +674,7 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     Transfer::TransferManager* tm = (Transfer::TransferManager*)mTempTferManager->as<void*>();
     this->transferManager = tm;
 
-//    gravity = Vector3d(0, -9.8, 0);
-    gravity = Vector3d(0, 0, 0);
+    gravity = Vector3d(0, -0.8, 0);
     //groundlevel = 3044.0;
     groundlevel = -1000.0;
     btTransform groundTransform;
