@@ -10,8 +10,9 @@ print dir(HostedObject)
 
 import util
 
-class exampleclass(object):
+DEBUG_OUTPUT=False
 
+class exampleclass(object):
     def reallyProcessRPC(self,serialheader,name,serialarg):
         print "Got an RPC named",name
         header = pbHead.Header()
@@ -46,7 +47,7 @@ class exampleclass(object):
                 pass
 
     def sawAnotherObject(self,persistence,header,retstatus):
-        print "PY: sawAnotherObject called"
+        if DEBUG_OUTPUT: print "PY: sawAnotherObject called"
         if header.HasField('return_status') or retstatus:
             return
         uuid = util.tupleToUUID(header.source_object)
@@ -57,9 +58,9 @@ class exampleclass(object):
                     nameStruct=pbSiri.StringProperty()
                     nameStruct.ParseFromString(field.data)
                     myName = nameStruct.value
-        print "Object",uuid,"has name",myName
+        if DEBUG_OUTPUT: print "PY: Object",uuid,"has name",myName
+
         if myName=="Avatar_01":
-            print "found daddy!"
             rws=pbPer.ReadWriteSet()
             se=rws.writes.add()
             se.field_name="Parent"
