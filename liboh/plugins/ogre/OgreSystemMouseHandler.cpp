@@ -110,6 +110,21 @@ bool compareEntity (const Entity* one, const Entity* two) {
     return one<two;
 }
 
+vector<String> tokenizeString (const String& str)
+{
+    vector<String> tokens;
+    String delimiters(" ");
+    String::size_type lastPos = str.find_first_not_of(delimiters, 0);
+    String::size_type pos = str.find_first_of(delimiters, lastPos);
+    while (String::npos != pos || String::npos != lastPos)
+    {
+        tokens.push_back(str.substr(lastPos, pos - lastPos));
+        lastPos = str.find_first_not_of(delimiters, pos);
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+    return tokens;
+}
+
 // Defined in DragActions.cpp.
 
 class OgreSystem::MouseHandler {
@@ -1129,14 +1144,19 @@ private:
     /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
     void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
         //ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
-        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
-        if (!cam) return;
-
-        RoutableMessageBody msg;
-        msg.add_message("CameraMessage", arg);
-        String smsg;
-        msg.SerializeToString(&smsg);
-        cam->sendMessage(MemoryReference(smsg));
+        vector<String> tokens = tokenizeString(arg);
+        if (tokens[0]=="camera") {
+            ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+            if (!cam) return;
+            RoutableMessageBody msg;
+            msg.add_message("CameraMessage", arg);
+            String smsg;
+            msg.SerializeToString(&smsg);
+            cam->sendMessage(MemoryReference(smsg));
+        }
+        else {
+            std::cout << "ERROR -- undefined string token in genericStringMessage: " << tokens[0] << std::endl;
+        }
     }
 
     ///////////////// DEVICE FUNCTIONS ////////////////

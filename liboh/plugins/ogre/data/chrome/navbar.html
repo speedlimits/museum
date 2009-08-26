@@ -120,7 +120,7 @@
       function goTurnLeft(amt) { Client.event("navturnleft", amt); }
       function goTurnRight(amt) { Client.event("navturnright", amt); }
       // This is supposed to be for a navigation help message, but we use it for testing now. 
-      function goHelp() { Client.event("navcommand", "python camera insertObject"); }
+      function goHelp() { Client.event("navcommand", "camera placeObject painting2"); }
 
       // FIXME: Use inheritance or call chaining to add additional functionality.
       function startMoveForward() { Client.event("navmoveforward", 1.0); setButtonPressed("moveforward"); }
