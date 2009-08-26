@@ -29,8 +29,8 @@
 
 
 
-//setTimeout('enterWelcomeScreen()', 1000);
-setTimeout('artTest()', 1000);
+setTimeout('enterWelcomeScreen()', 1000);
+//setTimeout('artTest()', 1000);
 
 function enterWelcomeScreen() {
 	loadLargeModal("welcome.html");
@@ -46,9 +46,9 @@ function enterPlaceArtwork2() {
 	loadInfoScreen("select-art.html", false);
 }
 
-function artTest() {
+function developmentMode() {
 	$("#header").fadeIn("slow");
-
+	$('#development-screen').fadeIn('slow');
 	loadSideBar("place-art.html");
 	$('#wizzard-screen').fadeOut('slow');
 }
@@ -143,7 +143,7 @@ function enterSelectFrames2() {
 <div id="navigation-screen" class="ui">
 	<img src="images/navi_all.png" border="0" usemap="#map"/>
     <map name="map" id="map">
-      <area id="navi_up" shape="poly" coords="76,69,136,7,10,6"  />
+	<area id="navi_up" shape="poly" coords="76,69,136,7,10,6"  />
       <area id="navi_down" shape="poly" coords="74,78,8,144,138,141"  />
       <area id="navi_left" shape="poly" coords="71,75,5,133,7,5"  />
       <area id="navi_right" shape="poly" coords="76,76,144,4,142,137" />
@@ -154,9 +154,19 @@ function enterSelectFrames2() {
 
 </div>
   
+<div id="development-screen" class="ui">
+	<a href="javascript:$('#header').toggle();">Tabs</a>
+   	<a href="javascript:$('#navigation-screen').toggle();">Navigation</a>
+    <a href="javascript:$('#wizzard-screen').toggle();">Wizzard</a>
+    <a href="javascript:$('#sidebar1').toggle();">Sidebar</a>
+    <a href="javascript:$('#development-console-screen').toggle();">Console</a>
+    <a href="javascript:$('#').toggle();"></a>
+</div>
 
-
-
+<div id="development-console-screen" class="ui">
+	<p id="development-console"> Console
+	</p>
+</div>
 
 </body>
 </html>

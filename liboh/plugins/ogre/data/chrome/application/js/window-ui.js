@@ -2,10 +2,9 @@ $(document).ready(function() {
 	
 	$("#mainContent").droppable({
       	drop: function(event, ui) {
-		 	wizzard_setMessage("You dropped an object at" + event.pageX +
-							   ',' + event.pageY + "image id" + ui.helper[0].children[0].id + "<a href='javascript: wizzard_hideMessage();'>Ok</a>") ;
-			wizzard_showMessage();
-			alert();
+			debug("You dropped an object at" + event.pageX + ',' + event.pageY);
+			debug("&nbsp; image id: '" + ui.helper[0].children[0].id + "'" ) ;
+
 		}
 		
 	});
@@ -35,6 +34,7 @@ $(document).ready(function() {
 	});
 	
 	$("#navi_down").bind('mousedown' , function() {
+		debug('backwards is not working');		
 		Client.event("navback", 1.0)
 	});
 	$("#navi_down").bind('mouseup' , function() {

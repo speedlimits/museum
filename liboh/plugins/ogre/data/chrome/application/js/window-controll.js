@@ -31,3 +31,8 @@ function loadSideBar(page) {
 	$("#sidebar1").load(page);
 	setTimeout('$("#sidebar1").fadeIn("slow")', 1000);
 }
+function debug(msg) {
+	$("#development-console").append("<br>" + msg );
+
+}
+

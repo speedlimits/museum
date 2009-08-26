@@ -2,10 +2,9 @@ $(document).ready(function() {
 	
 	$("#mainContent").droppable({
       	drop: function(event, ui) {
-		 	wizzard_setMessage("You dropped an object at" + event.pageX +
-							   ',' + event.pageY + "image id" + ui.helper[0].children[0].id + "<a href='javascript: wizzard_hideMessage();'>Ok</a>") ;
-			wizzard_showMessage();
-			alert();
+			debug("You dropped an object at" + event.pageX +
+							   ',' + event.pageY + "image id '" + ui.helper[0].children[0].id + "'" ) ;
+
 		}
 		
 	});
@@ -34,12 +33,16 @@ $(document).ready(function() {
 		Client.event("navmoveforward", 0.0)
 	});
 	
-	$("#navi_down").click( function() {
-		alert("Down") ;
-		wizzard_showMessage();
-	
+	$("#navi_down").bind('mousedown' , function() {
+		debug('backwards is not working');		
+		Client.event("navback", 1.0)
 	});
-
+	$("#navi_down").bind('mouseup' , function() {
+		Client.event("navback", 0.0)
+	});
+	$("#navi_down").bind('mouseout' , function() {
+		Client.event("navback", 0.0)
+	});
 
 	$("#navi_left").bind('mousedown' , function() {
 		Client.event("navturnleft", 1.0)
