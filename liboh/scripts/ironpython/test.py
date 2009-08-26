@@ -48,9 +48,9 @@ class exampleclass:
                 dbQuery.send(HostedObject, myhdr)
             if proxcall.proximity_event == pbSiri.ProxCall.EXITED_PROXIMITY:
                 pass
-        elif name == "CameraMessage":
+        elif name == "JavascriptMessage":
             s = "".join(chr(i) for i in serialarg)
-            if DEBUG_OUTPUT: print "PY: CameraMessage:", s
+            if DEBUG_OUTPUT: print "PY", name, s
             tok = s.split()
             if tok[1]=="placeObject":
                 painting = tok[2]
