@@ -1140,24 +1140,155 @@ private:
     void webViewNavigateStringAction(WebViewManager::NavigationAction action, const String& arg) {
         WebViewManager::getSingleton().navigate(action, arg);
     }
+    
+    void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
+        /// FIXME: need to convert x, y mouse coords into global coords & quaternion
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        if (!cam) return;
+        RoutableMessageBody msg;
+        msg.add_message("JavascriptMessage", arg);
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
+    
+    static const char tokenDelimiter[];
+    
+    static bool getNextToken(const String &str, size_t *pos, String *token) {
+        if (*pos >= str.length())
+            return false;
+        size_t first = str.find_first_not_of(tokenDelimiter, *pos);
+        if (first == String::npos)
+            return false;
+        size_t last = str.find_first_of(tokenDelimiter, first);
+        if (last == String::npos)
+            last = str.length();
+        *token = str.substr(first, last - first);
+        *pos = last;
+        return true;
+    }
+
+    static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
+        String token;
+        if (!getNextToken(str, pos, &token))
+            return false;
+        *d = atof(token.c_str());
+        return true;
+    }
+
+    // walk [ straight | turn ] speed
+    void walkHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String token;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double speed;
+        getNextToken(arg, &ix, &token);                                 // walk (already parsed)
+        success = success && getNextToken(arg, &ix, &token);            // straight | turn
+        if      (token == "straight")   rotate = false;
+        else if (token == "turn")       rotate = true;
+        else                            success = false;
+        success = success && getNextTokenAsDouble(arg, &ix, &speed);    // distance
+        if (!success)
+            return;
+
+        if (!rotate)    moveAction(Vector3f(0, 0, -1), speed);
+        else            stableRotateAction(1, speed);
+    }
+
+    // step [ straight | turn ] distance
+    void stepHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String token;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double distance;
+        getNextToken(arg, &ix, &token);                                 // step (already parsed)
+        success = success && getNextToken(arg, &ix, &token);            // straight | turn
+        if      (token == "straight")   rotate = false;
+        else if (token == "turn")       rotate = true;
+        else                            success = false;
+        success = success && getNextTokenAsDouble(arg, &ix, &distance); // distance
+        if (!success)
+            return;
+
+        // FIXME: This should move by the specified amount, but below we incorrectly set the speed.
+        if (!rotate)    moveAction(Vector3f(0, 0, -1), distance);
+        else            stableRotateAction(1, distance);
+    }
+
+    void placeArtAt(const String &art_id, const Vector3d &position, const Quaternion &orientation) {
+        // FIXME: Actually fetch the art piece and place it.
+    }
+    
+    // place_art art_id screen_x screen_y
+    void placeArtHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String art_id;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double screen_x, screen_y;
+        getNextToken(arg, &ix, &art_id);                                // place_art (already parsed)
+        success = success && getNextToken(arg, &ix, &art_id);           // art_id
+        success = success && getNextTokenAsDouble(arg, &ix, &screen_x); // screen_x
+        success = success && getNextTokenAsDouble(arg, &ix, &screen_y); // screen_y
+        if (!success)
+            return;
+
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!camera) return;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        Location location(camera->globalLocation(now));
+        Vector3f direction(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screen_x, screen_y));
+        int resultCount;
+        double distance;
+        Vector3f normal;
+        Entity *obj = mParent->rayTrace(location.getPosition(), direction, resultCount, distance, normal, 0);
+        Vector3d position = location.getPosition() + distance * Vector3d(direction.x, direction.y, direction.z);
+        if (direction.dot(normal) < 0)
+            normal = -normal;   // outward normal
+        normal.normalizeThis();
+        double distanceFromWall = 10e-2;    // 10 cm
+        position += distanceFromWall * Vector3d(normal.x, normal.y, normal.z);
+        Vector3f xAxis, yAxis;
+        xAxis = Vector3f::unitY().cross(normal);
+        yAxis = normal.cross(xAxis);
+        Quaternion orientation(xAxis, yAxis, normal);
+        placeArtAt(art_id, position, orientation);
+        // FIXME: This is the appropriate behavior for pictures. We also need to implement sculptures.
+    }
 
     /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
     void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
-        //ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
-        vector<String> tokens = tokenizeString(arg);
-        if (tokens[0]=="inventory") {
-            /// need to convert x, y mouse coords into global coords & quaternion
-            ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
-            if (!cam) return;
-            RoutableMessageBody msg;
-            msg.add_message("JavascriptMessage", arg);
-            String smsg;
-            msg.SerializeToString(&smsg);
-            cam->sendMessage(MemoryReference(smsg));
-        }
-        else {
-            std::cout << "ERROR -- undefined string token in genericStringMessage: " << tokens[0] << std::endl;
-        }
+        // Get the command (first word)
+        String command;
+        size_t i = 0;
+        if (!getNextToken(arg, &i, &command))
+            std::cout << "No command found in " << arg << std::endl;
+
+//        static const char *delim = " \t\n\r";
+//        size_t first = arg.find_first_not_of(delim, 0);
+//        size_t last  = arg.find_first_of(delim);
+//        String command(arg.substr(first, last - first));
+
+        // Dispatch on the command
+        typedef void (OgreSystem::MouseHandler::*StringMessageHandler)(WebViewManager::NavigationAction action, const String& arg);
+        struct StringMessageDispatch {
+            const char              *command;
+            StringMessageHandler    handler;
+        };
+        static const StringMessageDispatch dispatchTable[] = {
+            { "inventory",  &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
+            { "walk",       &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
+            { "step",       &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
+            { "place_art",  &Sirikata::Graphics::OgreSystem::MouseHandler::placeArtHandler },
+            { NULL,         NULL }
+        };
+        const StringMessageDispatch *dp;
+        for (dp = dispatchTable; dp->command != NULL; ++dp)
+            if (dp->command == command)
+                break;
+        if (dp->handler != NULL)
+            (this->*(dp->handler))(action, arg);
+         else
+            std::cout << "ERROR -- undefined string token in genericStringMessage: " << command << std::endl;
     }
 
     ///////////////// DEVICE FUNCTIONS ////////////////
@@ -1414,6 +1545,9 @@ public:
         cameraPathTick(t);
     }
 };
+
+const char OgreSystem::MouseHandler::tokenDelimiter[] = " \t\n\r";
+
 
 void OgreSystem::allocMouseHandler() {
     mMouseHandler = new MouseHandler(this);
