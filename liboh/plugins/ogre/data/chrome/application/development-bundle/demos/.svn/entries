@@ -1,0 +1,159 @@
+9
+
+dir
+3
+http://svn.dennisschaaf.com/sirikataui/application/development-bundle/demos
+http://svn.dennisschaaf.com/sirikataui
+
+
+
+2009-08-12T23:41:17.516832Z
+1
+dennis
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+a6b2c910-9d07-448c-a2d0-ccafbc47bbe0
+
+show
+dir
+
+resizable
+dir
+
+toggle
+dir
+
+slider
+dir
+
+removeClass
+dir
+
+switchClass
+dir
+
+tabs
+dir
+
+progressbar
+dir
+
+effect
+dir
+
+demos.css
+file
+
+
+
+
+2009-08-26T04:45:08.000000Z
+2e2ec04700af4ac5681a956cfe405c47
+2009-08-12T23:41:17.516832Z
+1
+dennis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+14338
+
+dialog
+dir
+
+accordion
+dir
+
+selectable
+dir
+
+images
+dir
+
+toggleClass
+dir
+
+droppable
+dir
+
+draggable
+dir
+
+hide
+dir
+
+index.html
+file
+
+
+
+
+2009-08-26T04:45:08.000000Z
+b05060c40fd9dd154b0fe017c1c10085
+2009-08-12T23:41:17.516832Z
+1
+dennis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13544
+
+datepicker
+dir
+
+sortable
+dir
+
+animate
+dir
+
+addClass
+dir
+
