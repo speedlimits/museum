@@ -1215,12 +1215,71 @@ private:
         else            stableRotateAction(1, distance);
     }
 
+
+    // Determine the appropriate position and orientation for a piece of artwork
+    // to be placed at the given mouse coordinates.
+    //
+    // Given a point in screen space, fire a ray to find the first object hit.
+    // Compute the location and normal of the intersection with the object.
+    // Offset the intersection location by the specified surfaceOffset in the
+    // outward direction of the surface normal. Orientation is computed
+    // appropriate for a painting or a sculpture. It is assumed that the struck
+    // surface is vertical for a painting and horizontal for a sculpture. It is
+    // also assumed that paintings are done in the X-Y plane, and that a
+    // sculpture's vertical axis is the Y axis, with the primary view points its
+    // Z axis toward the user.
+    bool getPositionAndOrientationForNewArt(
+        double screenX, double screenY, // Location on screen
+        double surfaceOffset,           // Optional offset from surface of ray intersection
+        bool isSculpture,               // Is the artwork a painting or a sculpture?
+        Vector3d *position,             // Position for the new artwork
+        Quaternion *orientation         // Orientation of the new artwork
+    ) {
+        // Look for an object intersected by the ray.
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!camera)
+            return false;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        Location location(camera->globalLocation(now));
+        Vector3f direction(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
+        double distance;
+        Vector3f normal;
+        bool success = false;
+        int numHits = 1, i;
+        for (i = 0; i < numHits; i++) {
+            const Entity *obj = mParent->rayTrace(location.getPosition(), direction, numHits, distance, normal, i);
+            if (obj == NULL) {      // No object found
+                if (i < numHits)    // Why not?
+                    continue;       // Still more objects: keep looking
+                break;              // No more objects: return failure
+            }
+            success = true;
+            break;
+        }
+        if (success == false)
+            return false;
+
+        *position = location.getPosition() + distance * Vector3d(direction.x, direction.y, direction.z);
+        if (direction.dot(normal) < 0)
+            normal = -normal;   // outward normal
+        normal.normalizeThis();
+        double distanceFromWall = 10e-2;    // 10 cm
+        *position += distanceFromWall * Vector3d(normal.x, normal.y, normal.z);
+        Vector3f xAxis, yAxis;
+        xAxis = Vector3f::unitY().cross(normal);
+        yAxis = normal.cross(xAxis);
+        *orientation = Quaternion(xAxis, yAxis, normal);
+        return true;
+    }
+
+
     void placeArtAt(const String &art_id, const Vector3d &position, const Quaternion &orientation) {
         // FIXME: Actually fetch the art piece and place it.
     }
 
     // place_art art_id screen_x screen_y
     void placeArtHandler(WebViewManager::NavigationAction action, const String& arg) {
+        // Get args
         String art_id;
         size_t ix = 0;
         bool success = true, rotate = false;
@@ -1232,27 +1291,20 @@ private:
         if (!success)
             return;
 
-        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
-        if (!camera) return;
-        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
-        Location location(camera->globalLocation(now));
-        Vector3f direction(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screen_x, screen_y));
-        int resultCount;
-        double distance;
-        Vector3f normal;
-        Entity *obj = mParent->rayTrace(location.getPosition(), direction, resultCount, distance, normal, 0);
-        Vector3d position = location.getPosition() + distance * Vector3d(direction.x, direction.y, direction.z);
-        if (direction.dot(normal) < 0)
-            normal = -normal;   // outward normal
-        normal.normalizeThis();
-        double distanceFromWall = 10e-2;    // 10 cm
-        position += distanceFromWall * Vector3d(normal.x, normal.y, normal.z);
-        Vector3f xAxis, yAxis;
-        xAxis = Vector3f::unitY().cross(normal);
-        yAxis = normal.cross(xAxis);
-        Quaternion orientation(xAxis, yAxis, normal);
+        // Find position and orientation
+        bool isSculpture = 0;
+        double distanceFromWall;
+        Vector3d position;
+        Quaternion orientation;
+        if (isSculpture)    distanceFromWall = 0;       // flush
+        else                distanceFromWall = 10e-2;   // 10 cm
+        if (!getPositionAndOrientationForNewArt(screen_x, screen_y, distanceFromWall, isSculpture, &position, &orientation)) {
+            SILOG(input, error, "placeArtHandler: failed: " << arg);
+            // FIXME: We should place it somewhere.
+            return;
+        }
+
         placeArtAt(art_id, position, orientation);
-        // FIXME: This is the appropriate behavior for pictures. We also need to implement sculptures.
     }
 
     /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
