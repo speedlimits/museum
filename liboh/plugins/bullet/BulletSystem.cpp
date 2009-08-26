@@ -336,6 +336,7 @@ void BulletObj::buildBulletBody(const unsigned char* meshdata, int meshbytes) {
 void BulletObj::requestLocation(TemporalValue<Location>::Time timeStamp, const Protocol::ObjLoc& reqLoc) {
     mPIDControlEnabled = true;      /// need a way to turn this off!
     if (reqLoc.has_velocity()) {
+        cout << "dbm debug: requestLocation " << mName << " vel: " << reqLoc.velocity().x << ", " << reqLoc.velocity().z << endl;
         btVector3 btvel(reqLoc.velocity().x, reqLoc.velocity().y, reqLoc.velocity().z);
 //        mBulletBodyPtr->setLinearVelocity(btvel);
         mDesiredLinearVelocity = btvel;
@@ -437,7 +438,7 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > Duration::seconds(20.0)) {
+        if ((now-mStartTime) > Duration::seconds(10.0)) {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
@@ -461,6 +462,8 @@ bool BulletSystem::tick() {
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
+                        cout << "   dbm debug PID on " << objects[i]->mName << " set: " 
+                                << objects[i]->mDesiredLinearVelocity.x() <<","<< objects[i]->mDesiredLinearVelocity.z() << endl;
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
 
@@ -702,7 +705,8 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     mMotionState = new btDefaultMotionState(groundTransform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f,mMotionState,groundShape,localInertia);
     groundBody = new btRigidBody(rbInfo);
-    groundBody->setRestitution(0.5);                 /// bouncy for fun & profit
+    groundBody->setRestitution(0.2);
+    groundBody->setFriction(0.1);
     dynamicsWorld->addRigidBody(groundBody);
     proxyManager->addListener(this);
     DEBUG_OUTPUT(cout << "dbm: BulletSystem::initialized, including test bullet object" << endl);
