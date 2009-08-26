@@ -217,8 +217,11 @@ class CsvToSql:
                 physical.bounce = float(row['bounce'])
                 physical.collide_mask = int(row['colMask'])
                 physical.collide_msg = int(row['colMsg'])
-                if not row['gravity'] == "":
-                    physical.gravity = float(row['gravity'])
+                if "gravity" in row:
+                    if not row['gravity'] == "":
+                        physical.gravity = float(row['gravity'])
+                    else:
+                        physical.gravity = 1.0
                 else:
                     physical.gravity = 1.0
                 if row.get('hull_x',''):

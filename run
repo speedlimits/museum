@@ -35,15 +35,13 @@ else:
 # Run prox & space daemons (if not already running)
 #
 
-for p in [proxserver, "WAIT", spaceserver]:
+for proc, delay in (proxserver, 4.5), (spaceserver, .5):
 
-    if p=="WAIT":
-        time.sleep(1)
-    else:
-        if not check_for_proc("./"+p):
-            cmd = 'xterm -e "cd build/cmake; ./' + p + '" &'
-            print cmd
-            os.system(cmd)
+    if not check_for_proc("./"+proc):
+        cmd = 'xterm -e "cd build/cmake; ./' + proc + '" &'
+        print cmd
+        os.system(cmd)
+        time.sleep(delay)
 
 #
 # Convert .csv files into sqlite .db files

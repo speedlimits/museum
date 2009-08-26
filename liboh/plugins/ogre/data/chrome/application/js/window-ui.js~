@@ -2,8 +2,8 @@ $(document).ready(function() {
 	
 	$("#mainContent").droppable({
       	drop: function(event, ui) {
-			debug("You dropped an object at" + event.pageX +
-							   ',' + event.pageY + "image id '" + ui.helper[0].children[0].id + "'" ) ;
+			debug("You dropped an object at" + event.pageX + ',' + event.pageY);
+			debug("&nbsp; image id: '" + ui.helper[0].children[0].id + "'" ) ;
 
 		}
 		
@@ -24,6 +24,10 @@ $(document).ready(function() {
 	/* Navigation Stuff */
 	
 	$("#navi_up").bind('mousedown' , function() {
+<<<<<<< HEAD:liboh/plugins/ogre/data/chrome/application/js/window-ui.js
+=======
+		Client.event("navcommand", "inventory placeObject painting1 100 100")
+>>>>>>> 66c5edd2e48a72aa7d2b2cc19beae2a4ca26dfb3:liboh/plugins/ogre/data/chrome/application/js/window-ui.js
 		Client.event("navmoveforward", 1.0)
 	});
 	$("#navi_up").bind('mouseup' , function() {
@@ -33,8 +37,13 @@ $(document).ready(function() {
 		Client.event("navmoveforward", 0.0)
 	});
 	
+<<<<<<< HEAD:liboh/plugins/ogre/data/chrome/application/js/window-ui.js
 	$("#navi_down").bind('mousedown' , function() {
 		debug('backwards is not working');		
+=======
+	$("#navi_down").bind('mousedown' , function() {
+		Client.event("navcommand", "inventory placeObject painting2 100 100")
+>>>>>>> 66c5edd2e48a72aa7d2b2cc19beae2a4ca26dfb3:liboh/plugins/ogre/data/chrome/application/js/window-ui.js
 		Client.event("navback", 1.0)
 	});
 	$("#navi_down").bind('mouseup' , function() {
