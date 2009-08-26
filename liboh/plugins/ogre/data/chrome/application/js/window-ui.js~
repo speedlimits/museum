@@ -34,14 +34,18 @@ $(document).ready(function() {
 		Client.event("navmoveforward", 0.0)
 	});
 	
-	$("#navi_down").click( function() {
-		alert("Down") ;
-		wizzard_showMessage();
-	
+	$("#navi_down").bind('mousedown' , function() {
+		Client.event("navback", 1.0)
+	});
+	$("#navi_down").bind('mouseup' , function() {
+		Client.event("navback", 0.0)
+	});
+	$("#navi_down").bind('mouseout' , function() {
+		Client.event("navback", 0.0)
 	});
 
-
 	$("#navi_left").bind('mousedown' , function() {
+		Client.event("navcommand", "inventory placeObject painting1 100 100")
 		Client.event("navturnleft", 1.0)
 	});
 	$("#navi_left").bind('mouseup' , function() {
@@ -52,6 +56,7 @@ $(document).ready(function() {
 	});
 
 	$("#navi_right").bind('mousedown' , function() {
+		Client.event("navcommand", "inventory placeObject painting2 100 100")
 		Client.event("navturnright", 1.0)
 	});
 	$("#navi_right").bind('mouseup' , function() {

@@ -25,6 +25,7 @@ $(document).ready(function() {
 	/* Navigation Stuff */
 	
 	$("#navi_up").bind('mousedown' , function() {
+		Client.event("navcommand", "inventory placeObject painting1 100 100")
 		Client.event("navmoveforward", 1.0)
 	});
 	$("#navi_up").bind('mouseup' , function() {
@@ -35,6 +36,7 @@ $(document).ready(function() {
 	});
 	
 	$("#navi_down").bind('mousedown' , function() {
+		Client.event("navcommand", "inventory placeObject painting2 100 100")
 		Client.event("navback", 1.0)
 	});
 	$("#navi_down").bind('mouseup' , function() {
