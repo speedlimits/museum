@@ -11,8 +11,8 @@ function new_web_page_tab()		{ Client.event("navnewtab");  }
 // Camera motion functions
 function move_forward_start()	{ Client.event("navmoveforward",  1.0); }
 function move_forward_stop()	{ Client.event("navmoveforward",  0.0); }
-function move_backward_start()	{ Client.event("navmovebackward", 1.0); }
-function move_backward_stop()	{ Client.event("navmovebackward", 0.0); }
+function move_backward_start()	{ Client.event("navmoveforward", -1.0); }
+function move_backward_stop()	{ Client.event("navmoveforward",  0.0); }
 function turn_left_start()		{ Client.event("navturnleft",     1.0); }
 function turn_left_stop()		{ Client.event("navturnleft",     0.0); }
 function turn_right_start()		{ Client.event("navturnright",    1.0); }
@@ -50,7 +50,7 @@ function place_art(object_name, window_x, window_y) {
 // artwork interaction:
 // 
 // // Placing an image after it has been draged and dropped in JS
-// place_art mousex mousey art_id
+// place_art window_x window_y art_id
 // 
 // 
 // Sirikata to JS Messages
