@@ -51,8 +51,11 @@ class exampleclass:
         elif name == "CameraMessage":
             s = "".join(chr(i) for i in serialarg)
             if DEBUG_OUTPUT: print "PY: CameraMessage:", s
-            print "PY:   moving painting1 =", self.paintings["painting1"]
-            self.setPosition(objid=self.paintings["painting1"], position = (0, 0, .3))
+            tok = s.split()
+            if tok[1]=="placeObject":
+                painting = tok[2]
+                print "PY:   moving", painting, self.paintings[painting]
+                self.setPosition(objid=self.paintings[painting], position = (0, 0, .3))
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:
