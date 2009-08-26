@@ -78,6 +78,7 @@
       margin-top: 6px;
       }
     </style>
+    <script language="javascript" type="text/javascript" src="chromecomm.js"></script>
     <script language="javascript" type="text/javascript">
       function setButtonImage(id, mode) {
         var imgPath = "url(" + id + mode + ".png)";
@@ -91,10 +92,10 @@
       function initButton(id) {
         setButtonNormal(id);
         var button = document.getElementById(id);
-        button.onmouseover = function() { setButtonHover(id); }
-        button.onmouseout  = function() { setButtonNormal(id); }
+        button.onmouseover = function() { setButtonHover(id);  }
+        button.onmouseout  = function() { setButtonNormal(id);  }
         if (!button.hasOwnProperty("onmousedown"))  button.onmousedown = function() { setButtonPressed(id); }
-        if (!button.hasOwnProperty("onmouseup"))    button.onmousedown = function() { setButtonNormal(id);  }
+        if (!button.hasOwnProperty("onmouseup"))    button.onmouseup   = function() { setButtonNormal(id);  }
       }
 
       function initButtons() {
@@ -112,23 +113,21 @@
       function goAddress() {
         Client.event("navgo", document.getElementById("addresstext").value );
       }
-      function goBack() { Client.event("navback"); }
-      function goForward() { Client.event("navforward"); }
-      function goRefresh() { Client.event("navrefresh"); }
-      function goNewTab() { Client.event("navnewtab"); }
-      function goMoveForward(amt) { Client.event("navmoveforward", amt); }
-      function goTurnLeft(amt) { Client.event("navturnleft", amt); }
-      function goTurnRight(amt) { Client.event("navturnright", amt); }
+      function goBack()    { back_web_page();    }
+      function goForward() { forward_web_page(); }
+      function goRefresh() { refresh_web_page(); }
+      function goNewTab()  { new_web_page_tab(); }
+
       // This is supposed to be for a navigation help message, but we use it for testing now. 
       function goHelp() { Client.event("navcommand", "inventory placeObject painting2 100 100"); }
 
       // FIXME: Use inheritance or call chaining to add additional functionality.
-      function startMoveForward() { Client.event("navmoveforward", 1.0); setButtonPressed("moveforward"); }
-      function  stopMoveForward() { Client.event("navmoveforward", 0.0); setButtonNormal( "moveforward"); }
-      function    startTurnLeft() { Client.event("navturnleft",    1.0); setButtonPressed("turnleft"); }
-      function     stopTurnLeft() { Client.event("navturnleft",    0.0); setButtonNormal( "turnleft"); }
-      function   startTurnRight() { Client.event("navturnright",   1.0); setButtonPressed("turnright"); }
-      function    stopTurnRight() { Client.event("navturnright",   0.0); setButtonNormal( "turnright"); }
+      function startMoveForward() { move_forward_start(); setButtonPressed("moveforward"); }
+      function  stopMoveForward() { move_forward_stop();  setButtonNormal( "moveforward"); }
+      function    startTurnLeft() { turn_left_start();    setButtonPressed("turnleft"); }
+      function     stopTurnLeft() { turn_left_stop();     setButtonNormal( "turnleft"); }
+      function   startTurnRight() { turn_right_start();   setButtonPressed("turnright"); }
+      function    stopTurnRight() { turn_right_stop();    setButtonNormal( "turnright"); }
 
     </script>
   </head>
