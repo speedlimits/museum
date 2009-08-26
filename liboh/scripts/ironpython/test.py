@@ -54,6 +54,8 @@ class exampleclass:
             tok = s.split()
             if tok[1]=="placeObject":
                 painting = tok[2]
+                if not painting in self.paintings:
+                    print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
                 print "PY:   moving", painting, self.paintings[painting]
                 self.setPosition(objid=self.paintings[painting], position = (0, 0, .3))
 
@@ -68,7 +70,7 @@ class exampleclass:
                     nameStruct=pbSiri.StringProperty()
                     nameStruct.ParseFromString(field.data)
                     myName = nameStruct.value
-        if DEBUG_OUTPUT: print "PY: Object",uuid,"has name",myName
+        if DEBUG_OUTPUT: print "PY: Object",uuid,"has name-->" + myName + "<--",type(myName)
         if myName[:6]=="Avatar":
             rws=pbPer.ReadWriteSet()
             se=rws.writes.add()
@@ -81,7 +83,7 @@ class exampleclass:
             header.destination_object=util.tupleFromUUID(self.objid);
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
-        elif myName[:8]=="painting":
+        elif myName[:8]=="artwork_":
             self.paintings[myName]=uuid
 
     def processRPC(self,header,name,arg):

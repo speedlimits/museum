@@ -2,8 +2,9 @@ $(document).ready(function() {
 	
 	$("#mainContent").droppable({
       	drop: function(event, ui) {
-			debug("You dropped an object at" + event.pageX + ',' + event.pageY);
-			debug("&nbsp; image id: '" + ui.helper[0].children[0].id + "'" ) ;
+			debug("placing object");
+			debug("inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY) ;
+			Client.event("navcommand", "inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY);
 
 		}
 		
