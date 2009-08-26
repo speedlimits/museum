@@ -35,14 +35,13 @@ $(document).ready(function() {
 	});
 	
 	$("#navi_down").bind('mousedown' , function() {
-		debug('backwards is not working');		
-		Client.event("navback", 1.0)
+		Client.event("navmoveforward", -1.0)
 	});
 	$("#navi_down").bind('mouseup' , function() {
-		Client.event("navback", 0.0)
+		Client.event("navmoveforward", 0.0)
 	});
 	$("#navi_down").bind('mouseout' , function() {
-		Client.event("navback", 0.0)
+		Client.event("navmoveforward", 0.0)
 	});
 
 	$("#navi_left").bind('mousedown' , function() {
