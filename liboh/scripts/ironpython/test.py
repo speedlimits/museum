@@ -56,8 +56,8 @@ class exampleclass:
                 painting = tok[2]
                 if not painting in self.paintings:
                     print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
-                x = (float(tok[3])-400)*.01
-                y = (float(tok[4])-200)*.01
+                x = (float(tok[3])-500)*.015
+                y = (500-float(tok[4]))*.01
                 print "PY:   moving", painting, self.paintings[painting], "to", x, y
                 self.setPosition(objid=self.paintings[painting], position = (x, y, .3))
 
