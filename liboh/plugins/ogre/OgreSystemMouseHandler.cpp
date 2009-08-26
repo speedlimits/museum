@@ -81,7 +81,7 @@ using namespace std;
 #endif
 
 bool compareEntity (const Entity* one, const Entity* two) {
-    
+
     ProxyObject *pp = one->getProxyPtr().get();
 
     ProxyCameraObject* camera1 = dynamic_cast<ProxyCameraObject*>(pp);
@@ -615,17 +615,17 @@ private:
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
-        
+
         Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
         const Quaternion &orient = loc.getOrientation();
         Protocol::ObjLoc rloc;
         rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * .5);
-        rloc.set_angular_speed(0);        
+        rloc.set_angular_speed(0);
         cam->requestLocation(now, rloc);
     }
     void rotateAction(Vector3f about, float amount) {
-        
+
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
@@ -641,7 +641,7 @@ private:
     }
 
     void stableRotateAction(float dir, float amount) {
-        
+
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
@@ -656,7 +656,7 @@ private:
         raxis.x = 0;
         raxis.y = std::cos(p*DEG2RAD);
         raxis.z = -std::sin(p*DEG2RAD);
-        
+
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
         rloc.set_angular_speed(dir*amount);
@@ -784,10 +784,10 @@ private:
             temp << loc.getOrientation().w;
             w = temp.str();
         }
-        
+
         Vector3f angAxis(loc.getAxisOfRotation());
         float angSpeed(loc.getAngularSpeed());
-        
+
         string parent;
         ProxyObjectPtr parentObj = pp->getParentProxy();
         if (parentObj) {
@@ -811,7 +811,7 @@ private:
             fprintf(fp, "light,%s,,%s,,,%f,%f,%f,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,,,,,,,,,,,,,",typestr,parent.c_str(),
                     loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,x,y,z,w.c_str(),
                     loc.getVelocity().x, loc.getVelocity().y, loc.getVelocity().z, angAxis.x, angAxis.y, angAxis.z, angSpeed);
-            
+
             fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%lf,%f,%f,%f,%f,%f,%f,%f,%d\n",
                     linfo.mDiffuseColor.x,linfo.mDiffuseColor.y,linfo.mDiffuseColor.z,ambientPower,
                     linfo.mSpecularColor.x,linfo.mSpecularColor.y,linfo.mSpecularColor.z,shadowPower,
@@ -1044,7 +1044,7 @@ private:
 
     /// Camera Path Utilities
     void cameraPathSetCamera(const Vector3d& pos, const Quaternion& orient) {
-        
+
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
         Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
@@ -1140,7 +1140,7 @@ private:
     void webViewNavigateStringAction(WebViewManager::NavigationAction action, const String& arg) {
         WebViewManager::getSingleton().navigate(action, arg);
     }
-    
+
     void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
         /// FIXME: need to convert x, y mouse coords into global coords & quaternion
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
@@ -1151,9 +1151,9 @@ private:
         msg.SerializeToString(&smsg);
         cam->sendMessage(MemoryReference(smsg));
     }
-    
+
     static const char tokenDelimiter[];
-    
+
     static bool getNextToken(const String &str, size_t *pos, String *token) {
         if (*pos >= str.length())
             return false;
@@ -1218,7 +1218,7 @@ private:
     void placeArtAt(const String &art_id, const Vector3d &position, const Quaternion &orientation) {
         // FIXME: Actually fetch the art piece and place it.
     }
-    
+
     // place_art art_id screen_x screen_y
     void placeArtHandler(WebViewManager::NavigationAction action, const String& arg) {
         String art_id;
@@ -1260,13 +1260,10 @@ private:
         // Get the command (first word)
         String command;
         size_t i = 0;
-        if (!getNextToken(arg, &i, &command))
-            std::cout << "No command found in " << arg << std::endl;
-
-//        static const char *delim = " \t\n\r";
-//        size_t first = arg.find_first_not_of(delim, 0);
-//        size_t last  = arg.find_first_of(delim);
-//        String command(arg.substr(first, last - first));
+        if (!getNextToken(arg, &i, &command)) {
+            SILOG(input, error, "genericStringMessage: no command found in \"" << arg << "\"");
+            return;
+        }
 
         // Dispatch on the command
         typedef void (OgreSystem::MouseHandler::*StringMessageHandler)(WebViewManager::NavigationAction action, const String& arg);
@@ -1287,8 +1284,8 @@ private:
                 break;
         if (dp->handler != NULL)
             (this->*(dp->handler))(action, arg);
-         else
-            std::cout << "ERROR -- undefined string token in genericStringMessage: " << command << std::endl;
+        else
+            SILOG(input, error, "genericStringMessage: unknown command: \"" << command << "\"");
     }
 
     ///////////////// DEVICE FUNCTIONS ////////////////
@@ -1448,7 +1445,7 @@ public:
 //        mInputResponses["webCommand"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateCommand, _1));
 
         mInputResponses["genericMessage"] = new StringInputResponse(std::tr1::bind(&MouseHandler::genericStringMessage, this, WebViewManager::NavigateCommand, _1));
-        
+
         // Movement
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W), mInputResponses["moveForward"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S), mInputResponses["moveBackward"]);
