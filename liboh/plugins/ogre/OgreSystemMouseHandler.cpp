@@ -1145,11 +1145,12 @@ private:
     void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
         //ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         vector<String> tokens = tokenizeString(arg);
-        if (tokens[0]=="camera") {
+        if (tokens[0]=="inventory") {
+            /// need to convert x, y mouse coords into global coords & quaternion
             ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
             if (!cam) return;
             RoutableMessageBody msg;
-            msg.add_message("CameraMessage", arg);
+            msg.add_message("JavascriptMessage", arg);
             String smsg;
             msg.SerializeToString(&smsg);
             cam->sendMessage(MemoryReference(smsg));
