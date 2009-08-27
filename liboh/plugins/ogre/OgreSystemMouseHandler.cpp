@@ -313,10 +313,17 @@ private:
                 mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
             }
             if (mouseOver) {
-                mSelectedObjects.insert(mouseOver->getProxyPtr());
-                mouseOver->setSelected(true);
-                SILOG(input,info,"Replaced selection with " << mouseOver->id());
-                // Fire selected event.
+                /// FIXME: total kluge!  Need a way to not select walls etc
+                ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
+                if (overMesh) {
+                    Vector3f overScale = overMesh->getScale();
+                    if (overScale.x < 3.0 && overScale.y < 3.0 && overScale.z < 3.0) {
+                        mSelectedObjects.insert(mouseOver->getProxyPtr());
+                        mouseOver->setSelected(true);
+                        SILOG(input,info,"Replaced selection with " << mouseOver->id());
+                        // Fire selected event.
+                    }
+                }
             }
             mLastShiftSelected = SpaceObjectReference::null();
         }
