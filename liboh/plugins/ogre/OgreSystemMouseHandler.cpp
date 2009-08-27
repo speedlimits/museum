@@ -1146,7 +1146,30 @@ private:
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         if (!cam) return;
         RoutableMessageBody msg;
-        msg.add_message("JavascriptMessage", arg);
+        String tok;
+        size_t pos=0;
+        double mx, my;
+        getNextToken(arg, &pos, &tok);          //  inventory
+        getNextToken(arg, &pos, &tok);          //  placeObject
+        getNextToken(arg, &pos, &tok);          //  artwork_xx
+        getNextTokenAsDouble(arg, &pos, &mx);   // mouse x
+        getNextTokenAsDouble(arg, &pos, &my);   // mouse y
+        //double width=1024.0, height=768.0;      // FIXME: get real resolution
+        double width = mParent->mPrimaryCamera->getViewport()->getActualWidth();
+        double height = mParent->mPrimaryCamera->getViewport()->getActualHeight();
+        mx = (mx-width*.5) / (width*.5);
+        my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for titlebar?
+        Vector3d position;
+        Quaternion orientation;
+        bool err=getPositionAndOrientationForNewArt(mx, my, -0.1, false, &position, &orientation);
+        if (!err) {
+            std::cout << "dbm debug ERROR --getPos-etc failed" << std::endl;
+            position = Vector3d(0,2,0);
+        }
+        std::ostringstream fullmsg;
+        fullmsg << arg << " " << position.x <<" "<< position.y <<" "<< position.z <<" "<<
+                orientation.x <<" "<< orientation.y <<" "<< orientation.z <<" "<< orientation.w;
+        msg.add_message("JavascriptMessage", fullmsg.str());
         String smsg;
         msg.SerializeToString(&smsg);
         cam->sendMessage(MemoryReference(smsg));
@@ -1263,8 +1286,7 @@ private:
         if (direction.dot(normal) < 0)
             normal = -normal;   // outward normal
         normal.normalizeThis();
-        double distanceFromWall = 10e-2;    // 10 cm
-        *position += distanceFromWall * Vector3d(normal.x, normal.y, normal.z);
+        *position += surfaceOffset * Vector3d(normal.x, normal.y, normal.z);
         Vector3f xAxis, yAxis;
         xAxis = Vector3f::unitY().cross(normal);
         yAxis = normal.cross(xAxis);

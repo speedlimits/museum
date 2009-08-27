@@ -781,7 +781,6 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
         SILOG(input,insane,"moveSelection: Found no selected objects");
         return;
     }
-
     Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
     mCameraLocation = camera->getProxy().globalLocation(now); // Camera doesn't move
     Vector3f cameraAxis = -mCameraLocation.getOrientation().zAxis();

@@ -56,10 +56,15 @@ class exampleclass:
                 painting = tok[2]
                 if not painting in self.paintings:
                     print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
-                x = (float(tok[3])-500)*.015
-                y = (500-float(tok[4]))*.01
-                print "PY:   moving", painting, self.paintings[painting], "to", x, y
-                self.setPosition(objid=self.paintings[painting], position = (x, y, .3))
+                x = float(tok[5])
+                y = float(tok[6])
+                z = float(tok[7])
+                qx = float(tok[8])
+                qy = float(tok[9])
+                qz = float(tok[10])
+                qw = float(tok[11])
+                print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+                self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:

@@ -336,7 +336,6 @@ void BulletObj::buildBulletBody(const unsigned char* meshdata, int meshbytes) {
 void BulletObj::requestLocation(TemporalValue<Location>::Time timeStamp, const Protocol::ObjLoc& reqLoc) {
     mPIDControlEnabled = true;      /// need a way to turn this off!
     if (reqLoc.has_velocity()) {
-        cout << "dbm debug: requestLocation " << mName << " vel: " << reqLoc.velocity().x << ", " << reqLoc.velocity().z << endl;
         btVector3 btvel(reqLoc.velocity().x, reqLoc.velocity().y, reqLoc.velocity().z);
 //        mBulletBodyPtr->setLinearVelocity(btvel);
         mDesiredLinearVelocity = btvel;
@@ -462,8 +461,6 @@ bool BulletSystem::tick() {
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
-                        cout << "   dbm debug PID on " << objects[i]->mName << " set: " 
-                                << objects[i]->mDesiredLinearVelocity.x() <<","<< objects[i]->mDesiredLinearVelocity.z() << endl;
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
 
@@ -679,7 +676,7 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     Transfer::TransferManager* tm = (Transfer::TransferManager*)mTempTferManager->as<void*>();
     this->transferManager = tm;
 
-    groundlevel = 0.0;
+    groundlevel = -100.0;
     btTransform groundTransform;
     btDefaultMotionState* mMotionState;
     btVector3 worldAabbMin(-10000,-10000,-10000);
