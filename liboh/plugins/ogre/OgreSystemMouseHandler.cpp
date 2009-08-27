@@ -666,7 +666,6 @@ private:
     void setDragModeAction(const String& modename) {
         if (modename == "")
             mDragAction[1] = 0;
-
         mDragAction[1] = DragActionRegistry::get(modename);
     }
 
@@ -1430,7 +1429,7 @@ public:
         mEvents.push_back(mParent->mInputManager->registerDeviceListener(
                               std::tr1::bind(&MouseHandler::deviceListener, this, _1)));
 
-        mDragAction[1] = 0;
+        mDragAction[1] = DragActionRegistry::get("moveObjectOnWall");       /// let this be the default for all time
         mDragAction[2] = DragActionRegistry::get("zoomCamera");
         mDragAction[3] = DragActionRegistry::get("panCamera");
         mDragAction[4] = DragActionRegistry::get("rotateCamera");
