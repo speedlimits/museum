@@ -100,6 +100,8 @@ bool compareEntity (const Entity* one, const Entity* two) {
     return one<two;
 }
 
+float camSpeed=1.0f;
+
 // Defined in DragActions.cpp.
 
 class OgreSystem::MouseHandler {
@@ -621,7 +623,6 @@ private:
             return EventResponse::nop();
         }
         float amount = buttonev->mPressed?1:0;
-        static float camSpeed = 1.0f;
 
         CameraEntity *cam = mParent->mPrimaryCamera;
         ProxyPositionObjectPtr camProxy = cam->getProxyPtr();
@@ -716,7 +717,7 @@ private:
                 break;
             }
             else {
-                amount *= WORLD_SCALE*-.25*camSpeed;
+                amount *= WORLD_SCALE*-camSpeed;
                 loc.setVelocity(orient.xAxis()*amount);
                 loc.setAngularSpeed(0);
                 break;

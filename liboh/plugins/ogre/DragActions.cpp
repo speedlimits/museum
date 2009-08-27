@@ -143,8 +143,7 @@ void rotateCamera(CameraEntity *camera, float radianX, float radianY) {
     }
 
 
-
-
+extern float camSpeed;
 
 class MoveObjectDrag : public ActiveDrag {
     std::vector<ProxyPositionObjectPtr> mSelectedObjects;
@@ -185,10 +184,10 @@ public:
     
         /// dbm new way: ignore camera, just move along global axes
         Vector3d toMove(0,0,0);
-        double sensitivity = 20.0;
+        double sensitivity = 20.0 * camSpeed;
         Location cameraLoc = camera->getProxy().globalLocation(now);
         Vector3f cameraAxis = -cameraLoc.getOrientation().zAxis();
-        if (mParent->getInputManager()->isModifierDown(InputDevice::MOD_ALT)) sensitivity = 5.0;
+        if (mParent->getInputManager()->isModifierDown(InputDevice::MOD_ALT)) sensitivity *= 0.25;
         if (mParent->getInputManager()->isModifierDown(InputDevice::MOD_SHIFT &&
                 mParent->getInputManager()->isModifierDown(InputDevice::MOD_CTRL))) {
             toMove.y = ev->deltaY()*sensitivity;
