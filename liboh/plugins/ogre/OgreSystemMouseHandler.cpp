@@ -1160,7 +1160,7 @@ private:
         my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for titlebar?
         Vector3d position;
         Quaternion orientation;
-        bool err=getPositionAndOrientationForNewArt(mx, my, -0.1, false, &position, &orientation);
+        bool err=getPositionAndOrientationForNewArt(mx, my, 0.1, false, &position, &orientation);
         if (!err) {
             std::cout << "dbm debug ERROR --getPos-etc failed" << std::endl;
             position = Vector3d(0,2,0);
@@ -1263,13 +1263,13 @@ private:
             return false;
         Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
         Location location(camera->globalLocation(now));
-        Vector3f direction(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
+        Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
         double distance;
         Vector3f normal;
         bool success = false;
         int numHits = 1, i;
         for (i = 0; i < numHits; i++) {
-            const Entity *obj = mParent->rayTrace(location.getPosition(), direction, numHits, distance, normal, i);
+            const Entity *obj = mParent->rayTrace(location.getPosition(), viewDirection, numHits, distance, normal, i);
             if (obj == NULL) {      // No object found
                 if (i < numHits)    // Why not?
                     continue;       // Still more objects: keep looking
@@ -1281,15 +1281,38 @@ private:
         if (success == false)
             return false;
 
-        *position = location.getPosition() + distance * Vector3d(direction.x, direction.y, direction.z);
-        if (direction.dot(normal) < 0)
-            normal = -normal;   // outward normal
+        // Compute the position, offset from the surface by the specified amount
+        *position = location.getPosition() + distance * Vector3d(viewDirection.x, viewDirection.y, viewDirection.z);
+        if (viewDirection.dot(normal) > 0)  // backfacing normal
+            normal = -normal;               // make it front-facing
         normal.normalizeThis();
         *position += surfaceOffset * Vector3d(normal.x, normal.y, normal.z);
-        Vector3f xAxis, yAxis;
-        xAxis = Vector3f::unitY().cross(normal);
-        yAxis = normal.cross(xAxis);
-        *orientation = Quaternion(xAxis, yAxis, normal);
+
+        // Compute the orientation
+        Vector3f xAxis, yAxis, zAxis;
+        if (!isSculpture) {                         // a painting
+            zAxis = normal;
+            yAxis = Vector3f::unitY();              // Tentatively on a vertical wall
+            xAxis = yAxis.cross(zAxis);
+            if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
+                xAxis = -viewDirection.cross(yAxis);
+                if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
+                    xAxis = Vector3f::unitX();
+                zAxis = xAxis.cross(yAxis);
+            }
+            else {
+                yAxis = zAxis.cross(xAxis);         // This accommodates non-vertical walls
+            }
+        }
+        else {                                      // a sculpture
+            yAxis = Vector3f::unitY();
+            xAxis = viewDirection.cross(yAxis);     // Point toward the viewer
+            if (xAxis.normalizeThis() == 0) {       // Oops: looking straight up or down
+                xAxis = Vector3f::unitX();
+            }
+            zAxis = xAxis.cross(yAxis);
+        }
+        *orientation = Quaternion(xAxis, yAxis, zAxis);
         return true;
     }
 
