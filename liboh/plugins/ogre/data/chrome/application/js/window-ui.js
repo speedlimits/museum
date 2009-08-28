@@ -23,16 +23,16 @@ $(document).ready(function() {
 	$("#navigation-screen").draggable();
 
 	
-	$(".topbarbutton").bind('mouseover', function(event){
+	$("li.topbarbutton").bind('mouseover', function(event){
 		debug('mouseOver');												  
 		$(this).css('background-position-y', '-38px');	
 					
 	});
-	$(".topbarbutton").bind('mouseout', function(event){
+	$("li.topbarbutton").bind('mouseout', function(event){
 		debug('mouseOut');
 		$(this).css('background-position-y', '0px');						
 	});
-	$(".topbarbutton").mousedown( function(event){
+	$("li.topbarbutton").mousedown( function(event){
 		debug('mouseDown');
 		$(this).css('background-position-y', '-76px');						
 	});
