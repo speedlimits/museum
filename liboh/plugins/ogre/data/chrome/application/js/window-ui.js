@@ -12,6 +12,7 @@ $(document).ready(function() {
 
 	$("#development-screen").draggable();
 	$("#development-console-screen").draggable();
+	$("#navigation-screen").draggable();
 
 	
 	$(".topbarbutton").bind('mouseover', function(event){

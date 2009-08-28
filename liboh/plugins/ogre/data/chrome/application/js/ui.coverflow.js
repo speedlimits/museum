@@ -13,7 +13,7 @@
 // Dennis
 			debug('making elements dragable');
 
-			this.items = $(this.options.items, this.element).draggable();
+			this.items.draggable();
 			debug('done');
 
 // Dennis
@@ -70,7 +70,7 @@
 			if(this.previous == this.current)
 			{
 				
-				$("div.magnifyme").trigger('itemselect', this.current);
+				$("div.magnifyme").trigger('itemselect', {position: this.current, item: this.items.index(this.current)});
 				return false;
 			}
 			

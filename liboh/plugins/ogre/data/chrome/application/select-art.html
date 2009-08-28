@@ -68,7 +68,12 @@
 		
 <div class="wrapper"> 
 	<div class="magnifyme"> 
-		<img class="cover-icon"  src="icons/1.png" /> 
+		<!--<div class="cover-icon"><img src="icons/1.png" /> </div>
+		<div class="cover-icon"><img src="icons/2.png" /> </div>
+		<div class="cover-icon"><img src="icons/3.png" /> </div>
+		<div class="cover-icon"><img src="icons/4.png" /> </div>
+		<div class="cover-icon"><img src="icons/5.png" /> </div>
+		<div class="cover-icon"><img src="icons/6.png" /> </div> -->
 		<img class="cover-icon"  src="icons/2.png" /> 
 		<img class="cover-icon"  src="icons/3.png" /> 
 		<img class="cover-icon"  src="icons/4.png" /> 
@@ -99,7 +104,7 @@
 			$("div.magnifyme").ready(function() {
 				$("div.magnifyme").coverflow();
 				
-				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data ); return false;} );
+				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
 				
 				//$(".wrapper").disableSelection();
 				$(".magnifyme").disableSelection();
