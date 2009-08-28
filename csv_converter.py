@@ -146,7 +146,7 @@ class CsvToSql:
         for row in reader:
             try:
                 if row['objtype'] not in ALLOWED_TYPES:
-                    return # blank or bad row
+                    continue # blank or bad row
 
                 u = self.addUUID(row)
                 self.processRow(u, row, cursor)
