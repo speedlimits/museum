@@ -463,6 +463,7 @@ bool BulletSystem::tick() {
                         /// this is not yet a real PID controller!  YMMV
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
+                        objects[i]->mBulletBodyPtr->activate(true);
 
                         /// bit of a hack: if both linear & angular vel are zero, release control (so gravity & inertia can have fun)
                         if ( (btMagSq(objects[i]->mDesiredLinearVelocity) < 0.001f) &&
