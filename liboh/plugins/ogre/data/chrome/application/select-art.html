@@ -105,6 +105,17 @@
 				$("div.magnifyme").coverflow();
 				
 				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
+
+	$(".cover-icon").bind('mousedown' , function() {
+		debug('mousedown');
+	});
+	$(".cover-icon").bind('mouseup' , function() {
+		debug('mouseup');
+	});
+	$(".cover-icon").bind('mouseout' , function() {
+		debug('mouseout');
+	});
+
 				
 				//$(".wrapper").disableSelection();
 				$(".magnifyme").disableSelection();

@@ -1,3 +1,6 @@
+
+function stopPropagation(event, ui) { event.stopPropagation() ; }
+
 $(document).ready(function() {	
 	
 	$("#mainContent").droppable({
@@ -12,17 +15,25 @@ $(document).ready(function() {
 
 	$("#development-screen").draggable();
 	$("#development-console-screen").draggable();
+
+
+	$("#development-console-screen p").bind('mousedown', stopPropagation ) ;
+	$("#development-console-screen p").bind('mouseup', stopPropagation ) ;
+
 	$("#navigation-screen").draggable();
 
 	
 	$(".topbarbutton").bind('mouseover', function(event){
-												  
-		$(this).css('background-position-y', '-38px');						
+		debug('mouseOver');												  
+		$(this).css('background-position-y', '-38px');	
+					
 	});
 	$(".topbarbutton").bind('mouseout', function(event){
+		debug('mouseOut');
 		$(this).css('background-position-y', '0px');						
 	});
-	$(".topbarbutton").bind('mousedown', function(event){
+	$(".topbarbutton").mousedown( function(event){
+		debug('mouseDown');
 		$(this).css('background-position-y', '-76px');						
 	});
 	

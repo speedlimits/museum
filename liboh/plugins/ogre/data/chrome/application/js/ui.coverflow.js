@@ -13,7 +13,7 @@
 // Dennis
 			debug('making elements dragable');
 
-			this.items.draggable();
+			this.items.bind("mousedown", function (){debug('mouseDown on item');});
 			debug('done');
 
 // Dennis
