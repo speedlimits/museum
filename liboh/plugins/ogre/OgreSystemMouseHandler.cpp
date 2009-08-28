@@ -1297,26 +1297,25 @@ private:
 
         // Compute the orientation
         Vector3f xAxis, yAxis, zAxis;
-        if (!isSculpture) {                         // a painting
-            zAxis = normal;
-            yAxis = Vector3f::unitY();              // Tentatively on a vertical wall
+        if (!isSculpture) {                         //------ A Painting ------//
+            zAxis = normal;                         // The painting is flush against the wall
+            yAxis = Vector3f::unitY();              // Tentatively on a vertical wall, but this is adjusted later
             xAxis = yAxis.cross(zAxis);
             if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
-                xAxis = -viewDirection.cross(yAxis);
+                xAxis = viewDirection.cross(yAxis); // Let's have it face the viewer, rather than the floor or ceiling
                 if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
-                    xAxis = Vector3f::unitX();
-                zAxis = xAxis.cross(yAxis);
+                    xAxis = Vector3f::unitX();      // Align to the world's coordinate axes, since the normal and view are pathological
+                zAxis = xAxis.cross(yAxis);         // Hang it vertically
             }
             else {
-                yAxis = zAxis.cross(xAxis);         // This accommodates non-vertical walls
+                yAxis = zAxis.cross(xAxis);         // This accommodates non-vertical walls nicely, as long as they aren't completely horizontal
             }
         }
-        else {                                      // a sculpture
-            yAxis = Vector3f::unitY();
+        else {                                      //------ A Sculpture ------//
+            yAxis = Vector3f::unitY();              // Sculpture always stands upright
             xAxis = viewDirection.cross(yAxis);     // Point toward the viewer
-            if (xAxis.normalizeThis() == 0) {       // Oops: looking straight up or down
-                xAxis = Vector3f::unitX();
-            }
+            if (xAxis.normalizeThis() == 0)         // Oops: looking straight up or down
+                xAxis = Vector3f::unitX();          // Align to the world's coordinate axes, since the current view is pathological
             zAxis = xAxis.cross(yAxis);
         }
         *orientation = Quaternion(xAxis, yAxis, zAxis);
