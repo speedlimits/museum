@@ -9,6 +9,10 @@ $(document).ready(function() {
 		}
 		
 	});
+
+	$("#development-screen").draggable();
+	$("#development-console-screen").draggable();
+
 	
 	$(".topbarbutton").bind('mouseover', function(event){
 												  

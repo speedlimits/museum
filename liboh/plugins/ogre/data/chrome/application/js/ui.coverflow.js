@@ -9,6 +9,15 @@
 				self.moveTo(this);
 				$("div.slider").slider("moveTo", self.current, null, true);
 			});
+
+// Dennis
+			debug('making elements dragable');
+
+			this.items = $(this.options.items, this.element).draggable();
+			debug('done');
+
+// Dennis
+
 			this.itemWidth = this.items.outerWidth(true);
 			
 			//THIS IS FOR DEMO PURPOSES ONLY!

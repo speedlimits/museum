@@ -50,12 +50,15 @@
 				border: 1px solid #999;
 			}
 		</style> 
+
 <script type="text/javascript" src="js/jquery-1.2.6.js"></script> 
 <script type="text/javascript" src="js/ui.core.js"></script> 
 <script type="text/javascript" src="js/ui.slider.js"></script> 
 <script type="text/javascript" src="js/effects.core.js"></script> 
+<script type="text/javascript" src="js/ui.draggable.js"></script> 
 <script type="text/javascript" src="js/ui.coverflow.js"></script> 
- 
+
+
 <script type="text/javascript" src="js/sylvester.js"></script> 
 <script type="text/javascript" src="js/pb.transformie.js"></script> 
  
@@ -96,10 +99,10 @@
 			$("div.magnifyme").ready(function() {
 				$("div.magnifyme").coverflow();
 				
-				$("div.magnifyme").bind('itemselect',  function(e, data) {alert('ahh' + data ); return false;} );
+				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data ); return false;} );
 				
 				//$(".wrapper").disableSelection();
-				$(".manifyme").disableSelection();
+				$(".magnifyme").disableSelection();
 				$(".slider").disableSelection();
 				$(".ui-slider-handle").disableSelection();
 				
