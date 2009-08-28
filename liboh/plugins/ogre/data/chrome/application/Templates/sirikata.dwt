@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- TemplateBeginEditable name="doctitle" -->
+<title>Untitled Document</title>
+<!-- TemplateEndEditable -->
+<!-- TemplateBeginEditable name="head" -->
+<!-- TemplateEndEditable -->
+<link href="css/twoColLiqRtHdr.css" rel="stylesheet" type="text/css" />
+<link href="../css/humanity/jquery-ui-1.7.2.custom.css" type="text/css"/>
+<!--[if IE]>
+<style type="text/css"> 
+/* place css fixes for all versions of IE in this conditional comment */
+.twoColLiqRtHdr #sidebar1 { padding-top: 30px; }
+.twoColLiqRtHdr #mainContent { zoom: 1; padding-top: 15px; }
+/* the above proprietary zoom property gives IE the hasLayout it needs to avoid several bugs */
+</style>
+<![endif]-->
+</head>
+
+<body class="twoColLiqRtHdr">
+
+<div id="container">
+  <div id="header">
+    <h1>Select Gallery | Place Art |  Frames | Walls | Lighting | Save/Share</h1>
+  <!-- end #header --></div>
+  <div id="sidebar1">
+    <h3>Wizzard</h3>
+    <p>Inventory</p>
+    <p>Tools
+      <!-- end #sidebar1 -->
+  </p></div>
+  <div id="mainContent">
+    <h1>3D World</h1>
+  <!-- end #mainContent --></div>
+	<!-- This clearing element should immediately follow the #mainContent div in order to force the #container div to contain all child floats --><br class="clearfloat" />
+  <div id="footer">
+    <p>Footer</p>
+  <!-- end #footer --></div>
+<!-- end #container --></div>
+</body>
+</html>

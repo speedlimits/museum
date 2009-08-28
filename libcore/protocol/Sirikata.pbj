@@ -238,6 +238,7 @@ message PhysicalParameters {
 		DYNAMICBOX = 2;
 		DYNAMICSPHERE = 3;
 		DYNAMICCYLINDER = 4;
+		CHARACTER = 5;
 //		DYNAMICMESH = 123456789;
 	}
 	optional Mode mode = 2 ;
@@ -247,6 +248,7 @@ message PhysicalParameters {
     optional vector3f hull = 6 ;
     optional uint32 collide_msg = 16 ;
     optional uint32 collide_mask = 17 ;
+    optional float gravity = 18 ;
 }
 
 message LightInfoProperty {

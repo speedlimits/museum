@@ -26,6 +26,26 @@
       #reload {
       width: 31px;
       }
+ 
+      #moveforward {
+      height: 29px;
+      width: 31px;
+      }
+ 
+      #turnleft {
+      height: 29px;
+      width: 31px;
+      }
+ 
+      #turnright {
+      height: 29px;
+      width: 31px;
+      }
+ 
+      #help {
+      height: 29px;
+      width: 31px;
+      }
 
       div.addressbar {
       float: right;
@@ -36,6 +56,7 @@
       width: 230px;
       height: 30px;
       }
+			
       input.address {
       float: left;
       width: 100%;
@@ -57,6 +78,7 @@
       margin-top: 6px;
       }
     </style>
+    <script language="javascript" type="text/javascript" src="chromecomm.js"></script>
     <script language="javascript" type="text/javascript">
       function setButtonImage(id, mode) {
         var imgPath = "url(" + id + mode + ".png)";
@@ -70,10 +92,10 @@
       function initButton(id) {
         setButtonNormal(id);
         var button = document.getElementById(id);
-        button.onmouseover = function() { setButtonHover(id); }
-        button.onmouseout = function() { setButtonNormal(id); }
-        button.onmousedown = function() { setButtonPressed(id); }
-        button.onmouseup = function() { setButtonNormal(id); }
+        button.onmouseover = function() { setButtonHover(id);  }
+        button.onmouseout  = function() { setButtonNormal(id);  }
+        if (!button.hasOwnProperty("onmousedown"))  button.onmousedown = function() { setButtonPressed(id); }
+        if (!button.hasOwnProperty("onmouseup"))    button.onmouseup   = function() { setButtonNormal(id);  }
       }
 
       function initButtons() {
@@ -82,15 +104,31 @@
         initButton("reload");
         initButton("go");
         initButton("newtab");
+        initButton("moveforward");
+        initButton("turnleft");
+        initButton("turnright");
+        initButton("help");
       }
 
       function goAddress() {
         Client.event("navgo", document.getElementById("addresstext").value );
       }
-      function goBack() { Client.event("navback"); }
-      function goForward() { Client.event("navforward"); }
-      function goRefresh() { Client.event("navrefresh"); }
-      function goNewTab() { Client.event("navnewtab"); }
+      function goBack()    { back_web_page();    }
+      function goForward() { forward_web_page(); }
+      function goRefresh() { refresh_web_page(); }
+      function goNewTab()  { new_web_page_tab(); }
+
+      // This is supposed to be for a navigation help message, but we use it for testing now. 
+      function goHelp() { Client.event("navcommand", "inventory placeObject painting2 100 100"); }
+
+      // FIXME: Use inheritance or call chaining to add additional functionality.
+      function startMoveForward() { move_forward_start(); setButtonPressed("moveforward"); }
+      function  stopMoveForward() { move_forward_stop();  setButtonNormal( "moveforward"); }
+      function    startTurnLeft() { turn_left_start();    setButtonPressed("turnleft"); }
+      function     stopTurnLeft() { turn_left_stop();     setButtonNormal( "turnleft"); }
+      function   startTurnRight() { turn_right_start();   setButtonPressed("turnright"); }
+      function    stopTurnRight() { turn_right_stop();    setButtonNormal( "turnright"); }
+
     </script>
   </head>
   <body onLoad="initButtons()">
@@ -102,5 +140,9 @@
       <div class="button" id="go" onclick="goAddress()"></div>
     </div>
     <div class="button" id="newtab", onclick="goNewTab()"></div>
+    <div class="button" id="moveforward", onmousedown="startMoveForward()", onmouseup="stopMoveForward()"></div>
+    <div class="button" id="turnleft",    onmousedown="startTurnLeft()",    onmouseup="stopTurnLeft()"></div>
+    <div class="button" id="turnright",   onmousedown="startTurnRight()",   onmouseup="stopTurnRight()"></div>
+    <div class="button" id="help", onclick="goHelp()"></div>
   </body>
 </html>

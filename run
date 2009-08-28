@@ -1,0 +1,70 @@
+#!/usr/bin/python
+import sys, os, time
+
+def check_for_proc(proc):
+    sin, sout = os.popen2("ps -af")
+    s = sout.read()
+##    print s
+    procs = s.split("\n")
+    running=0
+    for p in procs:
+        w = p.split()
+        if proc in w:
+            running=int(w[1])
+##    print "check_for_proc", proc, "returns:", running
+    return running
+
+#
+# Check for executable version
+#
+
+if os.path.exists("build/cmake/cppoh_d"):
+    spaceserver = "space_d"
+    proxserver = "proximity_d"
+    executable = "cppoh_d"
+else:
+    if os.path.exists("build/cmake/cppoh"):
+        spaceserver = "space"
+        proxserver = "proximity"
+        executable = "cppoh"
+    else:
+        print "can't find executable"
+        exit()
+
+#
+# Run prox & space daemons (if not already running)
+#
+
+for proc, delay in (proxserver, 4.5), (spaceserver, .5):
+
+    if not check_for_proc("./"+proc):
+        cmd = 'xterm -e "cd build/cmake; ./' + proc + '" &'
+        print cmd
+        os.system(cmd)
+        time.sleep(delay)
+
+#
+# Convert .csv files into sqlite .db files
+#
+
+if len(sys.argv) > 1:
+    fin = sys.argv[1]
+else:
+    fin = "scene.csv"
+fout = fin[:-4] + ".db"
+cmd = "python csv_converter.py " + fin +" "+ fout
+print cmd
+sin, sout = os.popen2(cmd)
+s = sout.read()
+if not "SUCCESS" in s:
+    print s
+    print "csv --> db conversion failed, aborting run"
+    exit()
+
+#
+# Run our object host
+#
+
+cmd = "cd build/cmake; ./" + executable + " --db ../../" + fout
+print cmd
+os.system(cmd)

@@ -128,6 +128,8 @@ ENDMACRO(VERIFY_VERSION)
 INCLUDE(ListUtil)
 INCLUDE(ParseArguments)
 INCLUDE(AddPBJTarget)
+FIND_PACKAGE(PythonInterp)
+
 
 MACRO(ADD_CXXTEST_CPP_TARGET)
   PARSE_ARGUMENTS(CXXTEST "DEPENDS;OUTPUTDIR;LIBRARYDIR" "" ${ARGN})
@@ -143,28 +145,30 @@ MACRO(ADD_CXXTEST_CPP_TARGET)
   #IF(CXXTEST_OUTPUTDIR)
   #  SET(CXXTEST_OPTIONS ${CXXTEST_OPTIONS} -o ${CXXTEST_OUTPUTDIR})
   #ENDIF(CXXTEST_OUTPUTDIR)
-  FIND_PACKAGE(Perl)
-  IF(PERL_EXECUTABLE)
-    SET(CXXTEST_COMPILER ${PERL_EXECUTABLE})
-    SET(CXXTEST_GEN ${CXXTEST_LIBRARYDIR}/cxxtestgen.pl)
+
+  SET(CXXTEST_CPP_FILE ${CMAKE_CURRENT_BINARY_DIR}/test.cc)
+  
+  IF(PYTHON_EXECUTABLE)
+    SET(CXXTEST_COMPILER ${PYTHON_EXECUTABLE})
+    SET(CXXTEST_GEN ${CXXTEST_LIBRARYDIR}/cxxtestgen.py)
   ELSE()
-    FIND_PACKAGE(PythonInterp)
-    IF(PYTHON_EXECUTABLE)
-      SET(CXXTEST_COMPILER ${PYTHON_EXECUTABLE})
-      SET(CXXTEST_GEN ${CXXTEST_LIBRARYDIR}/cxxtestgen.py)
+    FIND_PACKAGE(Perl)
+    IF(PERL_EXECUTABLE)
+      SET(CXXTEST_CPP_FILE test.cc)      #perl cannot output to a full path.
+      SET(CXXTEST_COMPILER ${PERL_EXECUTABLE})
+      SET(CXXTEST_GEN ${CXXTEST_LIBRARYDIR}/cxxtestgen.pl)
     ELSE()
       MESSAGE(STATUS "!!! Cannot locate python or perl -- tests will not be compiled.")
     ENDIF()
   ENDIF()
-  SET(CXXTEST_CPP_FILE ${CXXTEST_OUTPUTDIR}/test.cc)
   FOREACH(FILE ${CXXTEST_FILES})
-    SET(CXXTEST_H_FILE ${FILE})
+    SET(CXXTEST_H_FILE ${TOP_LEVEL}/${FILE})
     SET(CXXTEST_TEST_FILES ${CXXTEST_TEST_FILES} ${CXXTEST_H_FILE})
   ENDFOREACH()
   IF (CXXTEST_COMPILER)
     SET(FINAL_CXXTEST_COMMAND ${CXXTEST_COMPILER} ${CXXTEST_GEN} ${CXXTEST_OPTIONS} -o ${CXXTEST_CPP_FILE} ${CXXTEST_TEST_FILES})
     ADD_CUSTOM_COMMAND(OUTPUT ${CXXTEST_CPP_FILE}
-                       COMMAND ${FINAL_CXXTEST_COMMAND}
+                       COMMAND ${CXXTEST_COMPILER} ${CXXTEST_GEN} ${CXXTEST_OPTIONS} -o ${CXXTEST_CPP_FILE} ${CXXTEST_TEST_FILES}
                        DEPENDS ${CXXTEST_TEST_FILES} ${CXXTEST_DEPENDS}
                        COMMENT "Building ${CXXTEST_TEST_FILES} -> ${CXXTEST_CPP_FILE}")
   ELSE()
@@ -599,7 +603,7 @@ ENDFOREACH()
 #protocol buffers preprocessing
 SET(ProtocolBuffersRoot ${LIBCORE_DIR}/protocol)
 SET(ProtocolBuffersSources
-  Persistence Sirikata Subscription Test
+  Persistence Sirikata Time Subscription Test
 )
 
 
@@ -929,6 +933,7 @@ SET(LIBOH_SOURCES
                   ${LIBOH_SOURCE_DIR}/HostedObject.cpp
                   ${LIBOH_SOURCE_DIR}/ObjectHostProxyManager.cpp
                   ${LIBOH_SOURCE_DIR}/TopLevelSpaceConnection.cpp
+                  ${LIBOH_SOURCE_DIR}/SpaceTimeOffsetManager.cpp
                   ${LIBOH_SOURCE_DIR}/SpaceConnection.cpp
                   ${LIBOH_SOURCE_DIR}/LightInfo.cpp
                   ${LIBOH_SOURCE_DIR}/ProxyMeshObject.cpp
@@ -1045,36 +1050,39 @@ ${GFX}/WebViewManager.cpp
 
 #test source files
 SET(CXXTESTSources
-${LIBCORE_DIR}/test/AnyTest.hpp
-${LIBCORE_DIR}/test/AtomicTest.hpp
-#${LIBCORE_DIR}/test/CacheLayerTest.hpp
-${LIBCORE_DIR}/test/DownloadTest.hpp
-${LIBCORE_DIR}/test/EventTest.hpp
-${LIBCORE_DIR}/test/ExtrapolationTest.hpp
-${LIBCORE_DIR}/test/FactoryTest.hpp
-${LIBCORE_DIR}/test/ListenerTest.hpp
-${LIBCORE_DIR}/test/Matrix3Test.hpp
-${LIBCORE_DIR}/test/MinitransactionHandlerTest.hpp
-${LIBCORE_DIR}/test/NameLookupTest.hpp
-${LIBCORE_DIR}/test/ObjectStorageTest.hpp
-${LIBCORE_DIR}/test/OptionTest.hpp
-#${LIBCORE_DIR}/test/ProxTest.hpp
-${LIBCORE_DIR}/test/QuaternionTest.hpp
-${LIBCORE_DIR}/test/ReadWriteHandlerTest.hpp
-${LIBCORE_DIR}/test/RoutableMessageTest.hpp
-${LIBCORE_DIR}/test/SQLiteMinitransactionTest.hpp
-${LIBCORE_DIR}/test/SQLiteReadWriteTest.hpp
-${LIBCORE_DIR}/test/SstTest.hpp
-${LIBCORE_DIR}/test/SubscriptionTest.hpp
-#${LIBCORE_DIR}/test/ThreadSafeQueueTest.hpp
-${LIBCORE_DIR}/test/TR1Test.hpp
-#${LIBCORE_DIR}/test/UploadTest.hpp
-${LIBCORE_DIR}/test/Vector3Test.hpp
+libcore/test/AnyTest.hpp
+libcore/test/AtomicTest.hpp
+#libcore/test/CacheLayerTest.hpp
+libcore/test/DownloadTest.hpp
+libcore/test/EventTest.hpp
+libcore/test/ExtrapolationTest.hpp
+libcore/test/FactoryTest.hpp
+libcore/test/ListenerTest.hpp
+libcore/test/Matrix3Test.hpp
+libcore/test/MinitransactionHandlerTest.hpp
+libcore/test/NameLookupTest.hpp
+libcore/test/ObjectStorageTest.hpp
+libcore/test/OptionTest.hpp
+#libcore/test/ProxTest.hpp
+libcore/test/QuaternionTest.hpp
+libcore/test/ReadWriteHandlerTest.hpp
+libcore/test/RoutableMessageTest.hpp
+libcore/test/SQLiteMinitransactionTest.hpp
+libcore/test/SQLiteReadWriteTest.hpp
+libcore/test/SstTest.hpp
+libcore/test/SubscriptionTest.hpp
+#libcore/test/ThreadSafeQueueTest.hpp
+libcore/test/TR1Test.hpp
+#libcore/test/UploadTest.hpp
+libcore/test/Vector3Test.hpp
  )
-#  ${LIBCORE_DIR}/test/ThreadSafeQueueTest.hpp
+#  libcore/test/ThreadSafeQueueTest.hpp
 ADD_CXXTEST_CPP_TARGET(CXXTEST ${CXXTESTSources}
-	LIBRARYDIR ${CXXTESTRoot}
-	OUTPUTDIR ${CMAKE_CURRENT_BINARY_DIR})
+	LIBRARYDIR ${CXXTESTRoot})
+
+
+
+
 
 SET(TEST_SOURCES ${CXXTEST_CPP_FILE}
                  ${SirikataProtocolDirectory}/Test_protobuf.cc 
@@ -1337,6 +1345,25 @@ IF(WIN32)
 ENDIF()
 
 
+IF(PYTHON_EXECUTABLE)
+  ADD_CUSTOM_TARGET(SCENEDB ALL
+              DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/scene.db
+              COMMENT "Checking ${CMAKE_CURRENT_BINARY_DIR}/scene.db")
+
+  ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/scene.db
+                     COMMAND ${PYTHON_EXECUTABLE} ${TOP_LEVEL}/csv_converter.py ${TOP_LEVEL}/scene.csv ${CMAKE_CURRENT_BINARY_DIR}/scene.db
+  ${CMAKE_CURRENT_BINARY_DIR}/scene.db ${CXXTEST_GEN} ${CXXTEST_OPTIONS} -o ${CXXTEST_CPP_FILE} ${CXXTEST_TEST_FILES}
+                     DEPENDS ${AdditionalProtoDepends}
+                     COMMENT "Making example scene database from  ${CMAKE_CURRENT_BINARY_DIR}/scene.db")
+
+ENDIF()
+
+SET(MONO_SCRIPT_TARGET)
+IF(FOUND_MONO)
+SET(MONO_SCRIPT_TARGET monoscript)
+ENDIF()
+
+SET(EXEC_PERMS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
 #installation information
 INSTALL(TARGETS
           ${PBJ_BINARY}
@@ -1344,11 +1371,20 @@ INSTALL(TARGETS
           ${SIRIKATA_SPACE_LIB}
           ${SIRIKATA_PROXIMITY_LIB}
           ${SIRIKATA_SUBSCRIPTION_LIB}
+          ${PROXIMITY_LIB}
+          tcpsst
+          sqlite
+          skeleton
+          ogregraphics
+          prox
+          bulletphysics
+          ${MONO_SCRIPT_TARGET}
           ${SIRIKATA_OH_LIB}
           ${SPACE_BINARY}
           ${PROXIMITY_BINARY}
           ${SUBSCRIPTION_BINARY}
           ${CPPOH_BINARY}
+        PERMISSIONS ${EXEC_PERMS}
         RUNTIME
           DESTINATION bin
         LIBRARY
@@ -1357,6 +1393,256 @@ INSTALL(TARGETS
           DESTINATION lib
 )
 
+#install protobufs
+IF(PROTOCOLBUFFERS_ROOT)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${PROTOCOLBUFFERS_ROOT}/bin/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ELSE()
+    INSTALL(DIRECTORY ${PROTOCOLBUFFERS_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
+
+
+#install ois
+IF(OIS_ROOT AND FOUND_OIS)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${OIS_ROOT}/bin/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ELSE()
+    INSTALL(DIRECTORY ${OIS_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.la" EXCLUDE
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
+
+
+#install sql
+IF(SQLite3_ROOT)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${SQLite3_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE
+            PATTERN "*.lib" EXCLUDE)        
+  ELSE()
+    INSTALL(DIRECTORY ${SQLite3_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.la" EXCLUDE
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
+
+#install SDL
+IF(sdl_FOUND AND sdl_ROOT)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${sdl_ROOT}/bin/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE
+            PATTERN "*.lib" EXCLUDE)        
+  ELSEIF(APPLE)
+    INSTALL(DIRECTORY ${sdl_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.la" EXCLUDE
+            PATTERN "*.exe" EXCLUDE)
+  ELSE()
+    INSTALL(DIRECTORY ${sdl_LIBRARY_DIRS}/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.la" EXCLUDE
+            PATTERN "*.exe" EXCLUDE)
+  ENDIF()
+ENDIF()
+
+IF(bullet_FOUND AND bullet_ROOT)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${bullet_ROOT}/bin/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ELSE()
+    INSTALL(DIRECTORY ${bullet_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.la" EXCLUDE
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
+
+IF(OGRE_FOUND)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${OGRE_ROOT}/bin/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ELSE()
+    FOREACH(OGRE_LIBRARY_DIR ${OGRE_LIBRARY_DIRS})
+      INSTALL(DIRECTORY ${OGRE_LIBRARY_DIR}/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.so"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.la" EXCLUDE
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.me" EXCLUDE
+            PATTERN "*.h" EXCLUDE
+            )          
+     ENDFOREACH()
+
+  ENDIF()
+  IF(AWESOMIUM_ROOT)
+    IF(WIN32)
+      INSTALL(DIRECTORY ${AWESOMIUM_ROOT}/
+              FILE_PERMISSIONS ${EXEC_PERMS}
+              DESTINATION bin/
+              PATTERN "*.a" EXCLUDE
+              PATTERN "*.la" EXCLUDE
+	      PATTERN "*.h" EXCLUDE
+	      PATTERN "*.lib" EXCLUDE
+              #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+              PATTERN "*.exe" EXCLUDE)        
+    ELSE()
+      INSTALL(DIRECTORY ${AWESOMIUM_ROOT}/lib/
+              FILE_PERMISSIONS ${EXEC_PERMS}
+              DESTINATION lib/
+              #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+    ENDIF()
+  ENDIF()
+ENDIF()
+
+#install boost
+IF(BOOST_ROOT)
+  IF(WIN32)
+    FOREACH(Boost_LIBRARY_DIR ${PLATFORM_LIBS}/boost_1_35_0/lib ${PLATFORM_LIBS}/boost_1_37_0/lib ${PLATFORM_LIBS}installed-boost/lib)
+      IF(EXISTS ${Boost_LIBRARY_DIR})
+      INSTALL(DIRECTORY ${Boost_LIBRARY_DIR}/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            #PATTERN "*.so"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.la" EXCLUDE
+            PATTERN "*.a" EXCLUDE
+            PATTERN "*.me" EXCLUDE
+            PATTERN "*.hpp" EXCLUDE
+	    PATTERN "*.lib" EXCLUDE
+            PATTERN "*wave-vc90-mt-1_37.dll" EXCLUDE
+            PATTERN "*wave-vc90-mt-gd-1_37.dll" EXCLUDE
+            PATTERN "*wave-vc80-mt-1_35.dll" EXCLUDE
+            PATTERN "*wave-vc80-mt-gd-1_35.dll" EXCLUDE
+            )          
+     ENDIF()
+     ENDFOREACH()
+  ELSE()
+    INSTALL(DIRECTORY ${BOOST_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
+
+IF(MONO_FOUND)
+  INSTALL(PROGRAMS
+          ${SirikataScriptRuntime}
+          ${SirikataScriptProtocol}
+        DESTINATION lib/)
+  INSTALL(PROGRAMS
+        ${SirikataScriptRuntime_LIBRARY}
+        ${SirikataProtoScriptRuntime_LIBRARY}
+        DESTINATION lib/)
+  INSTALL(DIRECTORY
+          ${IRON_PYTHON_ROOT}/
+          FILE_PERMISSIONS ${EXEC_PERMS}
+          DESTINATION lib/)
+  IF(MONO_ROOT)
+    INSTALL(PROGRAMS
+        ${MONO_ROOT}/lib/mono/2.0/System.Xml.dll
+        DESTINATION lib/)
+    INSTALL(DIRECTORY
+          ${MONO_ROOT}/lib/
+          FILE_PERMISSIONS ${EXEC_PERMS}
+          DESTINATION lib/
+          #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+	  PATTERN "*zlib1.dll" EXCLUDE
+          PATTERN "*.xsd" EXCLUDE
+          PATTERN "*.config" EXCLUDE
+          PATTERN "*.rsp" EXCLUDE
+          PATTERN "*.targets" EXCLUDE
+          PATTERN "*.zip" EXCLUDE
+          PATTERN "*.cs" EXCLUDE
+          PATTERN "*.tree" EXCLUDE
+          PATTERN "*.mdb" EXCLUDE
+          PATTERN "*.exe" EXCLUDE
+          PATTERN "*.la" EXCLUDE
+          PATTERN "*.a" EXCLUDE
+          PATTERN "*.xml*" EXCLUDE
+#         PATTERN "*.pc" EXCLUDE
+#          PATTERN "*.so*" EXCLUDE
+          PERMISSIONS ${EXEC_PERMS})
+  ENDIF()
+  IF(WIN32)
+    INSTALL(DIRECTORY ${MONO_ROOT}/bin/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+  	    PATTERN "*zlib1.dll" EXCLUDE
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
+
+#install curl #MUST BE DONE AFTER MONO to get correct libz
+IF(CURL_ROOT)
+  IF(WIN32)
+    INSTALL(DIRECTORY ${CURL_ROOT}/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION bin/
+            PATTERN "*.lib" EXCLUDE
+            PATTERN "*README" EXCLUDE
+            PATTERN "*COPYING" EXCLUDE
+            PATTERN "*Makefile" EXCLUDE
+            PATTERN "*.am" EXCLUDE
+            PATTERN "*.in" EXCLUDE
+            PATTERN "*CHANGES" EXCLUDE
+            PATTERN "*.exp" EXCLUDE
+            PATTERN "*.h" EXCLUDE
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ELSE()
+    INSTALL(DIRECTORY ${CURL_ROOT}/lib/
+            FILE_PERMISSIONS ${EXEC_PERMS}
+            DESTINATION lib/
+            #PATTERN "*.dll"<-- if only we could just INCLUDE a pattern
+            PATTERN "*.exe" EXCLUDE)        
+  ENDIF()
+ENDIF()
 
 INSTALL(DIRECTORY
           # note: the trailing slashes avoid prepending the directory name
@@ -1372,6 +1658,15 @@ INSTALL(DIRECTORY
         PATTERN "*.hh" EXCLUDE
 )
 
+
+INSTALL(DIRECTORY
+          # note: the trailing slashes avoid prepending the directory name
+          # itself to the installed files
+          ${ScriptsRoot}
+        DESTINATION lib/
+        PATTERN "*.cs" EXCLUDE
+        PATTERN "*.pyc" EXCLUDE)
+
 # get the name of the binaries for running tests
 IF(WIN32)
   GET_TARGET_PROPERTY(TEST_RUNABLE ${TEST_BINARY} LOCATION)
@@ -1382,6 +1677,16 @@ ELSE()
   ELSE()
     GET_TARGET_PROPERTY(TEST_RUNABLE ${TEST_BINARY} LOCATION)
   ENDIF()
+ENDIF()
+
+
+
+INSTALL(FILES ${TOP_LEVEL}/cdn.txt
+        DESTINATION bin/)                               
+IF(PYTHON_EXECUTABLE)
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/scene.db 
+          DESTINATION bin/
+          OPTIONAL )                               
 ENDIF()
 
 ADD_CUSTOM_TARGET(test

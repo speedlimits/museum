@@ -129,19 +129,25 @@ WebView::~WebView()
 	TextureManager::getSingletonPtr()->remove(viewName + "Texture");
 	if(usingMask) TextureManager::getSingletonPtr()->remove(viewName + "MaskTexture");
 
-	if(proxyObject.use_count())
-		proxyObject->WebViewProvider::removeListener(this);
+	setProxyObject(std::tr1::shared_ptr<ProxyWebViewObject>());
+}
+
+void WebView::destroyed() {
+	WebViewManager::getSingleton().destroyWebView(this);
 }
 
 void WebView::setProxyObject(const std::tr1::shared_ptr<ProxyWebViewObject>& proxyObject)
 {
-	if(this->proxyObject.use_count())
+	if(this->proxyObject)
 		proxyObject->WebViewProvider::removeListener(this);
+		proxyObject->ProxyObjectProvider::removeListener(this);
 
 	this->proxyObject = proxyObject;
 
-	if(this->proxyObject.use_count())
+	if(this->proxyObject) {
 		proxyObject->WebViewProvider::addListener(this);
+		proxyObject->ProxyObjectProvider::addListener(this);
+	}
 }
 
 void WebView::createWebView(bool asyncRender, int maxAsyncRenderRate)
@@ -202,7 +208,8 @@ void WebView::createMaterial()
 	MaterialPtr material = MaterialManager::getSingleton().create(viewName + "Material",
 		ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	matPass = material->getTechnique(0)->getPass(0);
-	matPass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+	//matPass->setSeparateSceneBlending (SBF_SOURCE_ALPHA, SBF_ONE_MINUS_SOURCE_ALPHA, SBF_SOURCE_ALPHA, SBF_ONE_MINUS_SOURCE_ALPHA);
+	matPass->setSeparateSceneBlending (SBF_ONE, SBF_ONE_MINUS_SOURCE_ALPHA, SBF_SOURCE_ALPHA, SBF_ONE_MINUS_SOURCE_ALPHA);
 	matPass->setDepthWriteEnabled(false);
 
 	baseTexUnit = matPass->createTextureUnitState(viewName + "Texture");

@@ -34,6 +34,7 @@
 #include <oh/Platform.hpp>
 #include <oh/SimulationFactory.hpp>
 #include <oh/ProxyObject.hpp>
+#include <oh/SpaceTimeOffsetManager.hpp>
 #include <options/Options.hpp>
 #include <transfer/TransferManager.hpp>
 #include "btBulletDynamicsCommon.h"
@@ -103,9 +104,10 @@ void BulletObj::meshChanged (const URI &newMesh) {
 }
 
 void BulletObj::setPhysical (const PhysicalParameters &pp) {
-    DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " mesh: " << mMeshname << endl);
+    DEBUG_OUTPUT(cout << "dbm: setPhysical: " << this << " mode=" << pp.mode << " name: " << pp.name << " mesh: " << mMeshname << endl);
     mName = pp.name;
     mHull = pp.hull;
+    mGravity = system->getGravity() * pp.gravity;
     colMask = pp.colMask;
     colMsg = pp.colMsg;
     switch (pp.mode) {
@@ -131,6 +133,18 @@ void BulletObj::setPhysical (const PhysicalParameters &pp) {
         mDynamic = true;
         mShape = ShapeSphere;
         break;
+    case PhysicalParameters::Character:
+        mDynamic = true;
+        mShape = ShapeCharacter;
+        break;
+    }
+    if (mMeshptr) {
+        if (mDynamic && (!mMeshptr->isLocal()) ) {      /// for now, physics ignores dynamic objects on other hosts
+            DEBUG_OUTPUT(cout << "  dbm: debug setPhysical: disabling dynamic&non-local" << endl);
+            mActive = false;
+            mMeshptr->setLocationAuthority(0);
+            return;
+        }
     }
     if (!(pp.mode==PhysicalParameters::Disabled)) {
         DEBUG_OUTPUT(cout << "  dbm: debug setPhysical: adding to bullet" << endl);
@@ -187,7 +201,7 @@ void BulletObj::setScale (const Vector3f &newScale) {
     }
     mBulletBodyPtr->setCollisionShape(mColShape);
     mBulletBodyPtr->setMassProps(mass, localInertia);
-    mBulletBodyPtr->setGravity(btVector3(0, -9.8, 0));                              /// otherwise gravity assumes old inertia!
+    mBulletBodyPtr->setGravity(btVector3(mGravity.x, mGravity.y, mGravity.z));  /// otherwise gravity assumes old inertia!
     mBulletBodyPtr->activate(true);
     DEBUG_OUTPUT(cout << "dbm: setScale " << newScale << " old X: " << mSizeX << " mass: "
                  << mass << " localInertia: " << localInertia.getX() << "," << localInertia.getY() << "," << localInertia.getZ() << endl);
@@ -201,6 +215,11 @@ void BulletObj::buildBulletShape(const unsigned char* meshdata, int meshbytes, f
             DEBUG_OUTPUT(cout << "dbm: shape=sphere " << endl);
             mColShape = new btSphereShape(btScalar(mSizeX*mHull.x));
             mass = mSizeX*mSizeX*mSizeX * mDensity * 4.189;                         /// Thanks, Wolfram Alpha!
+        }
+        if (mShape == ShapeCharacter) {
+            DEBUG_OUTPUT(cout << "dbm: shape=character " << endl);                  /// for now, it's a sphere
+            mColShape = new btSphereShape(btScalar(mSizeX*mHull.x));                /// should be ellipsoid or capsule, some day
+            mass = mSizeX*mSizeX*mSizeX * mDensity * 20.0;                          /// yeah! Massive, dude!
         }
         else if (mShape == ShapeBox) {
             DEBUG_OUTPUT(cout << "dbm: shape=boxen " << endl);
@@ -304,18 +323,23 @@ void BulletObj::buildBulletBody(const unsigned char* meshdata, int meshbytes) {
         body->setActivationState(DISABLE_DEACTIVATION);
     }
     else {
-        body->setAngularFactor(0);
+        if (mShape==ShapeCharacter) {
+            body->setAngularFactor(0);  /// for now, all we do with characters is avoid external angular effects
+        }
     }
     system->dynamicsWorld->addRigidBody(body);
+    body->setGravity(btVector3(mGravity.x, mGravity.y, mGravity.z));
     mBulletBodyPtr=body;
     mActive=true;
     system->bt2siri[body]=this;
 }
 
 void BulletObj::requestLocation(TemporalValue<Location>::Time timeStamp, const Protocol::ObjLoc& reqLoc) {
+    mPIDControlEnabled = true;      /// need a way to turn this off!
     if (reqLoc.has_velocity()) {
         btVector3 btvel(reqLoc.velocity().x, reqLoc.velocity().y, reqLoc.velocity().z);
-        mBulletBodyPtr->setLinearVelocity(btvel);
+//        mBulletBodyPtr->setLinearVelocity(btvel);
+        mDesiredLinearVelocity = btvel;
     }
     if (reqLoc.has_angular_speed()) {
         Vector3f axis(0,1,0);
@@ -328,8 +352,9 @@ void BulletObj::requestLocation(TemporalValue<Location>::Time timeStamp, const P
         }
         axis = mMeshptr->getOrientation() * axis;
         axis *= reqLoc.angular_speed();
-        btVector3 btangvel = btVector3(axis.x, axis.y, axis.z);
-        mBulletBodyPtr->setAngularVelocity(btangvel);
+        btVector3 btangvel(axis.x, axis.y, axis.z);
+//        mBulletBodyPtr->setAngularVelocity(btangvel);
+        mDesiredAngularVelocity = btangvel;
     }
 }
 
@@ -394,16 +419,18 @@ void BulletSystem::removePhysicalObject(BulletObj* obj) {
     }
 }
 
-float distSqV3(Vector3f v1, Vector3f v2) {
-    return ( (v1.x-v2.x)*(v1.x-v2.x) + (v1.y-v2.y)*(v1.y-v2.y) + (v1.z-v2.z)*(v1.z-v2.z) );
+float btMagSq(btVector3 v) {
+    return v.x() * v.x()
+           + v.y() * v.y()
+           + v.z() * v.z();
 }
 
 bool BulletSystem::tick() {
-    static Task::AbsTime lasttime = mStartTime;
+    static Task::LocalTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     static int mode = 0;
     static string lastPathSection="path_00_00";
-    Task::AbsTime now = Task::AbsTime::now();
+    Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
     positionOrientation po;
 
@@ -413,6 +440,8 @@ bool BulletSystem::tick() {
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
         if ((now-mStartTime) > Duration::seconds(20.0)) {
+
+            /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     if (objects[i]->mName.substr(0,6) == "Avatar") {
@@ -457,9 +486,10 @@ bool BulletSystem::tick() {
                                 << endl;
                         oscplugin::sendOSCmessage(data);
                     }
+
+                    /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
-                        /// if object has been moved, reset bullet position accordingly
                         DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
                                      << " meshpos: " << objects[i]->mMeshptr->getPosition()
                                      << " bulletpos before reset: " << objects[i]->getBulletState().p;)
@@ -470,6 +500,21 @@ bool BulletSystem::tick() {
                             ));
                         DEBUG_OUTPUT(cout << "bulletpos after reset: " << objects[i]->getBulletState().p << endl;)
                     }
+
+                    /// if object under PID control, control it
+                    if (objects[i]->mPIDControlEnabled) {
+
+                        /// this is not yet a real PID controller!  YMMV
+                        objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
+                        objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
+                        objects[i]->mBulletBodyPtr->activate(true);
+
+                        /// bit of a hack: if both linear & angular vel are zero, release control (so gravity & inertia can have fun)
+                        if ( (btMagSq(objects[i]->mDesiredLinearVelocity) < 0.001f) &&
+                                (btMagSq(objects[i]->mDesiredAngularVelocity) < 0.001f) ) {
+                            objects[i]->mPIDControlEnabled=false;
+                        }
+                    }
                 }
             }
             dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
@@ -478,11 +523,12 @@ bool BulletSystem::tick() {
                 if (objects[i]->mActive) {
                     po = objects[i]->getBulletState();
                     DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
-                                 << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl;)
-                    Location loc (objects[i]->mMeshptr->globalLocation(now));
+                                 << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl);
+                    Time remoteNow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(objects[i]->mMeshptr->getObjectReference().space()));
+                    Location loc (objects[i]->mMeshptr->globalLocation(remoteNow));
                     loc.setPosition(po.p);
                     loc.setOrientation(po.o);
-                    objects[i]->mMeshptr->setLocation(now, loc);
+                    objects[i]->mMeshptr->setLocation(remoteNow, loc);
                 }
             }
 
@@ -509,6 +555,7 @@ bool BulletSystem::tick() {
                 BulletObj* b1=i->first.getHigher();
                 ObjectReference b0id=b0->getObjectReference();
                 ObjectReference b1id=b1->getObjectReference();
+                Time spaceNow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(b0->getSpaceID()));
 
                 if (i->second.collidedThisFrame()) {             /// recently colliding; send msg & change mode
                     if (!i->second.collidedLastFrame()) {
@@ -516,7 +563,7 @@ bool BulletSystem::tick() {
                             RoutableMessageBody *body=&mBeginCollisionMessagesToSend[b1id];
 
                             Physics::Protocol::CollisionBegin collide;
-                            collide.set_timestamp(now);
+                            collide.set_timestamp(spaceNow);
                             collide.set_other_object_reference(b0id.getAsUUID());
                             for (std::vector<customDispatch::ActiveCollisionState::PointCollision>::iterator iter=i->second.mPointCollisions.begin(),iterend=i->second.mPointCollisions.end();iter!=iterend;++iter) {
                                 collide.add_this_position(iter->mWorldOnHigher);
@@ -527,13 +574,13 @@ bool BulletSystem::tick() {
                             }
                             collide.SerializeToString(body->add_message("BegCol"));
                             cout << "   begin collision msg: " << b0->mName << " --> " << b1->mName
-                            << " time: " << (Task::AbsTime::now()-mStartTime).toSeconds() << endl;
+                            << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
                         }
                         if (b0->colMsg & b1->colMask) {
                             RoutableMessageBody *body=&mBeginCollisionMessagesToSend[b0id];
 
                             Physics::Protocol::CollisionBegin collide;
-                            collide.set_timestamp(now);
+                            collide.set_timestamp(spaceNow);
                             collide.set_other_object_reference(b1id.getAsUUID());
                             for (std::vector<customDispatch::ActiveCollisionState::PointCollision>::iterator iter=i->second.mPointCollisions.begin(),iterend=i->second.mPointCollisions.end();iter!=iterend;++iter) {
                                 collide.add_other_position(iter->mWorldOnHigher);
@@ -544,7 +591,7 @@ bool BulletSystem::tick() {
                             }
                             collide.SerializeToString(body->add_message("BegCol"));
                             cout << "   begin collision msg: " << b1->mName << " --> " << b0->mName
-                            << " time: " << (Task::AbsTime::now()-mStartTime).toSeconds() << endl;
+                            << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
                         }
                     }
                     i->second.resetCollisionFlag();
@@ -556,22 +603,22 @@ bool BulletSystem::tick() {
                         RoutableMessageBody *body=&mEndCollisionMessagesToSend[b1id];
 
                         Physics::Protocol::CollisionEnd collide;
-                        collide.set_timestamp(now);
+                        collide.set_timestamp(spaceNow);
                         collide.set_other_object_reference(b0id.getAsUUID());
                         collide.SerializeToString(body->add_message("EndCol"));
 
                         cout << "     end collision msg: " << b0->mName << " --> " << b1->mName
-                        << " time: " << (Task::AbsTime::now()-mStartTime).toSeconds() << endl;
+                        << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
                     }
                     if (b0->colMsg & b1->colMask) {
                         RoutableMessageBody *body=&mEndCollisionMessagesToSend[b0id];
 
                         Physics::Protocol::CollisionEnd collide;
-                        collide.set_timestamp(now);
+                        collide.set_timestamp(spaceNow);
                         collide.set_other_object_reference(b1id.getAsUUID());
                         collide.SerializeToString(body->add_message("EndCol"));
                         cout << "     end collision msg: " << b1->mName << " --> " << b0->mName
-                        << " time: " << (Task::AbsTime::now()-mStartTime).toSeconds() << endl;
+                        << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
                     }
                     dispatcher->collisionPairs.erase(i++);
                 }
@@ -674,8 +721,6 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     Transfer::TransferManager* tm = (Transfer::TransferManager*)mTempTferManager->as<void*>();
     this->transferManager = tm;
 
-    gravity = Vector3d(0, -0.8, 0);
-    //groundlevel = 3044.0;
     groundlevel = -1000.0;
     btTransform groundTransform;
     btDefaultMotionState* mMotionState;
@@ -692,7 +737,7 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     overlappingPairCache= new btAxisSweep3(worldAabbMin,worldAabbMax,maxProxies);
     solver = new btSequentialImpulseConstraintSolver;
     dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,overlappingPairCache,solver,collisionConfiguration);
-    dynamicsWorld->setGravity(btVector3(gravity.x, gravity.y, gravity.z));
+    dynamicsWorld->setGravity(btVector3(mGravity.x, mGravity.y, mGravity.z));
 
     /// create ground
     groundShape= new btBoxShape(btVector3(btScalar(1500.),btScalar(1.0),btScalar(1500.)));
@@ -702,7 +747,8 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     mMotionState = new btDefaultMotionState(groundTransform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f,mMotionState,groundShape,localInertia);
     groundBody = new btRigidBody(rbInfo);
-    groundBody->setRestitution(0.5);                 /// bouncy for fun & profit
+    groundBody->setRestitution(0.2);
+    groundBody->setFriction(0.1);
     dynamicsWorld->addRigidBody(groundBody);
     proxyManager->addListener(this);
     DEBUG_OUTPUT(cout << "dbm: BulletSystem::initialized, including test bullet object" << endl);
@@ -713,7 +759,9 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     return true;
 }
 
-BulletSystem::BulletSystem() :             mStartTime(Task::AbsTime::now()) {
+BulletSystem::BulletSystem() :
+        mGravity(0, GRAVITY, 0),
+        mStartTime(Task::LocalTime::now()) {
     DEBUG_OUTPUT(cout << "dbm: I am the BulletSystem constructor!" << endl);
 }
 

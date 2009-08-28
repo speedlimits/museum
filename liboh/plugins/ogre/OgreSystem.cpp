@@ -34,9 +34,9 @@
 #include "options/Options.hpp"
 #include "OgreSystem.hpp"
 #include "OgrePlugin.hpp"
-
 #include <task/Event.hpp>
 #include <transfer/TransferManager.hpp>
+#include <oh/SpaceTimeOffsetManager.hpp>
 #include <oh/ProxyManager.hpp>
 #include <oh/ProxyCameraObject.hpp>
 #include <oh/ProxyMeshObject.hpp>
@@ -128,11 +128,10 @@ Ogre::RenderTarget* OgreSystem::sRenderTarget=NULL;
 Ogre::Plugin*OgreSystem::sCDNArchivePlugin=NULL;
 std::list<OgreSystem*> OgreSystem::sActiveOgreScenes;
 uint32 OgreSystem::sNumOgreSystems=0;
-OgreSystem::OgreSystem():mLastFrameTime(Time::now()),mFloatingPointOffset(0,0,0),mPrimaryCamera(NULL)
+OgreSystem::OgreSystem():mLastFrameTime(Task::LocalTime::now()),mFloatingPointOffset(0,0,0),mPrimaryCamera(NULL)
 {
     increfcount();
-    mInternalCubeMap=NULL;
-    mExternalCubeMap=NULL;
+    mCubeMap=NULL;
     mInputManager=NULL;
     mRenderTarget=NULL;
     mSceneManager=NULL;
@@ -316,7 +315,11 @@ std::list<CameraEntity*>::iterator OgreSystem::attachCamera(const String &render
         cubeMapNames.push_back("InteriorCubeMap");
         cubeMapOffsets.push_back(Vector3f(0,0,0));
         cubeMapNearPlanes.push_back(0.1);
-        mExternalCubeMap=new CubeMap(this,cubeMapNames,512,cubeMapOffsets, cubeMapNearPlanes);
+        try {
+            mCubeMap=new CubeMap(this,cubeMapNames,512,cubeMapOffsets, cubeMapNearPlanes);
+        }catch (std::bad_alloc&) {
+            mCubeMap=NULL;
+        }
 
     }
     return retval;
@@ -325,10 +328,8 @@ std::list<CameraEntity*>::iterator OgreSystem::detachCamera(std::list<CameraEnti
     if (entity != mAttachedCameras.end()) {
         if (mPrimaryCamera == *entity) {
             mPrimaryCamera = NULL;//move to second in chain??
-            delete mExternalCubeMap;
-            delete mInternalCubeMap;
-            mExternalCubeMap=NULL;
-            mInternalCubeMap=NULL;
+            delete mCubeMap;
+            mCubeMap=NULL;
         }
         mAttachedCameras.erase(entity);
     }
@@ -559,6 +560,10 @@ bool ogreLoadPlugin(String root, const String&filename, bool recursive=true) {
                 return true;
             if (ogreLoadPlugin("../../../dependencies/lib/OGRE",filename,false))
                 return true;
+            if (ogreLoadPlugin("../lib/OGRE",filename,false))
+                return true;
+            if (ogreLoadPlugin("OGRE",filename,false))
+                return true;
             if (ogreLoadPlugin("Debug",filename,false))
                 return true;
             if (ogreLoadPlugin("Release",filename,false))
@@ -664,6 +669,11 @@ OgreSystem::~OgreSystem() {
     delete mInputManager;
 }
 
+static void KillWebView(ProxyObjectPtr p) {
+    std::cout << "Killing WebView!"<<std::endl;
+    p->getProxyManager()->destroyObject(p);
+}
+
 void OgreSystem::createProxy(ProxyObjectPtr p){
     bool created = false;
     {
@@ -701,8 +711,9 @@ void OgreSystem::createProxy(ProxyObjectPtr p){
     {
         std::tr1::shared_ptr<ProxyWebViewObject> webviewpxy=std::tr1::dynamic_pointer_cast<ProxyWebViewObject>(p);
         if (webviewpxy) {
-			WebView* view = WebViewManager::getSingleton().createWebView(UUID::random().rawHexData(), 128, 256, OverlayPosition());
-			view->setProxyObject(webviewpxy);
+            WebView* view = WebViewManager::getSingleton().createWebView(UUID::random().rawHexData(), 128, 256, OverlayPosition());
+            view->setProxyObject(webviewpxy);
+            view->bind("close", std::tr1::bind(&KillWebView, p));
         }
 
     }
@@ -850,7 +861,7 @@ void OgreSystem::uploadFinished(UploadStatusMap &uploadStatus)
         if (success) {
             SILOG(ogre,debug,"Upload of " << (*iter).first.mID << " (hash "<<(*iter).first.mHash << ") was successful.");
             if ((*iter).first.mType == Meru::MESH) {
-                Task::AbsTime now(Task::AbsTime::now());
+                Time now(SpaceTimeOffsetManager::getSingleton().now(mPrimaryCamera->id().space()));
                 SpaceObjectReference newId = SpaceObjectReference(mPrimaryCamera->id().space(), ObjectReference(UUID::random()));
                 Location loc = mPrimaryCamera->getProxy().globalLocation(now);
                 float scale = mInputManager->mWorldScale->as<float>();
@@ -921,7 +932,7 @@ Duration OgreSystem::desiredTickRate()const{
     return mFrameDuration->as<Duration>();
 }
 
-bool OgreSystem::renderOneFrame(Time curFrameTime, Duration deltaTime) {
+bool OgreSystem::renderOneFrame(Task::LocalTime curFrameTime, Duration deltaTime) {
     for (std::list<OgreSystem*>::iterator iter=sActiveOgreScenes.begin();iter!=sActiveOgreScenes.end();) {
         (*iter++)->preFrame(curFrameTime, deltaTime);
     }
@@ -929,7 +940,7 @@ bool OgreSystem::renderOneFrame(Time curFrameTime, Duration deltaTime) {
     if (mPrimaryCamera) {
         Ogre::Root::getSingleton().renderOneFrame();
     }
-    Time postFrameTime = Time::now();
+    Task::LocalTime postFrameTime = Task::LocalTime::now();
     Duration postFrameDelta = postFrameTime-mLastFrameTime;
     bool continueRendering=mInputManager->tick(postFrameTime,postFrameDelta);
     for (std::list<OgreSystem*>::iterator iter=sActiveOgreScenes.begin();iter!=sActiveOgreScenes.end();) {
@@ -957,11 +968,11 @@ bool OgreSystem::renderOneFrame(Time curFrameTime, Duration deltaTime) {
 
     return continueRendering;
 }
-static Time debugStartTime = Time::now();
+//static Task::LocalTime debugStartTime = Task::LocalTime::now();
 bool OgreSystem::tick(){
     GraphicsResourceManager::getSingleton().computeLoadedSet();
-    Time curFrameTime(Time::now());
-    Time finishTime(curFrameTime + desiredTickRate()); // arbitrary
+    Task::LocalTime curFrameTime(Task::LocalTime::now());
+    Task::LocalTime finishTime(curFrameTime + desiredTickRate()); // arbitrary
 
     tickInputHandler(curFrameTime);
 
@@ -979,25 +990,26 @@ bool OgreSystem::tick(){
 
     return continueRendering;
 }
-void OgreSystem::preFrame(Time currentTime, Duration frameTime) {
+void OgreSystem::preFrame(Task::LocalTime currentTime, Duration frameTime) {
     std::list<Entity*>::iterator iter;
+    Time lastTime(Time::epoch());
+    SpaceID lastSpace(SpaceID::null());
     for (iter = mMovingEntities.begin(); iter != mMovingEntities.end();) {
         Entity *current = *iter;
         ++iter;
 //        SILOG(ogre,debug,"Extrapolating "<<current<<" for time "<<(float64)(currentTime-debugStartTime));
-        current->extrapolateLocation(currentTime);
+        SpaceID space(current->getProxy().getObjectReference().space());
+        current->extrapolateLocation(lastSpace==space?lastTime:(lastTime=Time::convertFrom(currentTime,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(space))));
+        lastSpace=space;
     }
 }
 
-void OgreSystem::postFrame(Time current, Duration frameTime) {
+void OgreSystem::postFrame(Task::LocalTime current, Duration frameTime) {
     Ogre::FrameEvent evt;
     evt.timeSinceLastEvent=frameTime.toMicroseconds()*1000000.;
     evt.timeSinceLastFrame=frameTime.toMicroseconds()*1000000.;
-    if (mExternalCubeMap) {
-        mExternalCubeMap->frameEnded(evt);
-    }
-    if (mInternalCubeMap) {
-        mInternalCubeMap->frameEnded(evt);
+    if (mCubeMap) {
+        mCubeMap->frameEnded(evt);
     }
 
 }

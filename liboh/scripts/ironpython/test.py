@@ -7,12 +7,15 @@ import protocol.MessageHeader_pb2 as pbHead
 
 from Sirikata.Runtime import HostedObject
 print dir(HostedObject)
-
+import System
 import util
 
-DEBUG_OUTPUT=False
+DEBUG_OUTPUT=True
 
-class exampleclass(object):
+class exampleclass:
+    def __init__(self):
+        self.paintings={}
+
     def reallyProcessRPC(self,serialheader,name,serialarg):
         print "Got an RPC named",name
         header = pbHead.Header()
@@ -30,7 +33,7 @@ class exampleclass(object):
 
             print self.spaceid
             self.sendNewProx()
-            self.setPosition(angular_speed=0,axis=(0,1,0))
+            self.setPosition(angular_speed=0, axis=(0,1,0))
         elif name == "ProxCall":
             proxcall = pbSiri.ProxCall()
             proxcall.ParseFromString(util.fromByteArray(serialarg))
@@ -45,9 +48,25 @@ class exampleclass(object):
                 dbQuery.send(HostedObject, myhdr)
             if proxcall.proximity_event == pbSiri.ProxCall.EXITED_PROXIMITY:
                 pass
+        elif name == "JavascriptMessage":
+            s = "".join(chr(i) for i in serialarg)
+            if DEBUG_OUTPUT: print "PY", name, s
+            tok = s.split()
+            if tok[1]=="placeObject":
+                painting = tok[2]
+                if not painting in self.paintings:
+                    print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
+                x = float(tok[5])
+                y = float(tok[6])
+                z = float(tok[7])
+                qx = float(tok[8])
+                qy = float(tok[9])
+                qz = float(tok[10])
+                qw = float(tok[11])
+                print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+                self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
 
     def sawAnotherObject(self,persistence,header,retstatus):
-        if DEBUG_OUTPUT: print "PY: sawAnotherObject called"
         if header.HasField('return_status') or retstatus:
             return
         uuid = util.tupleToUUID(header.source_object)
@@ -58,9 +77,8 @@ class exampleclass(object):
                     nameStruct=pbSiri.StringProperty()
                     nameStruct.ParseFromString(field.data)
                     myName = nameStruct.value
-        if DEBUG_OUTPUT: print "PY: Object",uuid,"has name",myName
-
-        if myName=="Avatar_01":
+        if DEBUG_OUTPUT: print "PY: Object",uuid,"has name-->" + myName + "<--",type(myName)
+        if myName[:6]=="Avatar":
             rws=pbPer.ReadWriteSet()
             se=rws.writes.add()
             se.field_name="Parent"
@@ -72,6 +90,8 @@ class exampleclass(object):
             header.destination_object=util.tupleFromUUID(self.objid);
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
+        elif myName[:8]=="artwork_":
+            self.paintings[myName]=uuid
 
     def processRPC(self,header,name,arg):
         try:
@@ -80,7 +100,8 @@ class exampleclass(object):
             print "Error processing RPC",name
             traceback.print_exc()
 
-    def setPosition(self,position=None,orientation=None,velocity=None,angular_speed=None,axis=None,force=False):
+    def setPosition(self,position=None,orientation=None,velocity=None,angular_speed=None,axis=None,force=False,objid=None):
+        if not objid: objid = self.objid
         objloc = pbSiri.ObjLoc()
         if position is not None:
             for i in range(3):
@@ -111,7 +132,7 @@ class exampleclass(object):
         body.message_arguments.append(objloc.SerializeToString())
         header = pbHead.Header()
         header.destination_space = util.tupleFromUUID(self.spaceid)
-        header.destination_object = util.tupleFromUUID(self.objid)
+        header.destination_object = util.tupleFromUUID(objid)
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def sendNewProx(self):
@@ -128,6 +149,13 @@ class exampleclass(object):
             header = pbHead.Header()
             print "sendprox5"
             header.destination_space = util.tupleFromUUID(self.spaceid);
+            print dir(HostedObject)
+            print "time locally ",HostedObject.GetLocalTime().microseconds();
+
+            from System import Array, Byte
+            arry=Array[Byte](tuple(Byte(c) for c in util.tupleFromUUID(self.spaceid)))
+            print "time on spaceA ",HostedObject.GetTimeFromByteArraySpace(arry).microseconds()
+            #print "time on spaceB ",HostedObject.GetTime(self.spaceid).microseconds()
             header.destination_object = util.tupleFromUUID(uuid.UUID(int=0))
             header.destination_port = 3 # libcore/src/util/KnownServices.hpp
             headerstr = header.SerializeToString()

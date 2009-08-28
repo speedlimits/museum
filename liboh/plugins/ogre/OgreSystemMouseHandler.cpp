@@ -41,6 +41,7 @@
 #include <oh/ProxyObject.hpp>
 #include <oh/ProxyMeshObject.hpp>
 #include <oh/ProxyLightObject.hpp>
+#include <oh/SpaceTimeOffsetManager.hpp>
 #include "input/InputEvents.hpp"
 #include "input/SDLInputDevice.hpp"
 #include "DragActions.hpp"
@@ -55,6 +56,7 @@
 #include "WebViewManager.hpp"
 #include "CameraPath.hpp"
 #include "Ogre_Sirikata.pbj.hpp"
+#include "util/RoutableMessageBody.hpp"
 
 namespace Sirikata {
 namespace Graphics {
@@ -79,12 +81,14 @@ using namespace std;
 #endif
 
 bool compareEntity (const Entity* one, const Entity* two) {
-    Task::AbsTime now = Task::AbsTime::now();
+
     ProxyObject *pp = one->getProxyPtr().get();
-    Location loc1 = pp->globalLocation(now);
+
     ProxyCameraObject* camera1 = dynamic_cast<ProxyCameraObject*>(pp);
     ProxyLightObject* light1 = dynamic_cast<ProxyLightObject*>(pp);
     ProxyMeshObject* mesh1 = dynamic_cast<ProxyMeshObject*>(pp);
+    Time now = SpaceTimeOffsetManager::getSingleton().now(pp->getObjectReference().space());
+    Location loc1 = pp->globalLocation(now);
     pp = two->getProxyPtr().get();
     Location loc2 = pp->globalLocation(now);
     ProxyCameraObject* camera2 = dynamic_cast<ProxyCameraObject*>(pp);
@@ -104,6 +108,21 @@ bool compareEntity (const Entity* one, const Entity* two) {
         return mesh1->getPhysical().name < mesh2->getPhysical().name;
     }
     return one<two;
+}
+
+vector<String> tokenizeString (const String& str)
+{
+    vector<String> tokens;
+    String delimiters(" ");
+    String::size_type lastPos = str.find_first_not_of(delimiters, 0);
+    String::size_type pos = str.find_first_of(delimiters, lastPos);
+    while (String::npos != pos || String::npos != lastPos)
+    {
+        tokens.push_back(str.substr(lastPos, pos - lastPos));
+        lastPos = str.find_first_not_of(delimiters, pos);
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+    return tokens;
 }
 
 // Defined in DragActions.cpp.
@@ -126,6 +145,7 @@ class OgreSystem::MouseHandler {
        each cursor should have its own MouseHandler instance */
     std::map<int, DragAction> mDragAction;
     std::map<int, ActiveDrag*> mActiveDrag;
+    std::set<int> mWebViewActiveButtons;
     /*
         typedef EventResponse (MouseHandler::*ClickAction) (EventPtr evbase);
         std::map<int, ClickAction> mClickAction;
@@ -135,7 +155,7 @@ class OgreSystem::MouseHandler {
     bool mRunningCameraPath;
     uint32 mCameraPathIndex;
     Task::DeltaTime mCameraPathTime;
-    Time mLastCameraTime;
+    Task::LocalTime mLastCameraTime;
 
     typedef std::map<String, InputResponse*> InputResponseMap;
     InputResponseMap mInputResponses;
@@ -177,7 +197,7 @@ class OgreSystem::MouseHandler {
 
     /////////////////// HELPER FUNCTIONS ///////////////
 
-    Entity *hoverEntity (CameraEntity *cam, Task::AbsTime time, float xPixel, float yPixel, int *hitCount,int which=0) {
+    Entity *hoverEntity (CameraEntity *cam, Time time, float xPixel, float yPixel, int *hitCount,int which=0) {
         Location location(cam->getProxy().globalLocation(time));
         Vector3f dir (pixelToDirection(cam, location.getOrientation(), xPixel, yPixel));
         SILOG(input,info,"X is "<<xPixel<<"; Y is "<<yPixel<<"; pos = "<<location.getPosition()<<"; dir = "<<dir);
@@ -235,7 +255,7 @@ private:
         if (mParent->mInputManager->isModifierDown(Input::MOD_SHIFT)) {
             // add object.
             int numObjectsUnderCursor=0;
-            Entity *mouseOver = hoverEntity(camera, Task::AbsTime::now(), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
+            Entity *mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
             if (!mouseOver) {
                 return;
             }
@@ -254,7 +274,7 @@ private:
             }else {
                 mWhichRayObject=0;
             }
-            mouseOver = hoverEntity(camera, Task::AbsTime::now(), p.x, p.y, &mLastHitCount, mWhichRayObject);
+            mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject);
             if (!mouseOver) {
                 return;
             }
@@ -288,15 +308,22 @@ private:
             clearSelection();
             mWhichRayObject+=direction;
             int numObjectsUnderCursor=0;
-            Entity *mouseOver = hoverEntity(camera, Task::AbsTime::now(), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
+            Entity *mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
             if (recentMouseInRange(p.x, p.y, &mLastHitX, &mLastHitY)==false||numObjectsUnderCursor!=mLastHitCount){
-                mouseOver = hoverEntity(camera, Task::AbsTime::now(), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
+                mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
             }
             if (mouseOver) {
-                mSelectedObjects.insert(mouseOver->getProxyPtr());
-                mouseOver->setSelected(true);
-                SILOG(input,info,"Replaced selection with " << mouseOver->id());
-                // Fire selected event.
+                /// FIXME: total kluge!  Need a way to not select walls etc
+                ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
+                if (overMesh) {
+                    Vector3f overScale = overMesh->getScale();
+                    if (overScale.x < 3.0 && overScale.y < 3.0 && overScale.z < 3.0) {
+                        mSelectedObjects.insert(mouseOver->getProxyPtr());
+                        mouseOver->setSelected(true);
+                        SILOG(input,info,"Replaced selection with " << mouseOver->id());
+                        // Fire selected event.
+                    }
+                }
             }
             mLastShiftSelected = SpaceObjectReference::null();
         }
@@ -306,7 +333,7 @@ private:
     ///////////////// KEYBOARD HANDLERS /////////////////
 
     void deleteObjectsAction() {
-        Task::AbsTime now(Task::AbsTime::now());
+        Task::LocalTime now(Task::LocalTime::now());
         while (doUngroupObjects(now)) {
         }
         for (SelectedObjectSet::iterator iter = mSelectedObjects.begin();
@@ -320,7 +347,7 @@ private:
         mSelectedObjects.clear();
     }
 
-    Entity *doCloneObject(Entity *ent, const ProxyObjectPtr &parentPtr, Task::AbsTime now) {
+    Entity *doCloneObject(Entity *ent, const ProxyObjectPtr &parentPtr, Time now) {
         SpaceObjectReference newId = SpaceObjectReference(ent->id().space(), ObjectReference(UUID::random()));
         Location loc = ent->getProxy().globalLocation(now);
         Location localLoc = ent->getProxy().extrapolateLocation(now);
@@ -371,7 +398,7 @@ private:
 
     void cloneObjectsAction() {
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
-        Task::AbsTime now(Task::AbsTime::now());
+        Task::LocalTime now(Task::LocalTime::now());
         SelectedObjectSet newSelectedObjects;
         for (SelectedObjectSet::iterator iter = mSelectedObjects.begin();
                 iter != mSelectedObjects.end(); ++iter) {
@@ -380,10 +407,11 @@ private:
             if (!ent) {
                 continue;
             }
-            Entity *newEnt = doCloneObject(ent, ent->getProxy().getParentProxy(), now);
-            Location loc (ent->getProxy().extrapolateLocation(now));
+            Entity *newEnt = doCloneObject(ent, ent->getProxy().getParentProxy(), Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(ent->getProxy().getObjectReference().space())));
+            Time objnow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(ent->getProxy().getObjectReference().space()));
+            Location loc (ent->getProxy().extrapolateLocation(objnow));
             loc.setPosition(loc.getPosition() + Vector3d(WORLD_SCALE/2.,0,0));
-            newEnt->getProxy().resetLocation(now, loc);
+            newEnt->getProxy().resetLocation(objnow, loc);
             newSelectedObjects.insert(newEnt->getProxyPtr());
             newEnt->setSelected(true);
             ent->setSelected(false);
@@ -399,8 +427,9 @@ private:
             return;
         }
         SpaceObjectReference parentId = mCurrentGroup;
-        Task::AbsTime now(Task::AbsTime::now());
+
         ProxyManager *proxyMgr = mParent->mPrimaryCamera->getProxy().getProxyManager();
+        Time now(SpaceTimeOffsetManager::getSingleton().now(mParent->mPrimaryCamera->getProxy().getObjectReference().space()));
         for (SelectedObjectSet::iterator iter = mSelectedObjects.begin();
                 iter != mSelectedObjects.end(); ++iter) {
             ProxyObjectPtr obj(iter->lock());
@@ -445,7 +474,7 @@ private:
         newParentEntity->setSelected(true);
     }
 
-    bool doUngroupObjects(Task::AbsTime now) {
+    bool doUngroupObjects(Task::LocalTime now) {
         int numUngrouped = 0;
         SelectedObjectSet newSelectedObjects;
         for (SelectedObjectSet::iterator iter = mSelectedObjects.begin();
@@ -462,7 +491,7 @@ private:
             for (SubObjectIterator subIter (parentEnt); !subIter.end(); ++subIter) {
                 hasSubObjects = true;
                 Entity *ent = *subIter;
-                ent->getProxy().setParent(parentParent, now);
+                ent->getProxy().setParent(parentParent, Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(ent->getProxy().getObjectReference().space())));
                 newSelectedObjects.insert(ent->getProxyPtr());
                 ent->setSelected(true);
             }
@@ -481,12 +510,12 @@ private:
     }
 
     void ungroupObjectsAction() {
-        Task::AbsTime now(Task::AbsTime::now());
+        Task::LocalTime now(Task::LocalTime::now());
         doUngroupObjects(now);
     }
 
     void enterObjectAction() {
-        Task::AbsTime now(Task::AbsTime::now());
+        Task::LocalTime now(Task::LocalTime::now());
         if (mSelectedObjects.size() != 1) {
             return;
         }
@@ -513,7 +542,7 @@ private:
     }
 
     void leaveObjectAction() {
-        Task::AbsTime now(Task::AbsTime::now());
+        Task::LocalTime now(Task::LocalTime::now());
         for (SelectedObjectSet::iterator iter = mSelectedObjects.begin();
                 iter != mSelectedObjects.end(); ++iter) {
             ProxyObjectPtr obj(iter->lock());
@@ -538,11 +567,12 @@ private:
 
     void createLightAction() {
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
-        Task::AbsTime now(Task::AbsTime::now());
+
         CameraEntity *camera = mParent->mPrimaryCamera;
         if (!camera) return;
         SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
         ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
+        Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
         Location loc (camera->getProxy().globalLocation(now));
         loc.setPosition(loc.getPosition() + Vector3d(direction(loc.getOrientation()))*WORLD_SCALE);
         loc.setOrientation(Quaternion(0.886995, 0.000000, -0.461779, 0.000000, Quaternion::WXYZ()));
@@ -588,26 +618,26 @@ private:
 		return camProxy;
 	}
     void moveAction(Vector3f dir, float amount) {
-        Task::AbsTime now(Task::AbsTime::now());
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
-        
+
+        Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
         const Quaternion &orient = loc.getOrientation();
         Protocol::ObjLoc rloc;
         rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * .5);
         rloc.set_angular_speed(0);
-        std::cout << "dbm debug: moveAction: " << dir << ", " << amount << std::endl;
         cam->requestLocation(now, rloc);
     }
     void rotateAction(Vector3f about, float amount) {
-        Task::AbsTime now(Task::AbsTime::now());
+
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
         const Quaternion &orient = loc.getOrientation();
 
@@ -619,11 +649,12 @@ private:
     }
 
     void stableRotateAction(float dir, float amount) {
-        Task::AbsTime now(Task::AbsTime::now());
+
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
         const Quaternion &orient = loc.getOrientation();
 
@@ -633,7 +664,7 @@ private:
         raxis.x = 0;
         raxis.y = std::cos(p*DEG2RAD);
         raxis.z = -std::sin(p*DEG2RAD);
-        
+
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
         rloc.set_angular_speed(dir*amount);
@@ -644,7 +675,6 @@ private:
     void setDragModeAction(const String& modename) {
         if (modename == "")
             mDragAction[1] = 0;
-
         mDragAction[1] = DragActionRegistry::get(modename);
     }
 
@@ -682,8 +712,10 @@ private:
             perror("Failed to open scene_new.csv");
             return;
         }
-        fprintf(output, "objtype,subtype,name,parent,");
-        fprintf(output, "pos_x,pos_y,pos_z,orient_x,orient_y,orient_z,orient_w,scale_x,scale_y,scale_z,hull_x,hull_y,hull_z,");
+        fprintf(output, "objtype,subtype,name,parent,script,scriptparams,");
+        fprintf(output, "pos_x,pos_y,pos_z,orient_x,orient_y,orient_z,orient_w,");
+        fprintf(output, "vel_x,vel_y,vel_z,rot_axis_x,rot_axis_y,rot_axis_z,rot_speed,");
+        fprintf(output, "scale_x,scale_y,scale_z,hull_x,hull_y,hull_z,");
         fprintf(output, "density,friction,bounce,colMask,colMsg,meshURI,diffuse_x,diffuse_y,diffuse_z,ambient,");
         fprintf(output, "specular_x,specular_y,specular_z,shadowpower,");
         fprintf(output, "range,constantfall,linearfall,quadfall,cone_in,cone_out,power,cone_fall,shadow\n");
@@ -742,8 +774,8 @@ private:
         return name;
     }
     void dumpObject(FILE* fp, Entity* e, std::set<std::string> &saveSceneNames) {
-        Task::AbsTime now = Task::AbsTime::now();
         ProxyObject *pp = e->getProxyPtr().get();
+        Time now(SpaceTimeOffsetManager::getSingleton().now(pp->getObjectReference().space()));
         Location loc = pp->globalLocation(now);
         ProxyCameraObject* camera = dynamic_cast<ProxyCameraObject*>(pp);
         ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(pp);
@@ -760,6 +792,10 @@ private:
             temp << loc.getOrientation().w;
             w = temp.str();
         }
+
+        Vector3f angAxis(loc.getAxisOfRotation());
+        float angSpeed(loc.getAngularSpeed());
+
         string parent;
         ProxyObjectPtr parentObj = pp->getParentProxy();
         if (parentObj) {
@@ -780,9 +816,9 @@ private:
             float32 ambientPower, shadowPower;
             ambientPower = LightEntity::computeClosestPower(linfo.mDiffuseColor, linfo.mAmbientColor, linfo.mPower);
             shadowPower = LightEntity::computeClosestPower(linfo.mSpecularColor, linfo.mShadowColor,  linfo.mPower);
-            fprintf(fp, "light,%s,,%s,%f,%f,%f,%f,%f,%f,%s,,,,,,,,,,,,,",typestr,parent.c_str(),
-                    loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,
-                    x,y,z,w.c_str());
+            fprintf(fp, "light,%s,,%s,,,%f,%f,%f,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,,,,,,,,,,,,,",typestr,parent.c_str(),
+                    loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,x,y,z,w.c_str(),
+                    loc.getVelocity().x, loc.getVelocity().y, loc.getVelocity().z, angAxis.x, angAxis.y, angAxis.z, angSpeed);
 
             fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%lf,%f,%f,%f,%f,%f,%f,%f,%d\n",
                     linfo.mDiffuseColor.x,linfo.mDiffuseColor.y,linfo.mDiffuseColor.z,ambientPower,
@@ -815,13 +851,16 @@ private:
             case PhysicalParameters::DynamicCylinder:
                 subtype="dynamiccylinder";
                 break;
+            case PhysicalParameters::Character:
+                subtype="character";
+                break;
             default:
                 std::cout << "unknown physical mode! " << (int)phys.mode << std::endl;
             }
             std::string name = physicalName(mesh, saveSceneNames);
-            fprintf(fp, "mesh,%s,%s,%s,%f,%f,%f,%f,%f,%f,%s,",subtype.c_str(),name.c_str(),parent.c_str(),
-                    loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,
-                    x,y,z,w.c_str());
+            fprintf(fp, "mesh,%s,%s,%s,,,%f,%f,%f,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,",subtype.c_str(),name.c_str(),parent.c_str(),
+                    loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,x,y,z,w.c_str(),
+                    loc.getVelocity().x, loc.getVelocity().y, loc.getVelocity().z, angAxis.x, angAxis.y, angAxis.z, angSpeed);
 
             fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%s\n",
                     mesh->getScale().x,mesh->getScale().y,mesh->getScale().z,
@@ -829,9 +868,9 @@ private:
                     phys.density, phys.friction, phys.bounce, phys.colMask, phys.colMsg, uristr.c_str());
         }
         else if (camera) {
-            fprintf(fp, "camera,,,%s,%f,%f,%f,%f,%f,%f,%s\n",parent.c_str(),
-                    loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,
-                                    x,y,z,w.c_str());
+            fprintf(fp, "camera,,,%s,,,%f,%f,%f,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f\n",parent.c_str(),
+                    loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,x,y,z,w.c_str(),
+                    loc.getVelocity().x, loc.getVelocity().y, loc.getVelocity().z, angAxis.x, angAxis.y, angAxis.z, angSpeed);
         }
         else {
             fprintf(fp, "#unknown object type in dumpObject\n");
@@ -908,6 +947,25 @@ private:
         return EventResponse::nop();
     }
 
+    EventResponse mousePressedHandler(EventPtr ev) {
+        std::tr1::shared_ptr<MousePressedEvent> mouseev (
+            std::tr1::dynamic_pointer_cast<MousePressedEvent>(ev));
+        if (!mouseev)
+            return EventResponse::nop();
+
+        // Give the browsers a chance to use this input first
+        EventResponse browser_resp = WebViewManager::getSingleton().onMousePressed(mouseev);
+        if (browser_resp == EventResponse::cancel()) {
+            mWebViewActiveButtons.insert(mouseev->mButton);
+            return EventResponse::cancel();
+        }
+
+        InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
+        mInputBinding.handle(inputev);
+
+        return EventResponse::nop();
+    }
+
     EventResponse mouseClickHandler(EventPtr ev) {
         std::tr1::shared_ptr<MouseClickEvent> mouseev (
             std::tr1::dynamic_pointer_cast<MouseClickEvent>(ev));
@@ -916,8 +974,12 @@ private:
 
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMouseClick(mouseev);
-        if (browser_resp == EventResponse::cancel())
+        if (browser_resp == EventResponse::cancel()) {
             return EventResponse::cancel();
+        }
+        if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
+            return EventResponse::cancel();
+        }
 
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
         mInputBinding.handle(inputev);
@@ -931,10 +993,19 @@ private:
             return EventResponse::nop();
         }
 
-        // Give the browsers a chance to use this input first
-        EventResponse browser_resp = WebViewManager::getSingleton().onMouseDrag(ev);
-        if (browser_resp == EventResponse::cancel())
-            return EventResponse::cancel();
+        std::set<int>::iterator iter = mWebViewActiveButtons.find(ev->mButton);
+        if (iter != mWebViewActiveButtons.end()) {
+            // Give the browser a chance to use this input
+            EventResponse browser_resp = WebViewManager::getSingleton().onMouseDrag(ev);
+
+            if (ev->mType == Input::DRAG_END) {
+                mWebViewActiveButtons.erase(iter);
+            }
+
+            if (browser_resp == EventResponse::cancel()) {
+                return EventResponse::cancel();
+            }
+        }
 
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(evbase));
         mInputBinding.handle(inputev);
@@ -981,9 +1052,10 @@ private:
 
     /// Camera Path Utilities
     void cameraPathSetCamera(const Vector3d& pos, const Quaternion& orient) {
-        Task::AbsTime now(Task::AbsTime::now());
+
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
 
         loc.setPosition( pos );
@@ -1023,9 +1095,10 @@ private:
     }
 
     void cameraPathInsert() {
-        Task::AbsTime now(Task::AbsTime::now());
+
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
 
         mCameraPathIndex = mCameraPath.insert(mCameraPathIndex, loc.getPosition(), loc.getOrientation(), Task::DeltaTime::seconds(1.0));
@@ -1047,7 +1120,7 @@ private:
         mCameraPath.changeTimeDelta(mCameraPathIndex, Task::DeltaTime::seconds(factor));
     }
 
-    void cameraPathTick(const Time& t) {
+    void cameraPathTick(const Task::LocalTime& t) {
         Task::DeltaTime dt = t - mLastCameraTime;
         mLastCameraTime = t;
 
@@ -1074,6 +1147,249 @@ private:
 
     void webViewNavigateStringAction(WebViewManager::NavigationAction action, const String& arg) {
         WebViewManager::getSingleton().navigate(action, arg);
+    }
+
+    void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
+        /// FIXME: need to convert x, y mouse coords into global coords & quaternion
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        if (!cam) return;
+        RoutableMessageBody msg;
+        String tok;
+        size_t pos=0;
+        double mx, my;
+        getNextToken(arg, &pos, &tok);          //  inventory
+        getNextToken(arg, &pos, &tok);          //  placeObject
+        getNextToken(arg, &pos, &tok);          //  artwork_xx
+        getNextTokenAsDouble(arg, &pos, &mx);   // mouse x
+        getNextTokenAsDouble(arg, &pos, &my);   // mouse y
+        //double width=1024.0, height=768.0;      // FIXME: get real resolution
+        double width = mParent->mPrimaryCamera->getViewport()->getActualWidth();
+        double height = mParent->mPrimaryCamera->getViewport()->getActualHeight();
+        mx = (mx-width*.5) / (width*.5);
+        my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for titlebar?
+        Vector3d position;
+        Quaternion orientation;
+        bool err=getPositionAndOrientationForNewArt(mx, my, 0.1, false, &position, &orientation);
+        if (!err) {
+            std::cout << "dbm debug ERROR --getPos-etc failed" << std::endl;
+            position = Vector3d(0,2,0);
+        }
+        std::ostringstream fullmsg;
+        fullmsg << arg << " " << position.x <<" "<< position.y <<" "<< position.z <<" "<<
+                orientation.x <<" "<< orientation.y <<" "<< orientation.z <<" "<< orientation.w;
+        msg.add_message("JavascriptMessage", fullmsg.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
+
+    static const char tokenDelimiter[];
+
+    static bool getNextToken(const String &str, size_t *pos, String *token) {
+        if (*pos >= str.length())
+            return false;
+        size_t first = str.find_first_not_of(tokenDelimiter, *pos);
+        if (first == String::npos)
+            return false;
+        size_t last = str.find_first_of(tokenDelimiter, first);
+        if (last == String::npos)
+            last = str.length();
+        *token = str.substr(first, last - first);
+        *pos = last;
+        return true;
+    }
+
+    static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
+        String token;
+        if (!getNextToken(str, pos, &token))
+            return false;
+        *d = atof(token.c_str());
+        return true;
+    }
+
+    // walk [ straight | turn ] speed
+    void walkHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String token;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double speed;
+        getNextToken(arg, &ix, &token);                                 // walk (already parsed)
+        success = success && getNextToken(arg, &ix, &token);            // straight | turn
+        if      (token == "straight")   rotate = false;
+        else if (token == "turn")       rotate = true;
+        else                            success = false;
+        success = success && getNextTokenAsDouble(arg, &ix, &speed);    // distance
+        if (!success)
+            return;
+
+        if (!rotate)    moveAction(Vector3f(0, 0, -1), speed);
+        else            stableRotateAction(1, speed);
+    }
+
+    // step [ straight | turn ] distance
+    void stepHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String token;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double distance;
+        getNextToken(arg, &ix, &token);                                 // step (already parsed)
+        success = success && getNextToken(arg, &ix, &token);            // straight | turn
+        if      (token == "straight")   rotate = false;
+        else if (token == "turn")       rotate = true;
+        else                            success = false;
+        success = success && getNextTokenAsDouble(arg, &ix, &distance); // distance
+        if (!success)
+            return;
+
+        // FIXME: This should move by the specified amount, but below we incorrectly set the speed.
+        if (!rotate)    moveAction(Vector3f(0, 0, -1), distance);
+        else            stableRotateAction(1, distance);
+    }
+
+
+    // Determine the appropriate position and orientation for a piece of artwork
+    // to be placed at the given mouse coordinates.
+    //
+    // Given a point in screen space, fire a ray to find the first object hit.
+    // Compute the location and normal of the intersection with the object.
+    // Offset the intersection location by the specified surfaceOffset in the
+    // outward direction of the surface normal. Orientation is computed
+    // appropriate for a painting or a sculpture. It is assumed that the struck
+    // surface is vertical for a painting and horizontal for a sculpture. It is
+    // also assumed that paintings are done in the X-Y plane, and that a
+    // sculpture's vertical axis is the Y axis, with the primary view points its
+    // Z axis toward the user.
+    bool getPositionAndOrientationForNewArt(
+        double screenX, double screenY, // Location on screen
+        double surfaceOffset,           // Optional offset from surface of ray intersection
+        bool isSculpture,               // Is the artwork a painting or a sculpture?
+        Vector3d *position,             // Position for the new artwork
+        Quaternion *orientation         // Orientation of the new artwork
+    ) {
+        // Look for an object intersected by the ray.
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!camera)
+            return false;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        Location location(camera->globalLocation(now));
+        Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
+        double distance;
+        Vector3f normal;
+        bool success = false;
+        int numHits = 1, i;
+        for (i = 0; i < numHits; i++) {
+            const Entity *obj = mParent->rayTrace(location.getPosition(), viewDirection, numHits, distance, normal, i);
+            if (obj == NULL) {      // No object found
+                if (i < numHits)    // Why not?
+                    continue;       // Still more objects: keep looking
+                break;              // No more objects: return failure
+            }
+            success = true;
+            break;
+        }
+        if (success == false)
+            return false;
+
+        // Compute the position, offset from the surface by the specified amount
+        *position = location.getPosition() + distance * Vector3d(viewDirection.x, viewDirection.y, viewDirection.z);
+        if (viewDirection.dot(normal) > 0)  // backfacing normal
+            normal = -normal;               // make it front-facing
+        normal.normalizeThis();
+        *position += surfaceOffset * Vector3d(normal.x, normal.y, normal.z);
+
+        // Compute the orientation
+        Vector3f xAxis, yAxis, zAxis;
+        if (!isSculpture) {                         //------ A Painting ------//
+            zAxis = normal;                         // The painting is flush against the wall
+            yAxis = Vector3f::unitY();              // Tentatively on a vertical wall, but this is adjusted later
+            xAxis = yAxis.cross(zAxis);
+            if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
+                xAxis = viewDirection.cross(yAxis); // Let's have it face the viewer, rather than the floor or ceiling
+                if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
+                    xAxis = Vector3f::unitX();      // Align to the world's coordinate axes, since the normal and view are pathological
+                zAxis = xAxis.cross(yAxis);         // Hang it vertically
+            }
+            else {
+                yAxis = zAxis.cross(xAxis);         // This accommodates non-vertical walls nicely, as long as they aren't completely horizontal
+            }
+        }
+        else {                                      //------ A Sculpture ------//
+            yAxis = Vector3f::unitY();              // Sculpture always stands upright
+            xAxis = viewDirection.cross(yAxis);     // Point toward the viewer
+            if (xAxis.normalizeThis() == 0)         // Oops: looking straight up or down
+                xAxis = Vector3f::unitX();          // Align to the world's coordinate axes, since the current view is pathological
+            zAxis = xAxis.cross(yAxis);
+        }
+        *orientation = Quaternion(xAxis, yAxis, zAxis);
+        return true;
+    }
+
+
+    void placeArtAt(const String &art_id, const Vector3d &position, const Quaternion &orientation) {
+        // FIXME: Actually fetch the art piece and place it.
+    }
+
+    // place_art art_id screen_x screen_y
+    void placeArtHandler(WebViewManager::NavigationAction action, const String& arg) {
+        // Get args
+        String art_id;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double screen_x, screen_y;
+        getNextToken(arg, &ix, &art_id);                                // place_art (already parsed)
+        success = success && getNextToken(arg, &ix, &art_id);           // art_id
+        success = success && getNextTokenAsDouble(arg, &ix, &screen_x); // screen_x
+        success = success && getNextTokenAsDouble(arg, &ix, &screen_y); // screen_y
+        if (!success)
+            return;
+
+        // Find position and orientation
+        bool isSculpture = 0;
+        double distanceFromWall;
+        Vector3d position;
+        Quaternion orientation;
+        if (isSculpture)    distanceFromWall = 0;       // flush
+        else                distanceFromWall = 10e-2;   // 10 cm
+        if (!getPositionAndOrientationForNewArt(screen_x, screen_y, distanceFromWall, isSculpture, &position, &orientation)) {
+            SILOG(input, error, "placeArtHandler: failed: " << arg);
+            // FIXME: We should place it somewhere.
+            return;
+        }
+
+        placeArtAt(art_id, position, orientation);
+    }
+
+    /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
+    void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
+        // Get the command (first word)
+        String command;
+        size_t i = 0;
+        if (!getNextToken(arg, &i, &command)) {
+            SILOG(input, error, "genericStringMessage: no command found in \"" << arg << "\"");
+            return;
+        }
+
+        // Dispatch on the command
+        typedef void (OgreSystem::MouseHandler::*StringMessageHandler)(WebViewManager::NavigationAction action, const String& arg);
+        struct StringMessageDispatch {
+            const char              *command;
+            StringMessageHandler    handler;
+        };
+        static const StringMessageDispatch dispatchTable[] = {
+            { "inventory",  &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
+            { "walk",       &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
+            { "step",       &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
+            { "place_art",  &Sirikata::Graphics::OgreSystem::MouseHandler::placeArtHandler },
+            { NULL,         NULL }
+        };
+        const StringMessageDispatch *dp;
+        for (dp = dispatchTable; dp->command != NULL; ++dp)
+            if (dp->command == command)
+                break;
+        if (dp->handler != NULL)
+            (this->*(dp->handler))(action, arg);
+        else
+            SILOG(input, error, "genericStringMessage: unknown command: \"" << command << "\"");
     }
 
     ///////////////// DEVICE FUNCTIONS ////////////////
@@ -1129,7 +1445,7 @@ public:
     MouseHandler(OgreSystem *parent)
      : mParent(parent),
        mCurrentGroup(SpaceObjectReference::null()),
-       mLastCameraTime(Task::AbsTime::now()),
+       mLastCameraTime(Task::LocalTime::now()),
        mWhichRayObject(0)
     {
         mLastHitCount=0;
@@ -1144,7 +1460,7 @@ public:
         mEvents.push_back(mParent->mInputManager->registerDeviceListener(
                               std::tr1::bind(&MouseHandler::deviceListener, this, _1)));
 
-        mDragAction[1] = 0;
+        mDragAction[1] = DragActionRegistry::get("moveObjectOnWall");       /// let this be the default for all time
         mDragAction[2] = DragActionRegistry::get("zoomCamera");
         mDragAction[3] = DragActionRegistry::get("panCamera");
         mDragAction[4] = DragActionRegistry::get("rotateCamera");
@@ -1152,6 +1468,10 @@ public:
         mEvents.push_back(mParent->mInputManager->subscribeId(
                 MouseHoverEvent::getEventId(),
                 std::tr1::bind(&MouseHandler::mouseHoverHandler, this, _1)));
+
+        mEvents.push_back(mParent->mInputManager->subscribeId(
+                MousePressedEvent::getEventId(),
+                std::tr1::bind(&MouseHandler::mousePressedHandler, this, _1)));
 
         mEvents.push_back(mParent->mInputManager->subscribeId(
                 MouseDragEvent::getEventId(),
@@ -1203,6 +1523,7 @@ public:
 
         mInputResponses["setDragModeNone"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, ""));
         mInputResponses["setDragModeMoveObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "moveObject"));
+        mInputResponses["setDragModeMoveObjectOnWall"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "moveObjectOnWall"));
         mInputResponses["setDragModeRotateObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "rotateObject"));
         mInputResponses["setDragModeScaleObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "scaleObject"));
         mInputResponses["setDragModeRotateCamera"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "rotateCamera"));
@@ -1225,16 +1546,22 @@ public:
         mInputResponses["webHome"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateHome));
         mInputResponses["webGo"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateGo, _1));
 
+//        mInputResponses["webCommand"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateCommand, _1));
+
+        mInputResponses["genericMessage"] = new StringInputResponse(std::tr1::bind(&MouseHandler::genericStringMessage, this, WebViewManager::NavigateCommand, _1));
 
         // Movement
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_SHIFT), mInputResponses["moveForward"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S, Input::MOD_SHIFT), mInputResponses["moveBackward"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_D, Input::MOD_SHIFT), mInputResponses["moveRight"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_A, Input::MOD_SHIFT), mInputResponses["moveLeft"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP), mInputResponses["rotateXPos"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN), mInputResponses["rotateXNeg"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W), mInputResponses["moveForward"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S), mInputResponses["moveBackward"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_D), mInputResponses["moveRight"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_A), mInputResponses["moveLeft"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP, Input::MOD_SHIFT), mInputResponses["rotateXPos"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN, Input::MOD_SHIFT), mInputResponses["rotateXNeg"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP), mInputResponses["moveForward"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN), mInputResponses["moveBackward"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_LEFT), mInputResponses["stableRotatePos"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RIGHT), mInputResponses["stableRotateNeg"]);
+
         // Various other actions
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B), mInputResponses["createLight"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_ENTER), mInputResponses["enterObject"]);
@@ -1244,18 +1571,18 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_G), mInputResponses["groupObjects"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_G, Input::MOD_ALT), mInputResponses["ungroupObjects"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DELETE), mInputResponses["deleteObjects"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_PERIOD), mInputResponses["deleteObjects"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_V, Input::MOD_CTRL), mInputResponses["cloneObjects"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_D), mInputResponses["cloneObjects"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_O, Input::MOD_CTRL), mInputResponses["import"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S, Input::MOD_CTRL), mInputResponses["saveScene"]);
+
         // Drag modes
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Q), mInputResponses["setDragModeNone"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W), mInputResponses["setDragModeMoveObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_E), mInputResponses["setDragModeRotateObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["setDragModeScaleObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T), mInputResponses["setDragModeRotateCamera"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y), mInputResponses["setDragModePanCamera"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Q, Input::MOD_CTRL), mInputResponses["setDragModeNone"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_CTRL), mInputResponses["setDragModeMoveObject"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_CTRL|Input::MOD_SHIFT), mInputResponses["setDragModeMoveObjectOnWall"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_E, Input::MOD_CTRL), mInputResponses["setDragModeRotateObject"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R, Input::MOD_CTRL), mInputResponses["setDragModeScaleObject"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T, Input::MOD_CTRL), mInputResponses["setDragModeRotateCamera"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y, Input::MOD_CTRL), mInputResponses["setDragModePanCamera"]);
 
         // Mouse Zooming
         mInputBinding.add(InputBindingEvent::Axis(SDLMouse::WHEELY), mInputResponses["zoom"]);
@@ -1282,6 +1609,12 @@ public:
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navrefresh"), mInputResponses["webRefresh"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navhome"), mInputResponses["webHome"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navgo", 1), mInputResponses["webGo"]);
+        mInputBinding.add(InputBindingEvent::Web("__chrome", "navmoveforward", 1), mInputResponses["moveForward"]);
+        mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnleft", 1), mInputResponses["stableRotatePos"]);
+        mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnright", 1), mInputResponses["stableRotateNeg"]);
+
+    //    mInputBinding.add(InputBindingEvent::Web("__chrome", "navcommand", 1), mInputResponses["webCommand"]);
+        mInputBinding.add(InputBindingEvent::Web("__chrome", "navcommand", 1), mInputResponses["genericMessage"]);
     }
 
     ~MouseHandler() {
@@ -1309,10 +1642,13 @@ public:
         mSelectedObjects.insert(obj);
     }
 
-    void tick(const Time& t) {
+    void tick(const Task::LocalTime& t) {
         cameraPathTick(t);
     }
 };
+
+const char OgreSystem::MouseHandler::tokenDelimiter[] = " \t\n\r";
+
 
 void OgreSystem::allocMouseHandler() {
     mMouseHandler = new MouseHandler(this);
@@ -1333,7 +1669,7 @@ void OgreSystem::selectObject(Entity *obj, bool replace) {
     }
 }
 
-void OgreSystem::tickInputHandler(const Time& t) const {
+void OgreSystem::tickInputHandler(const Task::LocalTime& t) const {
     if (mMouseHandler != NULL)
         mMouseHandler->tick(t);
 }

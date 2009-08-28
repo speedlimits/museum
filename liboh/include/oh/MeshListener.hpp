@@ -44,7 +44,8 @@ struct PhysicalParameters {
         Static,                 /// collisions, no dynamic movement (bullet mass==0)
         DynamicBox,                 /// fully physical -- collision & dynamics
         DynamicSphere,
-        DynamicCylinder
+        DynamicCylinder,
+        Character
     };
 
     std::string name;
@@ -52,17 +53,19 @@ struct PhysicalParameters {
     float density;
     float friction;
     float bounce;
+    float gravity;
     int colMask;
     int colMsg;
     Vector3f hull;
-    PhysicalParameters() {
-        mode = Disabled;
-        density = 0;
-        friction = 0;
-        bounce = 0;
-        colMask = 0;
-        colMsg = 0;
-        hull = Vector3f::nil();
+    PhysicalParameters() :
+        mode(Disabled),
+        density(0),
+        friction(0),
+        bounce(0),
+        gravity(0),
+        colMask(0),
+        colMsg(0),
+        hull() {
     }
 };
 

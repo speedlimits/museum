@@ -1,0 +1,51 @@
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<p>Select the framestyle you want</p>
+<div>
+    <div id="slider-top" class="ui" onclick="document.getElementById('slider-display').scrollTop -= 5" >&nbsp;</div>
+    <div id="slider">     
+        <ul id="slider-display">
+            <li id="frame1" class="art-icon">
+              <img src="images/art/frame1.png" />
+            </li>
+            <li id="frame1" class="art-icon">
+                <img src="images/art/frame1.png" />
+            </li>
+            <li id="frame1" class="art-icon">
+                <img src="images/art/frame1.png" />
+            </li>
+            <li id="frame1" class="art-icon">
+                <img src="images/art/frame1.png" />
+            </li>
+          <li id="frame1" class="art-icon">
+              <img src="images/art/frame1.png" />
+            </li>
+            <li id="frame1" class="art-icon">
+                <img src="images/art/frame1.png" />
+            </li>
+            <li id="frame1" class="art-icon">
+                <img src="images/art/frame1.png" />
+            </li>
+            <li id="frame1" class="art-icon">
+                <img src="images/art/frame1.png" />
+            </li>
+        </ul>
+        
+      
+    </div>
+    
+	<div id="slider-bottom" class="ui"  onclick="document.getElementById('slider-display').scrollTop += 5" >&nbsp;</div>
+</div>
+
+<a href="#">Move To Next Art Piece</a>
+
+<script>
+
+// delayed drag that auto hides the info window
+	$("#slider").ready(function () {
+    	$("#slider-display").sortable();
+		$("#slider-display").disableSelection();
+		$(".ui").disableSelection();
+		//$(".art-icon").click(function () { loadSmallModal("images/art/" + this.id + ".html", true)
+		//							   });
+	});
+</script>
