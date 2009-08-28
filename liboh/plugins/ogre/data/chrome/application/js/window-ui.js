@@ -11,7 +11,7 @@ $(document).ready(function() {
 
 		}
 		
-	});
+	} ) ;
 
 	$("#development-screen").draggable();
 	$("#development-console-screen").draggable();
