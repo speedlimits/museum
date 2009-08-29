@@ -169,6 +169,11 @@ function enterSelectFrames2() {
 	Console
 	<p id="development-console"> &nbsp;
 	</p>
+	<p>
+		<input id="console-input" type="text" size="30" >
+		<input type="button" onclick="debug(eval($('#console-input').val()));" value="run">
+	</p>
+
 </div>
 
 </body>

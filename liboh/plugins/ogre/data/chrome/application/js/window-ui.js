@@ -11,7 +11,7 @@ $(document).ready(function() {
 
 		}
 		
-	});
+	} ) ;
 
 	$("#development-screen").draggable();
 	$("#development-console-screen").draggable();
@@ -23,17 +23,13 @@ $(document).ready(function() {
 	$("#navigation-screen").draggable();
 
 	
-	$(".topbarbutton").bind('mouseover', function(event){
-		debug('mouseOver');												  
-		$(this).css('background-position-y', '-38px');	
+	$("li.topbarbutton").bind('mouseover', function(event){		$(this).css('background-position-y', '-38px');	
 					
 	});
-	$(".topbarbutton").bind('mouseout', function(event){
-		debug('mouseOut');
+	$("li.topbarbutton").bind('mouseout', function(event){
 		$(this).css('background-position-y', '0px');						
 	});
-	$(".topbarbutton").mousedown( function(event){
-		debug('mouseDown');
+	$("li.topbarbutton").mousedown( function(event){
 		$(this).css('background-position-y', '-76px');						
 	});
 	
