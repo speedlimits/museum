@@ -73,6 +73,10 @@ public:
         return T(x,y);
     }
 #endif
+    void set(scalar x, scalar y) {
+        this->x=x;
+        this->y=y;
+    }
     scalar operator[](const unsigned int i) const{
         assert(i<2);
         return v[i];
@@ -135,8 +139,14 @@ public:
         y-=other.y;
         return *this;
     }
+    scalar cross(const Vector2&other) const {
+        return x*other.y-y*other.x;
+    }
     scalar dot(const Vector2 &other) const{
         return x*other.x+y*other.y;
+    }
+    Vector2 perp() const {
+        return Vector2(-y, x);
     }
     Vector2 min(const Vector2&other)const {
         return Vector2(other.x<x?other.x:x,
@@ -158,15 +168,15 @@ public:
     bool operator!=(const Vector2&other)const {
         return x!=other.x||y!=other.y;
     }
-    Vector2 normal()const {
+    Vector2 normal()const {     // FIXME: Change this to normalized()
         scalar len=length();
-        if (len>1e-08)
+        if (len>0)
             return *this/len;
         return *this;
     }
     scalar normalizeThis() {
         scalar len=length();
-        if (len>1e-08)
+        if (len>0)
             this/=len;
         return len;
     }

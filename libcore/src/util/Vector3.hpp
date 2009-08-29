@@ -80,6 +80,12 @@ public:
         assert(i<3);
         return v[i];
     }
+    void set(scalar x, scalar y, scalar z) {
+        this->x=x;
+        this->y=y;
+        this->z=z;
+    }
+
     Vector3&operator=(scalar other) {
         x=other;
         y=other;
@@ -179,7 +185,7 @@ public:
     bool operator!=(const Vector3&other)const {
         return x!=other.x||y!=other.y||z!=other.z;
     }
-    Vector3 normal()const {
+    Vector3 normal()const {     // FIXME: Change this to normalized()
         scalar len=length();
         if (len>1e-08)
             return *this/len;

@@ -70,6 +70,12 @@ public:
     template <class V> static Vector4 fromSSE(const V&other){
         return Vector4(other.x(),other.y(),other.z(),other.w());
     }
+    void set(scalar x, scalar y, scalar z, scalar w) {
+        this->x=x;
+        this->y=y;
+        this->z=z;
+        this->w=w;
+    }
     scalar&operator[](const unsigned int i) {
         assert(i<4);
         return v[i];
@@ -179,7 +185,7 @@ public:
     bool operator!=(const Vector4&other)const {
         return x!=other.x||y!=other.y||z!=other.z||w!=other.w;
     }
-    Vector4 normal()const {
+    Vector4 normal()const {     // FIXME: Change this to normalized()
         scalar len=length();
         if (len>1e-08)
             return *this/len;
