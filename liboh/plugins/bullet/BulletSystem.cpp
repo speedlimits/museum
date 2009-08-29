@@ -429,7 +429,7 @@ bool BulletSystem::tick() {
     static Task::LocalTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     static int mode = 0;
-    static string lastPathSection="path_00_00";
+    static string lastPathSection="in_c_path_0_cell_00";
     Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
     positionOrientation po;
@@ -448,7 +448,7 @@ bool BulletSystem::tick() {
                         double dist;
                         Vector3f norm;
                         SpaceObjectReference sor;
-                        string queryName="path_00_00";
+                        string queryName="in_c_path_0_cell_00";
                         if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
                             queryName=mLastQuery->mName;
                             cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
@@ -457,9 +457,15 @@ bool BulletSystem::tick() {
                         else {
                             cout << "dbm debug: queryRay returns nothing" << endl;
                         }
-                        if (queryName != lastPathSection) {
-                            cout << "dbm debug OSC event: stepped off " << lastPathSection << " and onto " << queryName << endl;
-                            lastPathSection = queryName;
+                        cout << "dbm debug queryName: " << queryName << " length: " << queryName.length() << endl;
+                        if (queryName.length()==19 && queryName.substr(0,10) == "in_c_path_" && queryName.substr(11,5) == "_cell") {
+                            if (queryName != lastPathSection) {
+                                cout << "dbm debug OSC event: stepped off " << lastPathSection << " and onto " << queryName << endl;
+                                lastPathSection = queryName;
+                            }
+                        }
+                        else {
+                            queryName="in_c_path_0_cell_00";        /// yeah, dat's da ticket
                         }
                         /// OSC stuff:
                         Vector3d pos = objects[i]->mMeshptr->getPosition();
@@ -468,10 +474,10 @@ bool BulletSystem::tick() {
                         istringstream suser(objects[i]->mName.substr(7));
                         suser >> data.user_id;
 
-                        istringstream spath(queryName.substr(5,2));
+                        istringstream spath(queryName.substr(10,1));
                         spath >> data.path_id;
 
-                        istringstream scell(queryName.substr(8));
+                        istringstream scell(queryName.substr(17));
                         scell >> data.cell_id;
 
                         data.global_x=pos.x;
