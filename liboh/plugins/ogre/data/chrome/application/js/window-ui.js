@@ -23,17 +23,13 @@ $(document).ready(function() {
 	$("#navigation-screen").draggable();
 
 	
-	$("li.topbarbutton").bind('mouseover', function(event){
-		debug('mouseOver');												  
-		$(this).css('background-position-y', '-38px');	
+	$("li.topbarbutton").bind('mouseover', function(event){		$(this).css('background-position-y', '-38px');	
 					
 	});
 	$("li.topbarbutton").bind('mouseout', function(event){
-		debug('mouseOut');
 		$(this).css('background-position-y', '0px');						
 	});
 	$("li.topbarbutton").mousedown( function(event){
-		debug('mouseDown');
 		$(this).css('background-position-y', '-76px');						
 	});
 	

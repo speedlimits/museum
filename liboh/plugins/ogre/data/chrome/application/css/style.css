@@ -234,8 +234,8 @@ body  {
 }
 
 #development-console-screen {
-	/*display: none;
-*/
+	display: none;
+
 	position: absolute;
 	background: #ccc;
 
