@@ -42,6 +42,8 @@
 #if defined(__WIN32__) || defined(_WIN32)
 // disable type needs to have dll-interface to be used byu clients due to STL member variables which are not public
 #pragma warning (disable: 4251)
+//disable warning about no suitable definition provided for explicit template instantiation request which seems to have no resolution nor cause any problems
+#pragma warning (disable: 4661)
 //disable non dll-interface class used as base for dll-interface class when deriving from singleton
 #pragma warning (disable : 4275)
 #  define SIRIKATA_PLATFORM PLATFORM_WINDOWS
@@ -157,7 +159,9 @@
 #endif
 
 #if SIRIKATA_PLATFORM == PLATFORM_WINDOWS
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 //need to get rid of GetMessage for protocol buffer compatibility
@@ -208,8 +212,9 @@ namespace Sirikata {
 // numeric typedefs to get standardized types
 typedef unsigned char uchar;
 #if SIRIKATA_PLATFORM == PLATFORM_WINDOWS
+#ifndef NOMINMAX
 #define NOMINMAX
-
+#endif
 typedef __int8 int8;
 typedef unsigned __int8 uint8;
 typedef __int16 int16;
@@ -271,6 +276,7 @@ class RoutableMessageBody;
 #include "options/OptionValue.hpp"
 #include "Logging.hpp"
 #include "Location.hpp"
+#include "VInt.hpp"
 namespace Sirikata {
 template<class T>T*aligned_malloc(size_t num_bytes, const unsigned char alignment) {
     unsigned char *data=(unsigned char*)malloc(num_bytes+alignment);
@@ -305,6 +311,8 @@ typedef Vector3<float32> Vector3f;
 typedef Vector3<float64> Vector3d;
 typedef Vector4<float32> Vector4f;
 typedef Vector4<float64> Vector4d;
+typedef VInt<uint32> vuint32;
+typedef VInt<uint64> vuint64;
 using std::tr1::placeholders::_1;
 using std::tr1::placeholders::_2;
 using std::tr1::placeholders::_3;

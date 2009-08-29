@@ -63,6 +63,10 @@ public:
     template<class T>T convert(const T*ptr=NULL) const{
         return T(x,y,z,w);
     }
+    template<class T> Vector4<T> downCast() const{
+        return Vector4<T>((T)x,(T)y,(T)z,(T)w);
+    }
+
     template <class V> static Vector4 fromArray(const V&other){
         return Vector4(other[0],other[1],other[2],other[3]);
     }
@@ -188,7 +192,7 @@ public:
     scalar normalizeThis() {
         scalar len=length();
         if (len>1e-08)
-            this/=len;
+            *this/=len;
         return len;
     }
     std::string toString()const {
