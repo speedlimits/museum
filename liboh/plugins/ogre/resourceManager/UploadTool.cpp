@@ -1128,10 +1128,31 @@ void UploadFilesAndConfirmReplacement(::Sirikata::Transfer::TransferManager*tm,
             }
         }
     }
+    std::ostringstream datestrm;
+    mkdir("/tmp"
+#ifndef _WIN32
+          ,0775
+#endif
+        );
+    datestrm << "/tmp/imp_"<<time(NULL)<<"/";
+    std::string dirstr = datestrm.str();
+    mkdir(dirstr.c_str()
+#ifndef _WIN32
+          ,0775
+#endif
+        );
     UploadStatus *status = new UploadStatus(callback, filesToUpload.size());
     for (size_t i = 0; i < filesToUpload.size(); ++i) {
         const ResourceFileUpload &current = *(filesToUpload[i]);
         std::cout << "Uploading "<<stripslashes(current.mSourceFilename)<<" to URI " << current.mID<<". Hash = "<<current.mHash<<"; Size = "<<current.mData->length()<<std::endl;
+        {
+            std::string filename = dirstr + current.mID.filename();
+            FILE *fp = fopen(filename.c_str(), "wb");
+            if (fp) {
+                fwrite(current.mData->data(), current.mData->length(), 1, fp);
+                fclose(fp);
+            }
+        }
         if (current.mID.context() == hashContext) {
             tm->uploadByHash(Transfer::RemoteFileId(current.mHash, current.mID),
                        current.mData,
