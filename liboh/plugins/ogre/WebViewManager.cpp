@@ -609,6 +609,14 @@ void WebViewManager::navigate(NavigationAction action) {
 }
 
 
+void WebViewManager::evaluateJavaScript(const std::string &webViewName, const String& javascript) {
+	WebView *wv = getWebView(webViewName);
+    if (!wv)
+        SILOG(ogre, error, "Cannot find webView \"" << webViewName << "\" for javascript: " << javascript);
+    wv->evaluateJS(javascript);
+}
+
+
 static void PythonNavigateHandler(const String& target, const String& pythonProgram) {
     SILOG(ogre, error, "PythonNavigateHandler is unimplemented");
     SILOG(ogre, error, target);
