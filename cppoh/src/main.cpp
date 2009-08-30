@@ -280,10 +280,12 @@ int main ( int argc,const char**argv ) {
 			sim->forwardMessagesTo(oh);
         }
     }
+    String s;
     while ( continue_simulation ) {
-	usleep(30000);
+    	usleep(30000);
         for(SimList::iterator it = sims.begin(); it != sims.end(); it++) {
             continue_simulation = continue_simulation && (*it)->tick();
+            (*it)->exchangeDumbMsg(s);
         }
         oh->tick();
         Network::IOServiceFactory::pollService(ioServ);

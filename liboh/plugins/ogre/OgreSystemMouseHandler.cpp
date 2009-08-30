@@ -57,6 +57,7 @@
 #include "CameraPath.hpp"
 #include "Ogre_Sirikata.pbj.hpp"
 #include "util/RoutableMessageBody.hpp"
+#include <oscplugin/osc.h>
 
 namespace Sirikata {
 namespace Graphics {
@@ -681,6 +682,13 @@ private:
     void setCameraSpeed(const float& speed) {
         std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
         mCamSpeed = speed;
+    }
+
+    void sendOscMsg(const int& msg) {
+        std::cout << "dbm debug sendOscMsg " << msg << std::endl;
+        ostringstream s;
+        s << "oscMsg_" << msg;
+        mParent->mDumbMsg = s.str();
     }
 
     void importAction() {
@@ -1541,6 +1549,9 @@ public:
         mInputResponses["setCameraSpeed4"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 3.0));
         mInputResponses["setCameraSpeed5"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 10.0));
 
+        mInputResponses["oscMsg9"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::sendOscMsg, this, 9));
+        mInputResponses["oscMsg0"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::sendOscMsg, this, 0));
+
         mInputResponses["cameraPathLoad"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathLoad, this));
         mInputResponses["cameraPathSave"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathSave, this));
         mInputResponses["cameraPathNextKeyFrame"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathNext, this));
@@ -1604,6 +1615,9 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_4), mInputResponses["setCameraSpeed4"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_5), mInputResponses["setCameraSpeed5"]);
         
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_9), mInputResponses["oscMsg9"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_0), mInputResponses["oscMsg0"]);
+
         // Mouse Zooming
         mInputBinding.add(InputBindingEvent::Axis(SDLMouse::WHEELY), mInputResponses["zoom"]);
 

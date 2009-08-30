@@ -490,6 +490,22 @@ bool BulletSystem::tick() {
                         << " cell: " << data.cell_id
                         << endl);
                         oscplugin::sendOSCmessage(data);
+                        if (mDumbMsg != "") {
+                            cout << "dbm debug msg from ogreSystem: " << mDumbMsg << endl;
+                            if (mDumbMsg.substr(0,7) == "oscMsg_") {
+                                istringstream s(mDumbMsg.substr(7,1));
+                                s >> data.cell_id;                                    
+                                data.path_id = -1;
+                                DEBUG_ALWAYS(cout << "dbm debug sendOsc ogre msg: " 
+                                        << pos.x <<", "<< pos.y <<", "<< pos.z
+                                        << " user: " << data.user_id
+                                        << " path: " << data.path_id
+                                        << " cell: " << data.cell_id
+                                        << endl);
+                                oscplugin::sendOSCmessage(data);
+                                mDumbMsg = "";
+                            }
+                        }
                     }
 
                     /// if object has been moved, reset bullet position accordingly
