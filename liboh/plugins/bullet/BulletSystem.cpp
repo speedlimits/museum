@@ -52,6 +52,7 @@ static int core_plugin_refcount = 0;
 
 //#define DEBUG_OUTPUT(x) x
 #define DEBUG_OUTPUT(x)
+#define DEBUG_ALWAYS(x) x
 
 SIRIKATA_PLUGIN_EXPORT_C void init() {
     using namespace Sirikata;
@@ -451,21 +452,19 @@ bool BulletSystem::tick() {
                         string queryName="in_c_path_0_cell_00";
                         if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
                             queryName=mLastQuery->mName;
-                            cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
-                            << " object: " << queryName << endl;
+                            DEBUG_OUTPUT(cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
+                            << " object: " << queryName << endl);
                         }
                         else {
-                            cout << "dbm debug: queryRay returns nothing" << endl;
+                            DEBUG_OUTPUT(cout << "dbm debug: queryRay returns nothing" << endl);
                         }
-                        cout << "dbm debug queryName: " << queryName << " length: " << queryName.length() << endl;
-                        if (queryName.length()==19 && queryName.substr(0,10) == "in_c_path_" && queryName.substr(11,5) == "_cell") {
-                            if (queryName != lastPathSection) {
-                                cout << "dbm debug OSC event: stepped off " << lastPathSection << " and onto " << queryName << endl;
-                                lastPathSection = queryName;
-                            }
-                        }
-                        else {
+                        //cout << "dbm debug queryName: " << queryName << " length: " << queryName.length() << endl;
+                        if (!(queryName.length()>=18 && queryName.substr(4,6) == "_path_" && queryName.substr(11,6) == "_cell_")) {
                             queryName="in_c_path_0_cell_00";        /// yeah, dat's da ticket
+                        }
+                        if (queryName != lastPathSection) {
+                            DEBUG_ALWAYS(cout << "dbm debug path/cell change from " << lastPathSection << " to " << queryName << endl);
+                            lastPathSection = queryName;
                         }
                         /// OSC stuff:
                         Vector3d pos = objects[i]->mMeshptr->getPosition();
@@ -485,11 +484,11 @@ bool BulletSystem::tick() {
                         data.global_z=pos.z;
                         data.relative_x=0;
                         data.relative_y=0;
-                        cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z 
-                                << " user: " << data.user_id
-                                << " path: " << data.path_id
-                                << " cell: " << data.cell_id
-                                << endl;
+                        DEBUG_OUTPUT(cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z
+                        << " user: " << data.user_id
+                        << " path: " << data.path_id
+                        << " cell: " << data.cell_id
+                        << endl);
                         oscplugin::sendOSCmessage(data);
                     }
 

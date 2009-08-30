@@ -318,7 +318,7 @@ struct HostedObject::PrivateCallbacks {
             } else {
                 if (realThis->hasProperty(name)) {
                     // Cached property--respond immediately.
-                    SILOG(cppoh,debug,"Cached GetProp: "<<name<<" = "<<realThis->getProperty(name));
+                    //SILOG(cppoh,debug,"Cached GetProp: "<<name<<" = "<<realThis->getProperty(name));
                     IStorageElement el = immedResponse.add_reads();
                     if (immedIndex != rwsIndex) {
                         el.set_index(rwsIndex);
@@ -1241,7 +1241,6 @@ void HostedObject::receivedPropertyUpdate(
             params.hull = parsedProperty.hull();
             params.gravity = parsedProperty.gravity();
             params.name = proxymesh->getPhysical().name;        /// otherwise setPhysical will wipe it
-            std::cout << "dbm debug calling setPhysical(1) with name =" << params.name << std::endl;
             proxymesh->setPhysical(params);
         }
     }
@@ -1265,7 +1264,6 @@ void HostedObject::receivedPropertyUpdate(
         if (proxymesh && parsedProperty.has_value()) {
             PhysicalParameters params = proxymesh->getPhysical();
             params.name = parsedProperty.value();
-            std::cout << "dbm debug calling setPhysical(2) with name=" << params.name << std::endl;
             proxymesh->setPhysical(params);
         }
     }
