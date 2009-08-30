@@ -50,12 +50,15 @@
 				border: 1px solid #999;
 			}
 		</style> 
+
 <script type="text/javascript" src="js/jquery-1.2.6.js"></script> 
 <script type="text/javascript" src="js/ui.core.js"></script> 
 <script type="text/javascript" src="js/ui.slider.js"></script> 
 <script type="text/javascript" src="js/effects.core.js"></script> 
+<script type="text/javascript" src="js/ui.draggable.js"></script> 
 <script type="text/javascript" src="js/ui.coverflow.js"></script> 
- 
+
+
 <script type="text/javascript" src="js/sylvester.js"></script> 
 <script type="text/javascript" src="js/pb.transformie.js"></script> 
  
@@ -65,7 +68,12 @@
 		
 <div class="wrapper"> 
 	<div class="magnifyme"> 
-		<img class="cover-icon"  src="icons/1.png" /> 
+		<!--<div class="cover-icon"><img src="icons/1.png" /> </div>
+		<div class="cover-icon"><img src="icons/2.png" /> </div>
+		<div class="cover-icon"><img src="icons/3.png" /> </div>
+		<div class="cover-icon"><img src="icons/4.png" /> </div>
+		<div class="cover-icon"><img src="icons/5.png" /> </div>
+		<div class="cover-icon"><img src="icons/6.png" /> </div> -->
 		<img class="cover-icon"  src="icons/2.png" /> 
 		<img class="cover-icon"  src="icons/3.png" /> 
 		<img class="cover-icon"  src="icons/4.png" /> 
@@ -96,10 +104,21 @@
 			$("div.magnifyme").ready(function() {
 				$("div.magnifyme").coverflow();
 				
-				$("div.magnifyme").bind('itemselect',  function(e, data) {alert('ahh' + data ); return false;} );
+				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
+
+	$(".cover-icon").bind('mousedown' , function() {
+		debug('mousedown');
+	});
+	$(".cover-icon").bind('mouseup' , function() {
+		debug('mouseup');
+	});
+	$(".cover-icon").bind('mouseout' , function() {
+		debug('mouseout');
+	});
+
 				
 				//$(".wrapper").disableSelection();
-				$(".manifyme").disableSelection();
+				$(".magnifyme").disableSelection();
 				$(".slider").disableSelection();
 				$(".ui-slider-handle").disableSelection();
 				

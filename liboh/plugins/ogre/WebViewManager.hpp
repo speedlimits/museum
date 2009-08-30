@@ -251,6 +251,8 @@ public:
     void navigate(NavigationAction action);
     void navigate(NavigationAction action, const String& arg);
 
+    void evaluateJavaScript(const std::string &webViewName, const String& javascript);
+    
 protected:
 	friend class WebView; // Our very close friend <3
 

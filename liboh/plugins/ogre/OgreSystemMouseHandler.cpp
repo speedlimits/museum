@@ -327,6 +327,7 @@ private:
             }
             mLastShiftSelected = SpaceObjectReference::null();
         }
+        getSelectedIDHandler(); // Update the list of selected items in the Javascript world.
         return;
     }
 
@@ -1323,39 +1324,30 @@ private:
     }
 
 
-    void placeArtAt(const String &art_id, const Vector3d &position, const Quaternion &orientation) {
-        // FIXME: Actually fetch the art piece and place it.
-    }
-
-    // place_art art_id screen_x screen_y
-    void placeArtHandler(WebViewManager::NavigationAction action, const String& arg) {
-        // Get args
-        String art_id;
-        size_t ix = 0;
-        bool success = true, rotate = false;
-        double screen_x, screen_y;
-        getNextToken(arg, &ix, &art_id);                                // place_art (already parsed)
-        success = success && getNextToken(arg, &ix, &art_id);           // art_id
-        success = success && getNextTokenAsDouble(arg, &ix, &screen_x); // screen_x
-        success = success && getNextTokenAsDouble(arg, &ix, &screen_y); // screen_y
-        if (!success)
-            return;
-
-        // Find position and orientation
-        bool isSculpture = 0;
-        double distanceFromWall;
-        Vector3d position;
-        Quaternion orientation;
-        if (isSculpture)    distanceFromWall = 0;       // flush
-        else                distanceFromWall = 10e-2;   // 10 cm
-        if (!getPositionAndOrientationForNewArt(screen_x, screen_y, distanceFromWall, isSculpture, &position, &orientation)) {
-            SILOG(input, error, "placeArtHandler: failed: " << arg);
-            // FIXME: We should place it somewhere.
-            return;
+    void getSelectedIDHandler(WebViewManager::NavigationAction action = WebViewManager::NavigateCommand, const String& arg = "") {
+        // Neither the action nor the are are used, yet.
+        String id;
+        id = "[";
+        for (SelectedObjectSet::const_iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it) {
+            ProxyObjectPtr obj(it->lock());
+            if (!obj)
+                continue;
+            if (it != mSelectedObjects.begin())
+                id += ", ";
+            id += "[\"";
+            id += obj->getObjectReference().toString();
+            id += "\", \"";
+            id += dynamic_cast<ProxyMeshObject*>(obj.get())->getPhysical().name;
+            id += "\"]";
         }
-
-        placeArtAt(art_id, position, orientation);
+        id += "]";
+        std::cout << "document.selected=" + id + ";" << std::endl;
+        WebViewManager::getSingleton().evaluateJavaScript(
+            "__chrome", "document.selected=" + id + ";" +
+            "debug(document.selected);"
+        );
     }
+
 
     /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
     void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
@@ -1374,10 +1366,10 @@ private:
             StringMessageHandler    handler;
         };
         static const StringMessageDispatch dispatchTable[] = {
-            { "inventory",  &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
-            { "walk",       &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
-            { "step",       &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
-            { "place_art",  &Sirikata::Graphics::OgreSystem::MouseHandler::placeArtHandler },
+            { "inventory",      &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
+            { "walk",           &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
+            { "step",           &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
+            { "getselectedids", &Sirikata::Graphics::OgreSystem::MouseHandler::getSelectedIDHandler },
             { NULL,         NULL }
         };
         const StringMessageDispatch *dp;

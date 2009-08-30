@@ -9,6 +9,15 @@
 				self.moveTo(this);
 				$("div.slider").slider("moveTo", self.current, null, true);
 			});
+
+// Dennis
+			debug('making elements dragable');
+
+			this.items.bind("mousedown", function (){debug('mouseDown on item');});
+			debug('done');
+
+// Dennis
+
 			this.itemWidth = this.items.outerWidth(true);
 			
 			//THIS IS FOR DEMO PURPOSES ONLY!
@@ -61,7 +70,7 @@
 			if(this.previous == this.current)
 			{
 				
-				$("div.magnifyme").trigger('itemselect', this.current);
+				$("div.magnifyme").trigger('itemselect', {position: this.current, item: this.items.index(this.current)});
 				return false;
 			}
 			

@@ -185,6 +185,8 @@
 		
 		mouseDown: function(e) {
 			// we may have missed mouseup (out of window)
+
+			
 			(this._mouseStarted && this.mouseUp(e));
 			
 			this._mouseDownEvent = e;
