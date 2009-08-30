@@ -150,7 +150,7 @@ class OgreSystem::MouseHandler {
         typedef EventResponse (MouseHandler::*ClickAction) (EventPtr evbase);
         std::map<int, ClickAction> mClickAction;
     */
-
+    float mCamSpeed;
     CameraPath mCameraPath;
     bool mRunningCameraPath;
     uint32 mCameraPathIndex;
@@ -627,7 +627,7 @@ private:
         Location loc = cam->extrapolateLocation(now);
         const Quaternion &orient = loc.getOrientation();
         Protocol::ObjLoc rloc;
-        rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * .5);
+        rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * mCamSpeed);
         rloc.set_angular_speed(0);
         cam->requestLocation(now, rloc);
     }
@@ -676,6 +676,11 @@ private:
         if (modename == "")
             mDragAction[1] = 0;
         mDragAction[1] = DragActionRegistry::get(modename);
+    }
+
+    void setCameraSpeed(const float& speed) {
+        std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
+        mCamSpeed = speed;
     }
 
     void importAction() {
@@ -1448,6 +1453,7 @@ public:
        mLastCameraTime(Task::LocalTime::now()),
        mWhichRayObject(0)
     {
+        mCamSpeed = 1.0;
         mLastHitCount=0;
         mLastHitX=0;
         mLastHitY=0;
@@ -1529,6 +1535,12 @@ public:
         mInputResponses["setDragModeRotateCamera"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "rotateCamera"));
         mInputResponses["setDragModePanCamera"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "panCamera"));
 
+        mInputResponses["setCameraSpeed1"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 0.1));
+        mInputResponses["setCameraSpeed2"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 0.3));
+        mInputResponses["setCameraSpeed3"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 1.0));
+        mInputResponses["setCameraSpeed4"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 3.0));
+        mInputResponses["setCameraSpeed5"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 10.0));
+
         mInputResponses["cameraPathLoad"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathLoad, this));
         mInputResponses["cameraPathSave"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathSave, this));
         mInputResponses["cameraPathNextKeyFrame"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathNext, this));
@@ -1584,6 +1596,14 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T, Input::MOD_CTRL), mInputResponses["setDragModeRotateCamera"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y, Input::MOD_CTRL), mInputResponses["setDragModePanCamera"]);
 
+        
+        // camera speeds
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_1), mInputResponses["setCameraSpeed1"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_2), mInputResponses["setCameraSpeed2"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_3), mInputResponses["setCameraSpeed3"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_4), mInputResponses["setCameraSpeed4"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_5), mInputResponses["setCameraSpeed5"]);
+        
         // Mouse Zooming
         mInputBinding.add(InputBindingEvent::Axis(SDLMouse::WHEELY), mInputResponses["zoom"]);
 
