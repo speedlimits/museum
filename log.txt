@@ -1,0 +1,3 @@
+build info:
+building for windows, release to artists 8-30-09
+dependencies svn -r reports 91
