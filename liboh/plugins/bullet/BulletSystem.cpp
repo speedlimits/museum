@@ -444,8 +444,6 @@ bool BulletSystem::tick() {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
-                if (objects[i]->mName.substr(0,6) == "Avatar")
-                    //cout << "dbm debug: object loop " << objects[i]->mName << ", " << oscplugin::isActive() << endl;
                 
                 /// OSC hax -- whether bullet-active or not, but only if OSC-active (if we're the server, we need to take care of everyone)
                 if (objects[i]->mName.substr(0,6) == "Avatar" && oscplugin::isActive()) {
