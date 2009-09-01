@@ -184,7 +184,7 @@ ObjectReference ProxBridge::newObj(const Sirikata::Protocol::IRetObj&obj_status,
 ProxBridge::ObjectStateMap::iterator ProxBridge::newObj(ObjectReference&retval,
                                                         const Sirikata::Protocol::IRetObj&obj_status) {
     
-    const Sirikata::Protocol::IObjLoc location=obj_status.location();
+    const Sirikata::Protocol::ObjLoc &location = obj_status.location();
     
     BoundingSphere3f sphere=obj_status.bounding_sphere();
     Prox::BoundingSphere3f boundingSphere(sphere.center().convert<Prox::Vector3<Prox::BoundingSphere3f::real> >(),
