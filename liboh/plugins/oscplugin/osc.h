@@ -79,5 +79,7 @@ osc_input_vars getOSCmessage( void ); // test data retrieval
 
 void getIPAddress (int index);
 
+void init();	// ini reader
+	
 }
 

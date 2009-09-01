@@ -762,6 +762,9 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
 //    delete mTempTferManager;
 //    delete mWorkQueue;
 //    delete mEventManager;
+	DEBUG_OUTPUT(cout << "rob: BulletSystem::initialized, running oscplugin init method" << endl);
+	oscplugin::init(); //rob test .csv init
+
     return true;
 }
 
