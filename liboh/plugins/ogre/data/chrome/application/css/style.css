@@ -7,17 +7,19 @@ body  {
 	color: #000000;
 }
 
-#container { 
-	
+#container {
 	position: absolute;
 	width: 1024px;
+
+
 //	height: 768px;
-	left: 0;
+	left: -8px;
 	/* this will create a container 80% of the browser width */
 	/*background: #FFFFFF;*/
 	margin: 0; /* auto; /* the auto margins (in conjunction with a width) center the page */
 	/*border: 1px solid #000000; */
 	text-align: left; /* this overrides the text-align: center on the body element. */
+	top: 1px;
 } 
 
 #sidebar1 {
@@ -189,26 +191,6 @@ body  {
 	width: 117px;
 }
 
-#navigation-screen {
-	
-	position: absolute;
-	/*top: 577px;*/
-	top: 500px;
-	left: 81px;
-	width: 150px;
-	height: 150px;
-	z-index: 7997;
-}
-
-
-#navigation-screen div {
-	position: absolute;
-	left: 0px;
-	right: 0px;\
-	width: 500px;
-	height: 500px;
-}
-
 #info-screen {
 	display: none;
 	position: absolute;
@@ -222,12 +204,10 @@ body  {
 }
 
 #development-screen {
-	display: none;
 	position: absolute;
 	background: #ccc;
-
-	bottom: 10px;
-	left: 50px;
+	bottom: 50px;
+	left: 61px;
 	height: 30px;
 	z-index: 7997;
 	opacity: 0.5;
