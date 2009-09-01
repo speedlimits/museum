@@ -445,7 +445,7 @@ bool BulletSystem::tick() {
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
-                    if (objects[i]->mName.substr(0,6) == "Avatar") {
+                    if (objects[i]->mName == "Avatar_01") {
                         double dist;
                         Vector3f norm;
                         SpaceObjectReference sor;

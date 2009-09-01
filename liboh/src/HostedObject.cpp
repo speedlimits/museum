@@ -841,7 +841,7 @@ void HostedObject::processRoutableMessage(const RoutableMessageHeader &header, M
     {
         std::ostringstream os;
         os << "** Message from: " << header.source_object() << " port " << header.source_port() << " to "<<myself_name<<" port " << header.destination_port();
-        SILOG(cppoh,debug,os.str());
+        //SILOG(cppoh,debug,os.str());
     }
     /// Handle Return values to queries we sent to someone:
     if (header.has_reply_id()) {
