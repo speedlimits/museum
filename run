@@ -23,25 +23,24 @@ def check_for_proc(proc):
 # Check for executable version
 #
 
-if not host:
-
-    if os.path.exists("build/cmake/cppoh_d"):
-        spaceserver = "space_d"
-        proxserver = "proximity_d"
-        executable = "cppoh_d"
+if os.path.exists("build/cmake/cppoh_d"):
+    spaceserver = "space_d"
+    proxserver = "proximity_d"
+    executable = "cppoh_d"
+else:
+    if os.path.exists("build/cmake/cppoh"):
+        spaceserver = "space"
+        proxserver = "proximity"
+        executable = "cppoh"
     else:
-        if os.path.exists("build/cmake/cppoh"):
-            spaceserver = "space"
-            proxserver = "proximity"
-            executable = "cppoh"
-        else:
-            print "can't find executable"
-            exit()
+        print "can't find executable"
+        exit()
 
-    #
-    # Run prox & space daemons (if not already running)
-    #
+#
+# Run prox & space daemons (if not already running)
+#
 
+if not host:
     for proc, delay in (proxserver, 4.5), (spaceserver, .5):
 
         if not check_for_proc("./"+proc):
