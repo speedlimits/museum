@@ -51,22 +51,29 @@ enum FileType { MESH, MATERIAL, DATA, NUMTYPES };
 
 class DiskFile {
 	String str;
+    String mfilename;
 public:
 	const String &diskpath() const { return str; }
-	String &diskpath() { return str; }
+	const String &filename() const { return mfilename; }
 	static DiskFile makediskfile(const String &mypath) {
 		DiskFile ret;
 		ret.str = mypath;
+        String::size_type lastslash = mypath.find_last_of("\\/");
+        if (lastslash == std::string::npos) {
+            ret.mfilename = mypath;
+        } else {
+            ret.mfilename = mypath.substr(lastslash+1);
+        }
 		return ret;
 	}
 	bool operator==(const DiskFile &other) const {
-		return str == other.str;
+		return mfilename == other.mfilename;
 	}
 	bool operator!=(const DiskFile &other) const {
-		return str != other.str;
+		return mfilename != other.mfilename;
 	}
 	bool operator<(const DiskFile &other) const {
-		return str < other.str;
+		return mfilename < other.mfilename;
 	}
 };
 
@@ -86,6 +93,9 @@ public:
         ResourceFileUpload retval;
         retval.mID=id;
         return retval;
+    }
+    bool exists() {
+        return mData ? true: false;
     }
     bool operator <(const ResourceFileUpload&i)const {
         return mID<i.mID;

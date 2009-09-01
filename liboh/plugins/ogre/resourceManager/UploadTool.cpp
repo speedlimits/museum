@@ -214,13 +214,7 @@ String stripquotes(String s) {
  * \returns everything past the last slash if such a slash exists
  */
 String stripslashes (DiskFile inputdp) {
-  std::string input = inputdp.diskpath();
-  std::string::size_type where=input.find_last_of("\\/");
-  if (where==Ogre::String::npos) {
-    return input;
-  }else {
-    return input.substr(where+1);
-  }
+    return inputdp.filename();
 }
 
 
@@ -513,7 +507,7 @@ class DependencyReplacingDataStream:public ReplacingDataStream {
   ///The dependencies of my file (inherits from the overarching dependencies.
   DependencyPair*my_dependencies;
   ///The options provided by the caller to this entire replace_material script
-  ReplaceMaterialOptionsAndReturn *username;
+  ReplaceMaterialOptionsAndReturn *dependencyinfo;
 public:
 
 ///This function takes as input many of the maps required to figure out which material names belong in which 3rd or first level names for scripts in order to munge those names
@@ -521,7 +515,7 @@ public:
     this->provides_to_name=provides_to_name;
     this->overarching_dependencies=overarching_dependencies;
     this->my_dependencies=my_dependencies;
-    this->username=&username;
+    this->dependencyinfo=&username;
 
   }
     /**
@@ -572,7 +566,14 @@ public:
           if (texture_reference) {
               dep = "../textures/"+dep;
           }
-          retval += '\"'+getFileURI(fileRelativeTo(dep,filename),*username)+'\"';
+          DiskFile myfile = fileRelativeTo(dep,filename);
+          ResourceFileUploadData *file = getFileData(myfile, *dependencyinfo, NULL);
+          DiskFile realname = file->mSourceFilename;
+          if (!isNativeFile(realname.filename()) && access(realname.diskpath().c_str(),F_OK)) {
+              retval += myfile.filename();
+          } else {
+              retval += '\"'+getFileURI(myfile,*dependencyinfo)+'\"';
+          }
           pwhere=return_lexeme_end;
 
       }
@@ -643,12 +644,12 @@ public:
           DiskFile diskfilename = DiskFile::makediskfile(filename);
           if (where->second!=diskfilename) {
           depends_on.push_back(depended);
-          DependencyPair * other_dep=getFileData(where->second,*username);
+          DependencyPair * other_dep=getFileData(where->second,*dependencyinfo);
           if (other_dep == NULL) {
           }
           my_dependencies->files.insert(other_dep->files.begin(),other_dep->files.end());
           my_dependencies->files.insert(where->second);
-          return '\"'+getFileURI(where->second,*username)+':'+depended+'\"';
+          return '\"'+getFileURI(where->second,*dependencyinfo)+':'+depended+'\"';
         }else {
 
           return eliminateFilename(filename,depended);
@@ -658,12 +659,12 @@ public:
           DiskFile wheresecond (DiskFile::makediskfile(depended+extension));
           std::cerr << " ****** Delegate does not exist ******: "<<(depended+extension)<<std::endl;
           
-          DependencyPair * other_dep=getFileData(wheresecond,*username);
+          DependencyPair * other_dep=getFileData(wheresecond,*dependencyinfo);
           if (other_dep == NULL) {
           }
           my_dependencies->files.insert(other_dep->files.begin(),other_dep->files.end());
           my_dependencies->files.insert(wheresecond);
-          return '\"'+getFileURI(wheresecond,*username)+':'+depended+'\"';
+          return '\"'+getFileURI(wheresecond,*dependencyinfo)+':'+depended+'\"';
       } else {
           return depended;
       }
@@ -927,6 +928,13 @@ std::vector<ResourceFileUpload> ProcessOgreMeshMaterialDependencies(const std::v
           if (boost::filesystem::extension(*i)==".os"||
               boost::filesystem::extension(*i)==".material"||
               boost::filesystem::extension(*i)==".mesh"||
+              boost::filesystem::extension(*i)==".frag"||
+              boost::filesystem::extension(*i)==".vert"||
+              boost::filesystem::extension(*i)==".hlsl"||
+              boost::filesystem::extension(*i)==".fp"||
+              boost::filesystem::extension(*i)==".vp"||
+              boost::filesystem::extension(*i)==".cg"||
+              boost::filesystem::extension(*i)==".glsl"||
               boost::filesystem::extension(*i)==".program") {
               filenames.push_back(DiskFile::makediskfile(i->string()));
               printf("ok\n");
