@@ -70,59 +70,60 @@ namespace oscplugin {
 	
 	
 	
-	void sendOSCmessage(mito_data data) {
-		
-		using namespace std;
-		
-		/*
-		 std::string s="hello";
-		 const char *p = s.c_str(); // get const char * representation
-		 int len = strlen(p);
-		 */
-		int size = osc_ips.size();
-		
-		for(int i=0;i<size;i++) {
-//			cout << "sendOSCmessage to => " << osc_targets[i][0] << ":" << osc_targets[i][1] << endl;
-//		cout << "sendOSCmessage vector => " << (std::string)osc_ips[0] << ":" << (std::string)osc_ports[0] << endl;		
-//		cout << "sendOSCmessage to => " << osc_targets[0][0] << ":" << osc_targets[0][1] << endl;
-
-
-//			cout << "sendOSCmessage vector => " << (std::string)osc_ips[i] << ":" << (std::string)osc_ports[i] << endl;		
-		
-		//		string ip(osc_targets[0][0]);	
-		//		string port(osc_targets[0][1]);			
-		
-		//		string ip(osc_targets[i][0]);	
-		//		string port(osc_targets[i][1]);			
-		
-		//		if(strlen(osc_targets[i][0])>0 && strlen(osc_targets[i][1]>0) {
-		
-			char buffer[OUTPUT_BUFFER_SIZE];
-			osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
-			//		    UdpTransmitSocket socket( IpEndpointName( ADDRESS, PORT ));
-			//			UdpTransmitSocket socket( IpEndpointName( osc_targets[i][0], osc_targets[i][1] ));
-//			UdpTransmitSocket socket( IpEndpointName( osc_targets[0][0].c_str(), atoi(osc_targets[0][1].c_str()) ));
-			UdpTransmitSocket socket( IpEndpointName( osc_ips[i].c_str(), atoi(osc_ports[i].c_str()) ));			
-			p.Clear();
-			
-			
-			p << osc::BeginMessage( "/mito" )
-			<< data.user_id
-			<< data.path_id
-			<< data.cell_id
-			<< data.global_x
-			<< data.global_y
-			<< data.global_z
-			<< data.relative_x
-			<< data.relative_y
-			<< osc::EndMessage;
-			
-			if (p.IsReady()) {
-				socket.Send( p.Data(), p.Size() );
-			}
-		}    
-		//	}    
-	}
+    void sendOSCmessage(mito_data data) {
+    
+        using namespace std;
+        if (osc_ips[0] != "0.0.0.0") {
+            /*
+             std::string s="hello";
+             const char *p = s.c_str(); // get const char * representation
+             int len = strlen(p);
+             */
+            int size = osc_ips.size();
+    
+            for (int i=0;i<size;i++) {
+    //   cout << "sendOSCmessage to => " << osc_targets[i][0] << ":" << osc_targets[i][1] << endl;
+    //  cout << "sendOSCmessage vector => " << (std::string)osc_ips[0] << ":" << (std::string)osc_ports[0] << endl;
+    //  cout << "sendOSCmessage to => " << osc_targets[0][0] << ":" << osc_targets[0][1] << endl;
+    
+    
+    //   cout << "sendOSCmessage vector => " << (std::string)osc_ips[i] << ":" << (std::string)osc_ports[i] << endl;
+    
+                //  string ip(osc_targets[0][0]);
+                //  string port(osc_targets[0][1]);
+    
+                //  string ip(osc_targets[i][0]);
+                //  string port(osc_targets[i][1]);
+    
+                //  if(strlen(osc_targets[i][0])>0 && strlen(osc_targets[i][1]>0) {
+    
+                char buffer[OUTPUT_BUFFER_SIZE];
+                osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
+                //      UdpTransmitSocket socket( IpEndpointName( ADDRESS, PORT ));
+                //   UdpTransmitSocket socket( IpEndpointName( osc_targets[i][0], osc_targets[i][1] ));
+    //   UdpTransmitSocket socket( IpEndpointName( osc_targets[0][0].c_str(), atoi(osc_targets[0][1].c_str()) ));
+                UdpTransmitSocket socket( IpEndpointName( osc_ips[i].c_str(), atoi(osc_ports[i].c_str()) ));
+                p.Clear();
+    
+    
+                p << osc::BeginMessage( "/mito" )
+                << data.user_id
+                << data.path_id
+                << data.cell_id
+                << data.global_x
+                << data.global_y
+                << data.global_z
+                << data.relative_x
+                << data.relative_y
+                << osc::EndMessage;
+    
+                if (p.IsReady()) {
+                    socket.Send( p.Data(), p.Size() );
+                }
+            }
+        }
+        // }
+    }
 	
 	/*
 	 void sendOSCbundle(ball_coordinates currentClient) {
