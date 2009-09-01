@@ -50,8 +50,8 @@ using namespace std;
 using std::tr1::placeholders::_1;
 static int core_plugin_refcount = 0;
 
-//#define DEBUG_OUTPUT(x) x
 #define DEBUG_OUTPUT(x)
+//#define DEBUG_OUTPUT(x) x
 #define DEBUG_ALWAYS(x) x
 
 SIRIKATA_PLUGIN_EXPORT_C void init() {
@@ -444,6 +444,8 @@ bool BulletSystem::tick() {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
+                if (objects[i]->mName.substr(0,6) == "Avatar")
+                    //cout << "dbm debug: object loop " << objects[i]->mName << ", " << oscplugin::isActive() << endl;
                 
                 /// OSC hax -- whether bullet-active or not, but only if OSC-active (if we're the server, we need to take care of everyone)
                 if (objects[i]->mName.substr(0,6) == "Avatar" && oscplugin::isActive()) {

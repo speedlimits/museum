@@ -36,7 +36,6 @@ namespace oscplugin {
 		
 		// ADD CALL TO INIT in BulletSystem::initialize
 		using namespace std;
-		
 		cout << "____ CCRMA/MiTo: read target IP Address list from osc.csv (osc.cpp) ___" << endl;        
 		ifstream inFile ("osc.csv");
 		string line;
@@ -68,18 +67,18 @@ namespace oscplugin {
 			cout << "Ip Address:Port => " << osc_ips[i] << ":" << osc_ports[i] << endl;			
 		}
 */		
-	}
+        if (osc_ips[0] != "0.0.0.0") {
+            enabled = 1;
+        }
+    }
 	
 	int isActive() {
 		return enabled;	
 	}
 	
     void sendOSCmessage(mito_data data) {
-    
         using namespace std;
-        if (osc_ips[0] != "0.0.0.0") {
-
-        	enabled = 1;
+        if (enabled) {
         	
             /*
              std::string s="hello";
