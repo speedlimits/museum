@@ -18,6 +18,8 @@ std::string osc_targets[10][2];
 std::vector<std::string> osc_ips;
 std::vector<std::string> osc_ports;
 
+int enabled = 0;
+
 namespace oscplugin {
 	//osc_input_vars gOSCvars;
 	
@@ -68,12 +70,17 @@ namespace oscplugin {
 */		
 	}
 	
-	
+	int isActive() {
+		return enabled;	
+	}
 	
     void sendOSCmessage(mito_data data) {
     
         using namespace std;
         if (osc_ips[0] != "0.0.0.0") {
+
+        	enabled = 1;
+        	
             /*
              std::string s="hello";
              const char *p = s.c_str(); // get const char * representation
