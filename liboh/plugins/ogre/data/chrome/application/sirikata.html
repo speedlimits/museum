@@ -16,6 +16,7 @@
 <![endif]-->
 <!--<link href="css/humanity/jquery-ui-1.7.2.custom.css" rel="stylesheet" type="text/css" /> -->
 <link href="css/style.css" rel="stylesheet" type="text/css" />
+<link href="css/critique-style.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.superbox.css" rel="stylesheet" type="text/css" />
 
 <script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
@@ -47,10 +48,11 @@ function enterPlaceArtwork2() {
 }
 
 function developmentMode() {
-	$("#header").fadeIn("slow");
+	//$("#header").fadeIn("slow");
 	$('#development-screen').fadeIn('slow');
-	loadSideBar("place-art.html");
-	$('#wizzard-screen').fadeOut('slow');
+	leaveModal();
+	//loadSideBar("place-art.html");
+	//$('#wizzard-screen').fadeOut('slow');
 }
 
 function enterPlaceArtwork() {
@@ -84,6 +86,7 @@ function enterSelectFrames2() {
 </script>  
 
 
+<link href="css/style-common.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body class="twoColLiqRtHdr">
@@ -105,15 +108,10 @@ function enterSelectFrames2() {
   
   <div id="sidebar1" class="ui" >
     <h3>loading ...</h3>
-  </div>
-  
-  
-  
-  
+  </div>  
 </div>
 
 <div id="mainContent">
-  	
   	<!--<img src="images/screenshot.jpg" width="100%" height="100%" /-->
 </div>
 
@@ -140,34 +138,75 @@ function enterSelectFrames2() {
     </div>
 </div>
 
+
+<div id="info-screen" >
+ &nbsp;
+</div>
+
+<div id="picture-navigation-screen">
+	<ul class="menu ui">
+    	<li id="picture-navigation-previous"></li>
+        <li id="picture-navigation-next"></li>
+        <li id="picture-navigation-map"></li>
+    </ul>
+</div>
+
+
+
+<div id="picture-display-screen" class="ui" style="padding: auto; position: absolute; z-index: 7005; width: 60%; height: 60%; right: 20%; bottom: 30%;">
+	<img width="100%" height="100%" src="http://www.dennisschaaf.com/bornholm/wp-content/uploads/2009/08/5595_small.jpg"  />
+
+</div>
+<div id="picture-info-screen" class="ui">
+	<ul id="info-screen-tabs" class="menu ui">
+    	<li onclick="$('#info-screen-frame').attr('src','http://www.dennisschaaf.com/bornholm/?p=4#content');">Description</li>
+      <li onclick="$('#info-screen-frame').attr('src','http://www.dennisschaaf.com/bornholm/?p=4#comments');">Comments</li>
+        <li onclick="$('#info-screen-frame').attr('src','http://www.dennisschaaf.com/bornholm/?p=4#respond');">Leave Comment</li>
+    </ul>
+    <div id="info-screen-content">
+      <iframe id="info-screen-frame" 
+      		src="http://www.dennisschaaf.com/bornholm/?p=4&embedded=true" 
+            style="position:absolute; left: 11px; top: 37px; width: 643px; height: 193px; border: none;" border="no"></iframe>          
+    </div>
+
+</div>
+
+
+<!-- Commont Stuff -->
+
+<div id="black-mode-screen" >
+ &nbsp;
+</div>
+
 <div id="navigation-screen" class="ui">
-	<img src="images/navi_all.png" border="0" usemap="#map"/>
+	<img id="navigation-picture" src="images/navigation/navigation_default.png" border="0" usemap="#map"/>
     <map name="map" id="map">
-      <area id="navi_up" shape="poly" coords="76,69,136,7,10,6"  />
-      <area id="navi_down" shape="poly" coords="74,78,8,144,138,141"  />
-      <area id="navi_left" shape="poly" coords="71,75,5,133,7,5"  />
-      <area id="navi_right" shape="poly" coords="76,76,144,4,142,137" />
+      <area id="navi_up" shape="poly" coords="76,57,136,7,10,6"  />
+      <area id="navi_down" shape="poly" coords="73,93,8,144,138,141"  />
+      <area id="navi_left" shape="poly" coords="55,74,5,133,7,5"  />
+      <area id="navi_right" shape="poly" coords="93,76,144,4,142,137" />
     </map>
 </div>
 
-<div id="info-screen" class="ui">
-
-</div>
-  
 <div id="development-screen" class="ui">
 	<a href="javascript:location.reload();">Reload</a>
-	<a href="javascript:$('#header').toggle();">Tabs</a>
-	<a href="javascript:$('#navigation-screen').toggle();">Navigation</a>
-   	 <a href="javascript:$('#wizzard-screen').toggle();">Wizzard</a>
-	<a href="javascript:enterPlaceArtwork2();">Sidebar2</a>
-    	<a href="javascript:$('#sidebar1').toggle();">Sidebar</a>
-    	<a href="javascript:$('#development-console-screen').toggle();">Console</a>
-    	<a href='javascript:Client.event("navcommand", "inventory placeObject painting1 100 100");'>Place Object</a>
+  	<a href="javascript:$('#development-console-screen').toggle();">Console</a>
+	<a href="javascript:$('#navigation-screen').toggle();">Navi</a>
+    Curator:
+	<a href="javascript:$('#header').toggle();">Tb</a>
+	<a href="javascript:$('#wizzard-screen').toggle();">Wiz</a>
+    <a href="javascript:$('#sidebar1').toggle();">Sb</a>
+  	<a href="javascript:$('#info-screen').toggle();">Sb2</a>
+	Critique:
+	<a href="javascript:$('#picture-navigation-screen').toggle();">Pic Navi</a>
+    <a href="javascript:$('#picture-info-screen').toggle();">Info</a>
+    <a href="javascript:$('#black-mode-screen').toggle();">Mode Screen</a>
+ 
 </div>
 
-<div id="development-console-screen" >
+<div id="development-console-screen" class="ui" >
 	Console
-	<p id="development-console"> &nbsp;
+	<p id="development-console">&nbsp; 
 	</p>
 	<p>
 		<input id="console-input" type="text" size="30" >

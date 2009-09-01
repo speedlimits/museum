@@ -22,6 +22,8 @@ function loadInfoScreen(page, showModeScreen) {
 	mw.load(page);
 	if(showModeScreen == true) 
 		$("#mode-screen").fadeIn("slow");
+//	mw.fadeIn("slow");
+	debug('change toggle');
 	mw.fadeIn("slow");
 }
 function loadSideBar(page) {
