@@ -60,12 +60,12 @@ namespace oscplugin {
 			
 			linenum++;
 		}
-		
+/*		
 		for(int i=0;i<linenum;i++) {
 			cout << "Ip Address:Port => " << osc_targets[i][0] << ":" << osc_targets[i][1] << endl;
 			cout << "Ip Address:Port => " << osc_ips[i] << ":" << osc_ports[i] << endl;			
 		}
-		
+*/		
 	}
 	
 	
@@ -83,9 +83,11 @@ namespace oscplugin {
 		
 		for(int i=0;i<size;i++) {
 //			cout << "sendOSCmessage to => " << osc_targets[i][0] << ":" << osc_targets[i][1] << endl;
-			cout << "sendOSCmessage vector => " << (std::string)osc_ips[i] << ":" << (std::string)osc_ports[i] << endl;		
 //		cout << "sendOSCmessage vector => " << (std::string)osc_ips[0] << ":" << (std::string)osc_ports[0] << endl;		
 //		cout << "sendOSCmessage to => " << osc_targets[0][0] << ":" << osc_targets[0][1] << endl;
+
+
+//			cout << "sendOSCmessage vector => " << (std::string)osc_ips[i] << ":" << (std::string)osc_ports[i] << endl;		
 		
 		//		string ip(osc_targets[0][0]);	
 		//		string port(osc_targets[0][1]);			
