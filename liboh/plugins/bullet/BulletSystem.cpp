@@ -444,70 +444,72 @@ bool BulletSystem::tick() {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
-                if (objects[i]->mActive) {
-                    if (objects[i]->mName.substr(0,6) == "Avatar") {
-                        double dist;
-                        Vector3f norm;
-                        SpaceObjectReference sor;
-                        string queryName="in_c_path_0_cell_00";
-                        if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
-                            queryName=mLastQuery->mName;
-                            DEBUG_OUTPUT(cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
-                            << " object: " << queryName << endl);
-                        }
-                        else {
-                            DEBUG_OUTPUT(cout << "dbm debug: queryRay returns nothing" << endl);
-                        }
+                
+                /// OSC hax -- whether bullet-active or not, but only if OSC-active (if we're the server, we need to take care of everyone)
+                if (objects[i]->mName.substr(0,6) == "Avatar" && oscplugin::isActive()) {
+                    double dist;
+                    Vector3f norm;
+                    SpaceObjectReference sor;
+                    string queryName="in_c_path_0_cell_00";
+                    if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
+                        queryName=mLastQuery->mName;
+                        DEBUG_OUTPUT(cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
+                                << " object: " << queryName << endl);
+                    }
+                    else {
+                        DEBUG_OUTPUT(cout << "dbm debug: queryRay returns nothing" << endl);
+                    }
                         //cout << "dbm debug queryName: " << queryName << " length: " << queryName.length() << endl;
-                        if (!(queryName.length()>=18 && queryName.substr(4,6) == "_path_" && queryName.substr(11,6) == "_cell_")) {
-                            queryName="in_c_path_0_cell_00";        /// yeah, dat's da ticket
-                        }
-                        if (queryName != lastPathSection) {
-                            DEBUG_ALWAYS(cout << "dbm debug path/cell change from " << lastPathSection << " to " << queryName << endl);
-                            lastPathSection = queryName;
-                        }
+                    if (!(queryName.length()>=18 && queryName.substr(4,6) == "_path_" && queryName.substr(11,6) == "_cell_")) {
+                        queryName="in_c_path_0_cell_00";        /// yeah, dat's da ticket
+                    }
+                    if (queryName != lastPathSection) {
+                        DEBUG_ALWAYS(cout << "dbm debug path/cell change from " << lastPathSection << " to " << queryName << endl);
+                        lastPathSection = queryName;
+                    }
                         /// OSC stuff:
-                        Vector3d pos = objects[i]->mMeshptr->getPosition();
-                        oscplugin::mito_data data;
+                    Vector3d pos = objects[i]->mMeshptr->getPosition();
+                    oscplugin::mito_data data;
 
-                        istringstream suser(objects[i]->mName.substr(7));
-                        suser >> data.user_id;
+                    istringstream suser(objects[i]->mName.substr(7));
+                    suser >> data.user_id;
 
-                        istringstream spath(queryName.substr(10,1));
-                        spath >> data.path_id;
+                    istringstream spath(queryName.substr(10,1));
+                    spath >> data.path_id;
 
-                        istringstream scell(queryName.substr(17));
-                        scell >> data.cell_id;
+                    istringstream scell(queryName.substr(17));
+                    scell >> data.cell_id;
 
-                        data.global_x=pos.x;
-                        data.global_y=pos.y;
-                        data.global_z=pos.z;
-                        data.relative_x=0;
-                        data.relative_y=0;
-                        DEBUG_OUTPUT(cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z
-                        << " user: " << data.user_id
-                        << " path: " << data.path_id
-                        << " cell: " << data.cell_id
-                        << endl);
-                        oscplugin::sendOSCmessage(data);
-                        if (mDumbMsg != "") {
-                            cout << "dbm debug msg from ogreSystem: " << mDumbMsg << endl;
-                            if (mDumbMsg.substr(0,7) == "oscMsg_") {
-                                istringstream s(mDumbMsg.substr(7,1));
-                                s >> data.cell_id;                                    
-                                data.path_id = -1;
-                                DEBUG_ALWAYS(cout << "dbm debug sendOsc ogre msg: " 
-                                        << pos.x <<", "<< pos.y <<", "<< pos.z
-                                        << " user: " << data.user_id
-                                        << " path: " << data.path_id
-                                        << " cell: " << data.cell_id
-                                        << endl);
-                                oscplugin::sendOSCmessage(data);
-                                mDumbMsg = "";
-                            }
+                    data.global_x=pos.x;
+                    data.global_y=pos.y;
+                    data.global_z=pos.z;
+                    data.relative_x=0;
+                    data.relative_y=0;
+                    DEBUG_OUTPUT(cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z
+                            << " user: " << data.user_id
+                            << " path: " << data.path_id
+                            << " cell: " << data.cell_id
+                            << endl);
+                    oscplugin::sendOSCmessage(data);
+                    if (mDumbMsg != "") {
+                        cout << "dbm debug msg from ogreSystem: " << mDumbMsg << endl;
+                        if (mDumbMsg.substr(0,7) == "oscMsg_") {
+                            istringstream s(mDumbMsg.substr(7,1));
+                            s >> data.cell_id;                                    
+                            data.path_id = -1;
+                            DEBUG_ALWAYS(cout << "dbm debug sendOsc ogre msg: " 
+                                    << pos.x <<", "<< pos.y <<", "<< pos.z
+                                    << " user: " << data.user_id
+                                    << " path: " << data.path_id
+                                    << " cell: " << data.cell_id
+                                    << endl);
+                            oscplugin::sendOSCmessage(data);
+                            mDumbMsg = "";
                         }
                     }
-
+                }
+                if (objects[i]->mActive) {
+                    
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
