@@ -942,7 +942,7 @@ void HostedObject::receivedPositionUpdate(
     } else {
         std::ostringstream os;
         os << "Received position update to "<<currentLoc;
-        SILOG(cppoh,debug,os.str());
+        //SILOG(cppoh,debug,os.str());
         proxy->setLocation(objLoc.timestamp(), currentLoc);
     }
 }
