@@ -153,7 +153,7 @@ function enterSelectFrames2() {
 
 
 
-<div id="picture-display-screen" class="ui" style="padding: auto; position: absolute; z-index: 7005; width: 60%; height: 60%; right: 20%; bottom: 30%;">
+<div id="picture-display-screen" class="ui" style="display: none; padding: auto; position: absolute; z-index: 7005; width: 60%; height: 60%; right: 20%; bottom: 30%;">
 	<img width="100%" height="100%" src="http://www.dennisschaaf.com/bornholm/wp-content/uploads/2009/08/5595_small.jpg"  />
 
 </div>
@@ -200,8 +200,8 @@ function enterSelectFrames2() {
 	Critique:
 	<a href="javascript:$('#picture-navigation-screen').toggle();">Pic Navi</a>
     <a href="javascript:$('#picture-info-screen').toggle();">Info</a>
-    <a href="javascript:$('#black-mode-screen').toggle();">Mode Screen</a>
- 
+    <a href="javascript:$('#black-mode-screen').toggle();$('#picture-display-screen').toggle();">pic</a>
+
 </div>
 
 <div id="development-console-screen" class="ui" >
