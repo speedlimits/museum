@@ -65,6 +65,12 @@ if not "SUCCESS" in s:
 # Run our object host
 #
 
+host=None
+if len(sys.argv) > 2:
+    host = sys.argv[2]
+
 cmd = "cd build/cmake; ./" + executable + " --db ../../" + fout
+if host:
+    cmd += " --host " + host
 print cmd
 os.system(cmd)
