@@ -90,10 +90,10 @@ void CameraPath::changeTimeDelta(int32 idx, const DeltaTime& d_dt) {
     mDirty = true;
 }
 
-int32 CameraPath::insert(int32 idx, const Vector3d& pos, const Quaternion& orient, const DeltaTime& dt) {
+int32 CameraPath::insert(int32 idx, const Vector3d& pos, const Quaternion& orient, const DeltaTime& dt, const String& msg) {
     mDirty = true;
 
-    CameraPoint cp(pos, orient, dt);
+    CameraPoint cp(pos, orient, dt, msg);
     int insert_idx = empty() ? 0 : idx + 1;
     mPathPoints.insert( mPathPoints.begin()+insert_idx, cp);
 
@@ -135,10 +135,10 @@ void CameraPath::load(const String& filename) {
         CameraPoint cp(
             Vector3d(),
             Quaternion(0,0,0,1, Quaternion::XYZW()),
-            DeltaTime::seconds(0)
+            DeltaTime::seconds(0),
+            String()
         );
-        String text;
-        if (loadCamPathLine(pathfile, cp, text)) {
+        if (loadCamPathLine(pathfile, cp)) {
             mPathPoints.push_back(cp);
         }
     }
@@ -154,10 +154,10 @@ void CameraPath::save(const String& filename) {
     }
     fprintf(pathfile, "pos_x,pos_y,pos_z,rot_x,rot_y,rot_z,rot_w,delay,text\n");
     for (uint32 i = 0; i < mPathPoints.size(); i++) {
-        fprintf(pathfile, "%f,%f,%f,%f,%f,%f,%f,%f,\n",
+        fprintf(pathfile, "%f,%f,%f,%f,%f,%f,%f,%f,%s\n",
                 mPathPoints[i].position.x, mPathPoints[i].position.y, mPathPoints[i].position.z,
                 mPathPoints[i].orientation.x, mPathPoints[i].orientation.y, mPathPoints[i].orientation.z, mPathPoints[i].orientation.w,
-                mPathPoints[i].dt.toSeconds()
+                mPathPoints[i].dt.toSeconds(), mPathPoints[i].msg.c_str()
                );
     }
 
@@ -199,7 +199,7 @@ void CameraPath::computeTimes() {
     }
 }
 
-bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out) {
+bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& msg) {
     if (mDirty) {
         normalizePath();
         mDirty = false;
@@ -216,12 +216,16 @@ bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* ori
     Quaternion orient_sum(0.0f, 0.0f, 0.0f, 0.0f, Quaternion::XYZW());
     float weight_sum = 0.0f;
 
+    msg = "";
     for (int32 i = 0; i < (int32)mPathPoints.size(); i++) {
         double difft = 0;
-        if (keyFrameTime(i) > t)
+        if (keyFrameTime(i) > t) {
             difft = (keyFrameTime(i) - t).toSeconds();
-        else
+        }
+        else {
             difft = (t - keyFrameTime(i)).toSeconds();
+            msg = mPathPoints[i].msg;
+        }
         float stddev = 1.0f / (float)mDensities[i];
         float weight = (float)exp( - difft * difft / (stddev*stddev));
         pos_sum += mPathPoints[i].position * weight;

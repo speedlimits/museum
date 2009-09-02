@@ -46,12 +46,14 @@ struct CameraPoint {
     Quaternion orientation;
     Task::DeltaTime dt;
     Task::DeltaTime time;
+    String msg;
 
-    CameraPoint(const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& _dt)
+    CameraPoint(const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& _dt, const String& s)
             : position(pos),
             orientation(orient),
             dt(_dt),
-            time(Task::DeltaTime::zero()) {
+            time(Task::DeltaTime::zero()),
+            msg(s) {
     }
 }; // struct CameraPoint
 
@@ -74,7 +76,7 @@ public:
     Task::DeltaTime keyFrameTime(int32 idx) const;
     void changeTimeDelta(int32 idx, const Task::DeltaTime& d_dt);
 
-    int32 insert(int32 idx, const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& dt);
+    int32 insert(int32 idx, const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& dt, const String& msg);
     int32 remove(int32 idx);
 
     void load(const String& filename);
@@ -84,7 +86,7 @@ public:
     void computeDensities();
     void computeTimes();
 
-    bool evaluate(const Task::DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out);
+    bool evaluate(const Task::DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& s);
 private:
     std::vector<CameraPoint> mPathPoints;
     std::vector<double> mDensities;
@@ -163,7 +165,7 @@ private:
         }
         return row;
     }
-    bool loadCamPathLine(FILE *fp, CameraPoint& cp, String text) {
+    bool loadCamPathLine(FILE *fp, CameraPoint& cp) {
         map<string, string>& row = *parse_csv_line(fp);
         if (row["pos_x"][0]=='#' or row["pos_x"]==string("")) {
             return false;                                         /// comment or blank line
@@ -177,7 +179,7 @@ private:
             cp.orientation.z = str2dbl(row["rot_z"]);
             cp.orientation.w = str2dbl(row["rot_w"]);
             cp.dt = Task::DeltaTime::seconds(str2dbl(row["delay"]));
-            text = row["text"];
+            cp.msg = row["text"];
             return true;
         }
     }

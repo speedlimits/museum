@@ -1114,7 +1114,7 @@ private:
         Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
 
-        mCameraPathIndex = mCameraPath.insert(mCameraPathIndex, loc.getPosition(), loc.getOrientation(), Task::DeltaTime::seconds(1.0));
+        mCameraPathIndex = mCameraPath.insert(mCameraPathIndex, loc.getPosition(), loc.getOrientation(), Task::DeltaTime::seconds(1.0), "");
         mCameraPathTime = mCameraPath.keyFrameTime(mCameraPathIndex);
     }
 
@@ -1143,18 +1143,22 @@ private:
         mLastCameraTime = t;
 
         if (mRunningCameraPath) {
-            std::ostringstream ss;
-            ss << "document.selected='cameraPathTick, time=" << dt << "'; debug(document.selected);";
-            WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
-            std::cout << "cameraPathTick" << std::endl;
             mCameraPathTime += dt;
         
             Vector3d pos;
             Quaternion orient;
-            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient);
+            static String oldmsg;
+            String msg;
+            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg);
+            if (msg != oldmsg && msg != "") {
+                std::ostringstream ss;
+                ss << "document.selected='" << msg << "'; debug(document.selected);";
+                WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
+            }
+            oldmsg=msg;
+            std::cout << "cameraPathTick--" << oldmsg << std::endl;
         
             if (!success) {
-                std::cout << "dbm debug: mCameraPath.evaluate failed, turning mRunningCameraPath off" << std::endl;
                 mRunningCameraPath = false;
                 return;
             }
