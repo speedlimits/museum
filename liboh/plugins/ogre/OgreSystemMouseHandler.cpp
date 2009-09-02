@@ -1504,6 +1504,85 @@ private:
     }
 
 
+    void setSelectedObjectLightLocation(float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
+        // Find wall normal and object bounding sphere.
+        // We assume that the object is in front of the wall
+
+        Vector3d objCenter;
+        Vector3f objNormal;
+        float objRadius;
+        Entity *sel;
+        // Get an object's center and radius
+        for (SelectedObjectSet::const_iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it) {
+            ProxyObjectPtr obj(it->lock());
+            sel = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
+            if (sel == NULL)
+                continue;
+            MeshEntity *meshEnt = dynamic_cast<MeshEntity*>(sel);
+            Time now(SpaceTimeOffsetManager::getSingleton().now(mParent->mPrimaryCamera->getProxy().getObjectReference().space()));
+            const BoundingInfo& boundingInfo = meshEnt->getBoundingInfo();
+//            ProxyMeshObject *proxyMesh = dynamic_cast<ProxyMeshObject*>(obj.get());
+            Location loc(obj->globalLocation(now));
+            objCenter = loc.getPosition();
+//            objCenter = boundingInfo.center();
+            objRadius = boundingInfo.radius();
+            break;
+//            Vector3d dViewPosition = mCameraLocation.getPosition();
+//            Vector3f viewDirection(viewDirection.x, viewDirection.y, viewDirection.z);
+        }
+        
+        // Get the floor coordinate
+        CameraEntity *camera = mParent->mPrimaryCamera;
+        Vector3d cameraPosition  =  camera->getOgrePosition();
+        Quaternion cameraOrientation = camera->getOgreOrientation();
+        Vector3f cameraAxis = -cameraOrientation.zAxis();
+        double distance;
+        Vector3f normal;
+        int numHits = 1, i;
+        const Entity *obj = mParent->rayTrace(cameraPosition, Vector3f(0, -1, 0), numHits, distance, normal, 0);
+
+
+
+        double floorY = cameraPosition.y - distance;
+        
+        // Determine the normal to the wall behind the object
+        for (i = 0; i < numHits; i++) {
+            double distance;        // Distance along the ray
+            const Entity *obj = mParent->rayTrace(cameraPosition, cameraAxis, numHits, distance, normal, i);
+            if (obj == NULL) {      // No object found
+                if (i < numHits)    // Why not?
+                    continue;       // Still more objects: keep looking
+                break;              // No more objects: return failure
+            }
+            
+            if (obj == sel)
+                continue;
+            if (cameraAxis.dot(normal) > 0) // Normal is pointing away from the camera
+                normal = -normal;           // Get normal pointing toward the camera
+        }
+        normal.normalizeThis();
+        
+        // Move the light out from the wall, at the given angle
+        Vector3d lightPosition;
+        lightPosition.y = floorY + ceilingHeight;
+        double f = ((lightPosition.y - objCenter.y) / tan(angle));
+        lightPosition.x = objCenter.x + normal.x * f;
+        lightPosition.z = objCenter.z + normal.z * f;
+        lightLocation->setPosition(lightPosition);
+
+        // Aim it at the artwork
+        Vector3f lightZ(objCenter.x - lightPosition.x, objCenter.y - lightPosition.y, objCenter.z - lightPosition.z);
+        lightZ.normalizeThis();
+        Vector3f lightX = Vector3f::unitY().cross(lightZ);
+        lightX.normalizeThis();
+        Vector3f lightY(lightZ.cross(lightY));
+        lightLocation->setOrientation(Quaternion(lightX, lightY, lightZ));
+        
+        // Adjust the cone.
+        float coneAngle = atan(objRadius / (objCenter - lightPosition).length());
+        lightInfo->setLightSpotlightCone(0, coneAngle, 0);
+   }
+
     void lightSelectedObjectHandler(WebViewManager::NavigationAction action, const String& arg) {
         // Set defaults
         LightInfo lightInfo;
