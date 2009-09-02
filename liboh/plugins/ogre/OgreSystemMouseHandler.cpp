@@ -1143,19 +1143,22 @@ private:
         mLastCameraTime = t;
 
         if (mRunningCameraPath) {
+            std::ostringstream ss;
+            ss << "document.selected='cameraPathTick, time=" << dt << "'; debug(document.selected);";
+            WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
             std::cout << "cameraPathTick" << std::endl;
             mCameraPathTime += dt;
-
+        
             Vector3d pos;
             Quaternion orient;
             bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient);
-
+        
             if (!success) {
                 std::cout << "dbm debug: mCameraPath.evaluate failed, turning mRunningCameraPath off" << std::endl;
                 mRunningCameraPath = false;
                 return;
             }
-
+        
             cameraPathSetCamera(pos, orient);
         }
     }
