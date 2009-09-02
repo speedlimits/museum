@@ -1084,7 +1084,7 @@ private:
         mCameraPathTime = mCameraPath[idx].time;
     }
 
-#define CAMERA_PATH_FILE "camera_path.txt"
+#define CAMERA_PATH_FILE "camera_path.csv"
 
     void cameraPathLoad() {
         std::cout << "dbm debug: cameraPathLoad" << std::endl;

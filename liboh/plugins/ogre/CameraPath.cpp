@@ -41,8 +41,7 @@ namespace Graphics {
 using namespace Sirikata::Task;
 
 CameraPath::CameraPath()
- : mDirty(true)
-{
+        : mDirty(true) {
 }
 
 CameraPoint& CameraPath::operator[](int idx) {
@@ -99,7 +98,7 @@ int32 CameraPath::insert(int32 idx, const Vector3d& pos, const Quaternion& orien
     mPathPoints.insert( mPathPoints.begin()+insert_idx, cp);
 
     // everything after this point needs its time shifted
-    for(uint32 after_idx = insert_idx + 1; after_idx < mPathPoints.size(); after_idx++)
+    for (uint32 after_idx = insert_idx + 1; after_idx < mPathPoints.size(); after_idx++)
         mPathPoints[after_idx].time += dt;
 
     return insert_idx;
@@ -131,31 +130,21 @@ void CameraPath::load(const String& filename) {
         return;
     }
 
-    while(true) {
-        float32 posx, posy, posz;
-        float32 orientx, orienty, orientz, orientw;
-        float32 dt;
-        int nitems = fscanf(pathfile, "(%f %f %f) (%f %f %f %f) (%f)\n",
-            &posx, &posy, &posz,
-            &orientx, &orienty, &orientz, &orientw,
-            &dt
-        );
-        std::cout << "dbm debug cameraPath load: " << posx<<","<<posy<<","<<posz<<","<<orientx<<","<<orienty<<","<<orientz<<","<<
-                orientw<<","<<dt<<std::endl;
-        if (nitems != 8) break;
+    parse_csv_headings(pathfile);
+    while (!feof(pathfile)) {
         CameraPoint cp(
-            Vector3d(posx, posy, posz),
-            Quaternion(orientx, orienty, orientz, orientw, Quaternion::XYZW()),
-            DeltaTime::seconds(dt)
+            Vector3d(),
+            Quaternion(0,0,0,1, Quaternion::XYZW()),
+            DeltaTime::seconds(0)
         );
-        mPathPoints.push_back(cp);
+        String text;
+        if (loadCamPathLine(pathfile, cp, text)) {
+            mPathPoints.push_back(cp);
+        }
     }
-
     fclose(pathfile);
-
     mDirty = true;
 }
-
 
 void CameraPath::save(const String& filename) {
     FILE* pathfile = fopen(filename.c_str(), "w");
@@ -163,13 +152,13 @@ void CameraPath::save(const String& filename) {
         SILOG(ogre,error,"Error saving camera path -- couldn't open file");
         return;
     }
-
-    for(uint32 i = 0; i < mPathPoints.size(); i++) {
-        fprintf(pathfile, "(%f %f %f) (%f %f %f %f) (%f)\n",
-            mPathPoints[i].position.x, mPathPoints[i].position.y, mPathPoints[i].position.z,
-            mPathPoints[i].orientation.x, mPathPoints[i].orientation.y, mPathPoints[i].orientation.z, mPathPoints[i].orientation.w,
-            mPathPoints[i].dt.toSeconds()
-        );
+    fprintf(pathfile, "pos_x,pos_y,pos_z,rot_x,rot_y,rot_z,rot_w,delay,text\n");
+    for (uint32 i = 0; i < mPathPoints.size(); i++) {
+        fprintf(pathfile, "%f,%f,%f,%f,%f,%f,%f,%f,\n",
+                mPathPoints[i].position.x, mPathPoints[i].position.y, mPathPoints[i].position.z,
+                mPathPoints[i].orientation.x, mPathPoints[i].orientation.y, mPathPoints[i].orientation.z, mPathPoints[i].orientation.w,
+                mPathPoints[i].dt.toSeconds()
+               );
     }
 
     fclose(pathfile);
@@ -185,7 +174,7 @@ void CameraPath::computeDensities() {
 
     mDensities.clear();
 
-    for(int32 idx = 0; idx < (int32)mPathPoints.size(); idx++) {
+    for (int32 idx = 0; idx < (int32)mPathPoints.size(); idx++) {
         uint32 min_idx = clampKeyIndex(idx - k);
         uint32 max_idx = clampKeyIndex(idx + k);
 
@@ -204,7 +193,7 @@ void CameraPath::computeDensities() {
 
 void CameraPath::computeTimes() {
     DeltaTime t = DeltaTime::zero();
-    for(uint32 idx = 0; idx < mPathPoints.size(); idx++) {
+    for (uint32 idx = 0; idx < mPathPoints.size(); idx++) {
         (*this)[idx].time = t;
         t += (*this)[idx].dt;
     }
@@ -217,7 +206,7 @@ bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* ori
     }
 
     uint32 idx = 0;
-    while(idx+1 < numPoints() && keyFrameTime(idx+1) < t)
+    while (idx+1 < numPoints() && keyFrameTime(idx+1) < t)
         idx++;
 
     if (idx+1 >= numPoints() || t > keyFrameTime(idx+1))
@@ -227,7 +216,7 @@ bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* ori
     Quaternion orient_sum(0.0f, 0.0f, 0.0f, 0.0f, Quaternion::XYZW());
     float weight_sum = 0.0f;
 
-    for(int32 i = 0; i < (int32)mPathPoints.size(); i++) {
+    for (int32 i = 0; i < (int32)mPathPoints.size(); i++) {
         double difft = 0;
         if (keyFrameTime(i) > t)
             difft = (keyFrameTime(i) - t).toSeconds();

@@ -36,6 +36,8 @@
 #include <util/Platform.hpp>
 #include <task/Time.hpp>
 
+using namespace std;
+
 namespace Sirikata {
 namespace Graphics {
 
@@ -46,11 +48,10 @@ struct CameraPoint {
     Task::DeltaTime time;
 
     CameraPoint(const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& _dt)
-     : position(pos),
-       orientation(orient),
-       dt(_dt),
-       time(Task::DeltaTime::zero())
-    {
+            : position(pos),
+            orientation(orient),
+            dt(_dt),
+            time(Task::DeltaTime::zero()) {
     }
 }; // struct CameraPoint
 
@@ -88,8 +89,99 @@ private:
     std::vector<CameraPoint> mPathPoints;
     std::vector<double> mDensities;
     bool mDirty;
-};
 
+    double str2dbl(string s) {
+        float f;
+        if (s=="") return 0.0;
+        sscanf(s.c_str(), "%f", &f);
+        return (double)f;
+    }
+
+    int str2int(string s) {
+        int d;
+        if (s=="") return 0;
+        sscanf(s.c_str(), "%d", &d);
+        return d;
+    }
+
+    void parse_csv_values(string line, vector<string>& values) {
+        values.clear();
+        string temp("");
+
+        for (unsigned int i=0; i<line.size(); i++) {
+            char c = line[i];
+            if (c!=',') {
+                if ((c!=' ') && (c!='"')) {
+                    temp.push_back(c);
+                }
+            }
+            else {
+                values.push_back(temp);
+                temp.clear();
+            }
+        }
+        values.push_back(temp);
+    }
+
+    vector<string> headings;
+
+    void getline(FILE* f, string& s) {
+        s.clear();
+        while (true) {
+            char c = fgetc(f);
+            if (c<0) {
+                s.clear();
+                break;
+            }
+            if (c==0x0d && s.size()==0) continue;            /// should deal with windows \n
+            if (c==0x0a || c==0x0d) {
+                break;
+            }
+            s.push_back(c);
+        }
+    }
+
+    void parse_csv_headings(FILE* fil) {
+        string line;
+        getline(fil, line);
+        parse_csv_values(line, headings);
+    }
+
+    map<string, string>* parse_csv_line(FILE* fil) {
+        string line;
+        getline(fil, line);
+        vector<string> values;
+        map<string, string> *row;
+        row = (new map<string, string>());
+        if (line.size()>0) {
+            parse_csv_values(line, values);
+            if (values.size() == headings.size()) {
+                for (unsigned int i=0; i < values.size(); i++) {
+                    (*row)[headings[i]] = values[i];
+                }
+            }
+        }
+        return row;
+    }
+    bool loadCamPathLine(FILE *fp, CameraPoint& cp, String text) {
+        map<string, string>& row = *parse_csv_line(fp);
+        if (row["pos_x"][0]=='#' or row["pos_x"]==string("")) {
+            return false;                                         /// comment or blank line
+        }
+        else {
+            cp.position.x = str2dbl(row["pos_x"]);
+            cp.position.y = str2dbl(row["pos_y"]);
+            cp.position.z = str2dbl(row["pos_z"]);
+            cp.orientation.x = str2dbl(row["rot_x"]);
+            cp.orientation.y = str2dbl(row["rot_y"]);
+            cp.orientation.z = str2dbl(row["rot_z"]);
+            cp.orientation.w = str2dbl(row["rot_w"]);
+            cp.dt = Task::DeltaTime::seconds(str2dbl(row["delay"]));
+            text = row["text"];
+            return true;
+        }
+    }
+};
 } // namespace Graphics
 } // namespace Sirikata
 
