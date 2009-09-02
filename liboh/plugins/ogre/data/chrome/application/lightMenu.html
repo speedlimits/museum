@@ -1,0 +1,628 @@
+<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="css/colorpicker.css" />
+<link rel="stylesheet" type="text/css" href="css/meru.css" />
+<style type="text/css">
+
+table {
+  border: none;
+  margin: 0;
+  padding: 0;
+  border-collapse: collapse;
+}
+tr {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+td {
+  border: none;
+  padding: 5 5 5 5;
+}
+
+.textTicker {
+  width: 50px;
+  text-align: center;
+}
+
+#loadDiv {
+  position: absolute;
+  top: 0px;
+}
+
+#accordion {
+  visibility: hidden;
+}
+.term {
+  background: url("images/tab.png");
+  padding: 5px;
+  margin: 0;
+  z-index: 1;
+}
+.term:hover {
+  background: url("images/tab_hover.png");
+}
+.definition {
+  padding: 5px;
+  border-width: 5;
+  margin: 0;
+  z-index: 2;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- Header Images -->
+<img src="images/Header_Left.png" id="meruHeaderImageLeft"/>
+<div id="meruHeaderCenterDiv">
+  <img src="images/Header.png" id="meruHeaderImageCenter"/>
+</div>
+<img src="images/Header_Right.png" id="meruHeaderImageRight"/>
+
+<!-- Body Images -->
+<div id="meruBodyDivLeft">
+  <img src="images/Body_Left.png" id="meruBodyImageLeft" />
+</div>
+<div id="meruBodyDiv">
+  <img src="images/Body_Center.png" id="meruBodyImage" />
+</div>
+<div id="meruBodyDivRight">
+  <img src="images/Body_Right.png" id="meruBodyImageRight" />
+</div>
+<div id="meruBodyDivBotLeft">
+  <img src="images/Body_Bottom_Left.png" id="meruBodyImageBotLeft" />
+</div>
+<div id="meruBodyDivBotLeftEdge">
+  <img src="images/Body_Bottom_Left_Edge.png" id="meruBodyImageBotLeftEdge" />
+</div>
+<div id="meruBodyDivBot">
+  <img src="images/Body_Bottom.png" id="meruBodyImageBot" />
+</div>
+<div id="meruBodyDivBotRight">
+  <img src="images/Body_Bottom_Right.png" id="meruBodyImageBotRight" />
+</div>
+<div id="meruBodyDivBotRightEdge">
+  <img src="images/Body_Bottom_Right_Edge.png" id="meruBodyImageBotRightEdge" />
+</div>
+<div id="meruBodyDivWing">
+  <img src="images/Body_Wing.png" id="meruBodyImageWing" />
+</div>
+<div id="meruBodyDivDeco">
+  <img src="images/Body_Deco.png" id="meruBodyImageDeco" />
+</div>
+
+<div id="meruHeader" onMouseDown="selectHeader()" onMouseUp="releaseHeader()">
+<meruH1 id="title">Light Properties</meruH1>
+<input type="button" id="closeButton" onClick="closeWindow()" onfocus="blur()" />
+</div>
+
+<div id="meruBody">
+<form>
+
+<div id="loadDiv">
+  <meruP>Loading...</meruP>
+</div>
+
+<dl id="accordion">
+  <dt class="term">
+    <meruP>Basic: </meruP>
+  </dt>
+  <dd class="definition">
+    <table>
+      <tr>
+        <td>
+          <meruP>Type: </meruP>
+        </td>
+        <td>
+          <select id="typeList" name="typeList" onChange="setType(this.form)">
+            <option value="point">Point</option>
+            <option value="spotlight">Spotlight</option>
+            <option value="directional">Directional</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>On: </meruP>
+        </td>
+        <td>
+          <input id="onCheck" name="onCheck" type="checkbox" onChange="setOn(this.form)"/>
+        </td>
+      </tr>
+    </table>
+  </dd>
+  
+  <dt class="term">
+    <meruP>Color:</meruP>
+  </dt>
+  <dd class="definition">
+    <meruP>Diffuse:</meruP>
+    <div class="colorPicker" id="diffusePicker">
+    </div>
+    <meruP>Specular:</meruP>
+    <div class="colorPicker" id="specularPicker">
+    </div>
+    <table>
+      <tr>
+        <td>
+          <meruP>Brightness: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="powerScaleBg">
+            <span class="sliderThumb" id="powerScaleThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+            
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="powerScale" />
+          </a>
+        </td>
+      </tr>
+    </table>
+  </dd>
+  
+  <dt class="term">
+    <meruP>Ambient / Shadow:</meruP>
+  </dt>
+  <dd class="definition">
+    <table>
+      <tr>
+        <td>
+          <meruP>Ambient Brightness: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="diffuseAlphaBg">
+            <span class="sliderThumb" id="diffuseAlphaThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="diffuseAlpha" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>Shadow Brightness: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="specularAlphaBg">
+            <span class="sliderThumb" id="specularAlphaThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="specularAlpha" />
+          </a>
+        </td>
+      </tr>
+    </table>
+  </dd>
+  
+  <dt class="term">
+    <meruP>Distance Attenuation:</meruP>
+  </dt>
+  <dd class="definition">
+    <table>
+      <tr>
+        <td>
+          <meruP>Distance: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="attenRangeBg">
+            <span class="sliderThumb" id="attenRangeThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="attenRange" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>Constant: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="attenConstBg">
+            <span class="sliderThumb" id="attenConstThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="attenConst" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>Linear: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="attenLinearBg">
+            <span class="sliderThumb" id="attenLinearThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp  
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="attenLinear" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>Quadratic: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="attenQuadraticBg">
+            <span class="sliderThumb" id="attenQuadraticThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="attenQuadratic" />
+          </a>
+        </td>
+      </tr>
+    </table>
+  </dd>
+  
+  <dt class="term">
+    <meruP>Spotlight Parameters:</meruP>
+  </dt>
+  <dd class="definition">
+    <table>
+      <tr>
+        <td>
+          <meruP>Inner Cone: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="innerAngleBg">
+            <span class="sliderThumb" id="innerAngleThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="innerAngle" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>Outer Cone: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="outerAngleBg">
+            <span class="sliderThumb" id="outerAngleThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="outerAngle" />
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <meruP>Cone Fall Off: </meruP>
+        </td>
+        <td>
+          <div class="sliderBgHoriz" id="fallOffBg">
+            <span class="sliderThumb" id="fallOffThumb">
+              <img src="images/thumb-bar-horiz.gif">
+            </span>
+            &nbsp
+          </div>
+        </td>
+        <td>
+          <a class="meruText">
+            <input type="text" class="meruTextLeft textTicker" id="fallOff" />
+          </a>
+        </td>
+      </tr>
+    </table>
+  </dd>
+  
+  <dt class="term">
+  </dt>
+  <dd class="definition">
+  </dd>
+  
+</dl>
+
+</form>
+
+<script type="text/javascript" src="js/MeruCommon.js"></script>
+<script type="text/javascript" src="js/TextSlider.js"></script>
+<script type="text/javascript" src='js/Navi.js'></script>
+<script type="text/javascript" src='js/MeruInitialize.js'></script>
+<script type="text/javascript" src='../../../../../../dependencies/yui/build/yahoo-dom-event/yahoo-dom-event.js'></script>
+<script type="text/javascript" src='../../../../../../dependencies/yui/build/animation/animation-min.js'></script>
+<script type="text/javascript" src='../../../../../../dependencies/yui/build/dragdrop/dragdrop-min.js'></script>
+<script type="text/javascript" src='../../../../../../dependencies/yui/build/slider/slider-min.js'></script>
+<script type="text/javascript" src='../../../../../../dependencies/yui/build/element/element-min.js'></script>
+<script type="text/javascript" src='../../../../../../dependencies/yui/build/colorpicker/colorpicker-min.js'></script>
+<script type="text/javascript">
+
+window.addEvent('domready', onDomReady);
+
+var diffusePicker;
+var diffuseAlphaSlider;
+var specularPicker;
+var specularAlphaSlider;
+var outerAngleSlider;
+var innerAngleSlider;
+var attenRangeSlider;
+var attenConstSlider;
+var attenLinearSlider;
+var attenQuadraticSlider;
+var fallOffSlider;
+var powerScaleSlider;
+
+function onDomReady()
+{
+  focusNavi();
+  $ND('registerNotify').add({notifyType: "NotifyNamedObjectName",
+                             jsMethod: "setName(?)"}).send();
+  $ND('getName').add({jsMethod: "setName(?)"}).send();
+  $ND('requestData').add({method: "GetLightInfo",
+                          callback: "setLightInfo(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"}).send();
+  setVisible(true);
+  setLightInfo("point", .1, .2, .3, .4, .5, .6, .7, .8, 1, 2, 3, 2, 5, 6, 7, .8, true);
+}
+
+function init()
+{
+  diffusePicker = createColorPicker("diffusePicker", true, false);
+  diffusePicker.on("rgbChange", diffuseRGBChange);
+    
+  diffuseAlphaSlider = new TextSlider("diffuseAlphaBg", "diffuseAlphaThumb", "diffuseAlpha", 0, 100, true, sendDiffuseAlpha);
+    
+  specularPicker = createColorPicker("specularPicker", true, false);
+  specularPicker.on("rgbChange", specularRGBChange);
+    
+  specularAlphaSlider = new TextSlider("specularAlphaBg", "specularAlphaThumb", "specularAlpha", 0, 100, true, sendSpecularAlpha);
+
+  outerAngleSlider = new TextSlider("outerAngleBg", "outerAngleThumb", "outerAngle", 0, 360, true, sendOuterAngle);
+    
+  innerAngleSlider = new TextSlider("innerAngleBg", "innerAngleThumb", "innerAngle", 0, 360, true, sendInnerAngle);
+    
+  attenRangeSlider = new TextSlider("attenRangeBg", "attenRangeThumb", "attenRange", 0, 1000, true, sendAttenRange);
+    
+  attenConstSlider = new TextSlider("attenConstBg", "attenConstThumb", "attenConst", 0, 5, false, sendAttenConst);
+    
+  attenLinearSlider = new TextSlider("attenLinearBg", "attenLinearThumb", "attenLinear", 0, 5, false, sendAttenLinear);
+    
+  attenQuadraticSlider = new TextSlider("attenQuadraticBg", "attenQuadraticThumb", "attenQuadratic", 0, 3, false, sendAttenQuadratic);
+    
+  fallOffSlider = new TextSlider("fallOffBg", "fallOffThumb", "fallOff", 0, 10, false, sendFallOff);
+    
+  powerScaleSlider = new TextSlider("powerScaleBg", "powerScaleThumb", "powerScale", 0, 10, false, sendPowerScale);
+
+  new Accordion('.term', '.definition', {opacity: false, duration: 300, alwaysHide: true, show: true});
+  
+  // Hack to disable dragging images so Navi does not freeze
+  var images = [
+    "meruHeaderImageLeft", "meruHeaderImageCenter", "meruHeaderImageRight",
+    "meruBodyImageLeft", "meruBodyImage", "meruBodyImageRight",
+    "meruBodyImageBotLeft", "meruBodyImageBotLeftEdge",
+    "meruBodyImageBot", "meruBodyImageBotRight", "meruBodyImageBotRightEdge",
+    "meruBodyImageWing", "meruBodyImageDeco"
+  ];
+  for (var i = 0; i < images.length; i++) {
+    document.getElementById(images[i]).onmousedown = function() {return false;}
+  }
+}
+
+function setLightInfo(type, diffuse_r, diffuse_g, diffuse_b, diffuse_a,
+  specular_r, specular_g, specular_b, specular_a,
+  atten_range, atten_const, atten_linear, atten_quad,
+  inner_angle, outer_angle, fall_off, power_scale, on)
+{
+  init();
+  
+  diffuse_r = Math.round(diffuse_r * 255);
+  diffuse_g = Math.round(diffuse_g * 255);
+  diffuse_b = Math.round(diffuse_b * 255);
+  diffuse_a = Math.round(diffuse_a * 100);
+  specular_r = Math.round(specular_r * 255);
+  specular_g = Math.round(specular_g * 255);
+  specular_b = Math.round(specular_b * 255);
+  specular_a = Math.round(specular_a * 100);
+  
+  var typeList = document.getElementById("typeList");
+  typeList.value = type;
+
+  diffusePicker.setValue([diffuse_r, diffuse_g, diffuse_b], true);
+  diffuseAlphaSlider.setRealValue(diffuse_a);
+
+  specularPicker.setValue([specular_r, specular_g, specular_b], true);
+  specularAlphaSlider.setRealValue(specular_a);
+
+  attenRangeSlider.setRealValue(atten_range);
+
+  attenConstSlider.setRealValue(atten_const);
+  
+  attenLinearSlider.setRealValue(atten_linear);
+  
+  attenQuadraticSlider.setRealValue(atten_quad);
+  
+  innerAngleSlider.setRealValue(inner_angle);
+  
+  outerAngleSlider.setRealValue(outer_angle);
+  
+  powerScaleSlider.setRealValue(power_scale);
+  
+  fallOffSlider.setRealValue(fall_off);
+  
+  var onCheck = document.getElementById("onCheck");
+  onCheck.checked = on;
+  
+  document.getElementById("accordion").style.visibility = "visible";
+  document.getElementById("loadDiv").style.visibility = "hidden";
+}
+
+function setName(name)
+{
+  var title = "Light Properties - " + name;
+  if (title.length > 45)
+    title = title.substring(0, 42) + "...";
+  document.getElementById("title").textContent = title;
+}
+
+function diffuseRGBChange(obj)
+{
+  var alpha = document.getElementById("diffuseAlpha").value;
+  $ND("send").add({method: "SetLightDiffuseColor",
+                   type1: "color",
+                   red1: obj.newValue[0] / 255,
+                   green1: obj.newValue[1] / 255,
+                   blue1: obj.newValue[2] / 255,
+                   alpha1: alpha / 100}).send();
+}
+
+function sendDiffuseAlpha(a)
+{
+  var r = diffusePicker.getElement("yui-picker-r").value;
+  var g = diffusePicker.getElement("yui-picker-g").value;
+  var b = diffusePicker.getElement("yui-picker-b").value;
+  
+  $ND("send").add({method: "SetLightDiffuseColor",
+                   type1: "color",
+                   red1: r / 255,
+                   green1: g / 255,
+                   blue1: b / 255,
+                   alpha1: a / 100}).send();
+}
+
+function specularRGBChange(obj)
+{
+  var alpha = document.getElementById("specularAlpha").value;
+  $ND("send").add({method: "SetLightSpecularColor",
+                   type1: "color",
+                   red1: obj.newValue[0] / 255,
+                   green1: obj.newValue[1] / 255,
+                   blue1: obj.newValue[2] / 255,
+                   alpha1: alpha / 100}).send();
+}
+
+function sendSpecularAlpha(a)
+{
+  var r = specularPicker.getElement("yui-picker-r").value;
+  var g = specularPicker.getElement("yui-picker-g").value;
+  var b = specularPicker.getElement("yui-picker-b").value;
+  
+  $ND("send").add({method: "SetLightSpecularColor",
+                   type1: "color",
+                   red1: r / 255,
+                   green1: g / 255,
+                   blue1: b / 255,
+                   alpha1: a / 100}).send();
+}
+
+function sendOuterAngle(angle)
+{
+  $ND("send").add({method: "SetLightOuterAngle",
+                   type1: "float",
+                   value1: angle}).send();
+}
+
+function sendInnerAngle(angle)
+{
+  $ND("send").add({method: "SetLightInnerAngle",
+                   type1: "float",
+                   value1: angle}).send();
+}
+
+function sendFallOff(fallOff)
+{
+  $ND("send").add({method: "SetLightFallOff",
+                   type1: "float",
+                   value1: fallOff}).send();
+}
+
+function sendPowerScale(powerScale)
+{
+  $ND("send").add({method: "SetLightPower",
+                   type1: "float",
+                   value1: powerScale}).send();
+}
+
+function sendAttenRange(val)
+{
+  $ND("send").add({method: "SetLightAttenuationRange",
+                   type1: "float",
+                   value1: val}).send();
+}
+
+function sendAttenConst(val)
+{
+  $ND("send").add({method: "SetLightAttenuationConst",
+                   type1: "float",
+                   value1: val}).send();
+}
+
+function sendAttenLinear(val)
+{
+  $ND("send").add({method: "SetLightAttenuationLinear",
+                   type1: "float",
+                   value1: val}).send();
+}
+
+function sendAttenQuadratic(val)
+{
+  $ND("send").add({method: "SetLightAttenuationQuadratic",
+                   type1: "float",
+                   value1: val}).send();
+}
+
+function setType(form)
+{
+  $ND("send").add({method: "SetLightType",
+                   type1: "string",
+                   value1: form.typeList.value}).send();
+}
+
+function setOn(form)
+{
+  $ND("send").add({method: "SetLightOn",
+                   type1: "bool",
+                   value1: form.onCheck.checked}).send();
+}
+
+</script>
+
+</body>
+</html>
