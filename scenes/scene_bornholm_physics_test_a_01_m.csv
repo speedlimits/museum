@@ -1,0 +1,7 @@
+"objtype","subtype","name","parent","pos_x","pos_y","pos_z","orient_x","orient_y","orient_z","orient_w","scale_x","scale_y","scale_z","hull_x","hull_y","hull_z","density","friction","bounce","colMask","colMsg","meshURI","diffuse_x","diffuse_y","diffuse_z","ambient","specular_x","specular_y","specular_z","shadowpower","range","constfall","linearfall","quadfall","cone_in","cone_out","power","cone_fall","shadow"
+"camera",,,,-6.53,-0.89,3.62,0,-71.05,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"light","point",,,-6.53,-0.89,3.62,0,-71.05,0,,,,,,,,,,,,,,0.22,0.22,0.22,0.6,0.4,0.4,0.4,0.11,200000,0.5,0,0,30,40,0.9,1,0
+"mesh","graphiconly","bornholm_Video_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornholm_Video_01.mesh",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","ocean_plane",,0,-166.28,0,0,0,0,,10,10,10,1,1,1,0,0,0,0,0,"mhash:///da542c0771306094157836a55c5645e9cb0e4c56d9ecdb5e02e3ea4b59dc0c4b",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","sky?",,0,-23.76,0,0,0,0,,1000,1000,1000,1,1,1,0,0,0,0,0,"mhash:///1c74fbde6008dc1bd5020c73eaf2025430bc6a1dbb6f9e781443730d0364dce0",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","terrain_main_02",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///terrain_main_02.mesh",,,,,,,,,,,,,,,,,

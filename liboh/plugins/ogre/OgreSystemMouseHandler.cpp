@@ -125,6 +125,7 @@ vector<String> tokenizeString (const String& str)
     return tokens;
 }
 
+
 // Defined in DragActions.cpp.
 
 class OgreSystem::MouseHandler {
@@ -150,7 +151,7 @@ class OgreSystem::MouseHandler {
         typedef EventResponse (MouseHandler::*ClickAction) (EventPtr evbase);
         std::map<int, ClickAction> mClickAction;
     */
-
+    float mCamSpeed;
     CameraPath mCameraPath;
     bool mRunningCameraPath;
     uint32 mCameraPathIndex;
@@ -567,6 +568,7 @@ private:
     }
 
     void createLightAction() {
+#if 0
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         CameraEntity *camera = mParent->mPrimaryCamera;
@@ -610,6 +612,10 @@ private:
         if (ent) {
             ent->setSelected(true);
         }
+#else
+    String command("lightSelectedObject");
+    genericStringMessage(WebViewManager::NavigateCommand, command);
+#endif
     }
 	ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
 		ProxyObjectPtr parentProxy;
@@ -628,7 +634,7 @@ private:
         Location loc = cam->extrapolateLocation(now);
         const Quaternion &orient = loc.getOrientation();
         Protocol::ObjLoc rloc;
-        rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * .5);
+        rloc.set_velocity((orient * dir) * amount * WORLD_SCALE * mCamSpeed);
         rloc.set_angular_speed(0);
         cam->requestLocation(now, rloc);
     }
@@ -675,6 +681,11 @@ private:
         if (modename == "")
             mDragAction[1] = 0;
         mDragAction[1] = DragActionRegistry::get(modename);
+    }
+
+    void setCameraSpeed(const float& speed) {
+        std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
+        mCamSpeed = speed;
     }
 
     void importAction() {
@@ -1073,13 +1084,15 @@ private:
         mCameraPathTime = mCameraPath[idx].time;
     }
 
-#define CAMERA_PATH_FILE "camera_path.txt"
+#define CAMERA_PATH_FILE "camera_path.csv"
 
     void cameraPathLoad() {
+        std::cout << "dbm debug: cameraPathLoad" << std::endl;
         mCameraPath.load(CAMERA_PATH_FILE);
     }
 
     void cameraPathSave() {
+        std::cout << "dbm debug: cameraPathSave" << std::endl;
         mCameraPath.save(CAMERA_PATH_FILE);
     }
 
@@ -1094,13 +1107,14 @@ private:
     }
 
     void cameraPathInsert() {
+        std::cout << "dbm debug: cameraPathInsert" << std::endl;
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
         Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
         Location loc = cam->extrapolateLocation(now);
 
-        mCameraPathIndex = mCameraPath.insert(mCameraPathIndex, loc.getPosition(), loc.getOrientation(), Task::DeltaTime::seconds(1.0));
+        mCameraPathIndex = mCameraPath.insert(mCameraPathIndex, loc.getPosition(), loc.getOrientation(), Task::DeltaTime::seconds(1.0), "");
         mCameraPathTime = mCameraPath.keyFrameTime(mCameraPathIndex);
     }
 
@@ -1111,8 +1125,13 @@ private:
 
     void cameraPathRun() {
         mRunningCameraPath = !mRunningCameraPath;
-        if (mRunningCameraPath)
+        if (mRunningCameraPath) {
+            std::cout << "dbm debug: cameraPathRun start" << std::endl;
             mCameraPathTime = Task::DeltaTime::zero();
+        }
+        else {
+            std::cout << "dbm debug: cameraPathRun end" << std::endl;
+        }
     }
 
     void cameraPathChangeSpeed(float factor) {
@@ -1125,16 +1144,25 @@ private:
 
         if (mRunningCameraPath) {
             mCameraPathTime += dt;
-
+        
             Vector3d pos;
             Quaternion orient;
-            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient);
-
+            static String oldmsg;
+            String msg;
+            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg);
+            if (msg != oldmsg && msg != "") {
+                std::ostringstream ss;
+                ss << "document.selected='" << msg << "'; debug(document.selected);";
+                WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
+            }
+            oldmsg=msg;
+            std::cout << "cameraPathTick--" << oldmsg << std::endl;
+        
             if (!success) {
                 mRunningCameraPath = false;
                 return;
             }
-
+        
             cameraPathSetCamera(pos, orient);
         }
     }
@@ -1149,7 +1177,6 @@ private:
     }
 
     void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
-        /// FIXME: need to convert x, y mouse coords into global coords & quaternion
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         if (!cam) return;
         RoutableMessageBody msg;
@@ -1349,6 +1376,194 @@ private:
     }
 
 
+    // This provides an easy way to get values from a string of the form name=value name=value ...
+    class JavascriptArgumentParser {
+    public:
+        JavascriptArgumentParser(const String &str) {
+            mString = &str;
+        }
+        size_t hasAttributeName(const char *name) {
+            size_t ix = 0;
+            while ((ix = mString->find(name, ix)) != String::npos) {
+                if (ix > 0 && !isspace((*mString)[ix-1])) {    // No whitespace before the name
+                    ix += strlen(name);         // Skip over name
+                    continue;                   // Keep looking
+                }
+                ix += strlen(name);             // Skip over name
+                if ((*mString)[ix++] != '=')    // There should have been an '='here
+                    continue;                   // Keep looking
+                // We know that we have <whitespace> <name> '=', and the index is positioned after the '='
+                // Check for an initial quote
+                if ((*mString)[ix] == '"')
+                    ++ix;
+            }
+            return ix;
+        }
+        bool getAttributeValue(const char *name, String *value) {
+            size_t ix = hasAttributeName(name);
+            if (ix == String::npos)
+                return false;
+            // The following does not allow escaping special characters
+            size_t iy = mString->find_first_of(((*mString)[ix-1] == '\"') ? "\"" : " \t\r\n", ix);
+            *value = String((*mString), ix, iy);
+            return true;
+        }
+        bool getAttributeValue(const char *name, int numValues, int *value) {
+            size_t ix = hasAttributeName(name);
+            if (ix == String::npos)
+                return false;
+            const char *s0 = &(*mString)[ix];
+            for (char *s1; numValues--; value++, s0 = s1 + 1) {
+                *value = strtol(s0, &s1, 10);
+                if (*s1 == 0)
+                    break;
+            }
+            return numValues == -1;
+        }
+        bool getAttributeValue(const char *name, int numValues, double *value) {
+            size_t ix = hasAttributeName(name);
+            if (ix == String::npos)
+                return false;
+            const char *s0 = &(*mString)[ix];
+            for (char *s1; numValues-- && *s1 != 0; value++, s0 = s1 + 1) {
+                *value = strtod(s0, &s1);
+                if (*s1 == 0)
+                    break;
+            }
+            return numValues == -1;
+        }
+        bool getAttributeValue(const char *name, int numValues, float *value) {
+            size_t ix = hasAttributeName(name);
+            if (ix == String::npos)
+                return false;
+            const char *s0 = &(*mString)[ix];
+            for (char *s1; numValues-- && *s1 != 0; value++, s0 = s1 + 1) {
+                *value = strtod(s0, &s1);
+                if (*s1 == 0)
+                    break;
+            }
+            return numValues == -1;
+        }
+        bool getAttributeValue(const char *name, int numValues, bool *value) {
+            size_t ix = hasAttributeName(name);
+            if (ix == String::npos)
+                return false;
+            const char *s0 = &(*mString)[ix];
+            for (const char *s1; numValues-- && *s1 != 0; value++, s0 = s1 + 1) {
+                *value = strtobool(s0, &s1);
+                if (*s1 == 0)
+                    break;
+            }
+            return numValues == -1;
+        }
+        static bool strtobool(char const *s0, char const **s1) {
+            *s1 = s0;
+            if (strncmp(s0, "true", 4) == 0 || strncmp(s0, "TRUE", 4) == 0) {
+                *s1 += 4;
+                return true;
+            } else if (s0[0] == '1') {
+                *s1 += 1;
+                return true;
+            }
+            if (strncmp(s0, "false", 5) == 0 || strncmp(s0, "FALSE", 5) == 0) {
+                *s1 += 5;
+                return false;
+            } else if (s0[0] == '0') {
+                *s1 += 1;
+                return false;
+            }
+            return static_cast<bool>(-1);
+        }
+
+    private:
+        const String *mString;
+    };
+    
+    
+    // This parses a string of the form:
+    // diffusecolor=1.0,1.0,0.95 specularcolor=1,1,1 ambientcolor=.05,.05,.05 shadowcolor=.02,.02,.02
+    // falloff=1.,.01,.02 cone=0,3,0 power=1e2 lightrange=256 castsshadow=true type=spot
+    static void setLightInfoFromString(const String &str, LightInfo *lightInfo) {
+        JavascriptArgumentParser jap(str);
+        String type;
+        if (jap.getAttributeValue("diffusecolor",  3, &lightInfo->mDiffuseColor[0]))    lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
+        if (jap.getAttributeValue("specularcolor", 3, &lightInfo->mSpecularColor[0]))   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
+        if (jap.getAttributeValue("ambientcolor",  3, &lightInfo->mAmbientColor[0]))    lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
+        if (jap.getAttributeValue("shadowcolor",   3, &lightInfo->mShadowColor[0]))     lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
+        if (jap.getAttributeValue("falloff",       3, &lightInfo->mConstantFalloff))    lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
+        if (jap.getAttributeValue("cone",          3, &lightInfo->mConeInnerRadians))   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
+        if (jap.getAttributeValue("power",         1, &lightInfo->mPower))              lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
+        if (jap.getAttributeValue("lightrange",    1, &lightInfo->mLightRange))         lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
+        if (jap.getAttributeValue("castsshadow",   1, &lightInfo->mCastsShadow))        lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
+        if (jap.getAttributeValue("type",             &type)) {                         lightInfo->mWhichFields |= LightInfo::TYPE;            // type
+            if       (type == "point")                          lightInfo->mType = LightInfo::POINT;
+            else if  (type == "directional")                    lightInfo->mType = LightInfo::DIRECTIONAL;
+            else if ((type == "spot") || (type == "spotlight")) lightInfo->mType = LightInfo::SPOTLIGHT;
+            else lightInfo->mWhichFields &= ~LightInfo::TYPE;
+        }
+    }
+
+
+    void lightSelectedObjectHandler(WebViewManager::NavigationAction action, const String& arg) {
+        // Set defaults
+        LightInfo lightInfo;
+        lightInfo.mDiffuseColor.set (1,     1,      1);
+        lightInfo.mSpecularColor.set(1,     1,      1);
+        lightInfo.mAmbientColor.set (.05,   .05,    .05);
+        lightInfo.mShadowColor.set  (.02,   .02,    .02);
+        lightInfo.mPower            = 1;
+        lightInfo.mLightRange       = 256;
+        lightInfo.mConstantFalloff  = 1.0;
+        lightInfo.mLinearFalloff    = .01;
+        lightInfo.mQuadraticFalloff = .02;
+        lightInfo.mConeInnerRadians = 0;
+        lightInfo.mConeOuterRadians = 3.1415926536;
+        lightInfo.mConeFalloff      = 0;
+        lightInfo.mType             = LightInfo::SPOTLIGHT;
+        lightInfo.mCastsShadow      = true;
+        lightInfo.mWhichFields      = LightInfo::NONE;
+
+        setLightInfoFromString(arg, &lightInfo);
+ 
+        // Aim the light
+        // This light initially aims along the positive Z axis.
+        // We apply a transformation to aim it in a different direction.
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!camera)
+            return;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        Location cameraLocation(camera->globalLocation(now));
+//        Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, cameraLocation.getOrientation(), screenX, screenY));
+        Vector3d totalPosition(averageSelectedPosition(now, mSelectedObjects.begin(), mSelectedObjects.end()));
+
+#if 0
+        Time now(SpaceTimeOffsetManager::getSingleton().now(mParent->mPrimaryCamera->getProxy().getObjectReference().space()));
+        Vector3d dViewPosition = mCameraLocation.getPosition();
+        Vector3f fViewDirection(viewDirection.x, viewDirection.y, viewDirection.z);
+        int numHits = 1, i;
+
+        for (i = 0; i < numHits; i++) {
+            double distance;        // Distance along the ray
+            Vector3f normal;
+            const Entity *obj = mParent->rayTrace(dViewPosition, fViewDirection, numHits, distance, normal, i);
+            if (obj == NULL) {      // No object found
+                if (i < numHits)    // Why not?
+                    continue;       // Still more objects: keep looking
+                break;              // No more objects: return failure
+            }
+            if (!isObjectToBeMoved(obj)) {
+                Vector3d surfacePoint = dViewPosition + distance * viewDirection;
+                if (fViewDirection.dot(normal) > 0) // Normal is pointing away from the camera
+                    normal = -normal;               // Get normal pointing toward the camera
+                plane->set(normal, surfacePoint);
+                return true;
+            }
+
+        }
+#endif
+    }
+    
+
     /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
     void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
         // Get the command (first word)
@@ -1366,11 +1581,12 @@ private:
             StringMessageHandler    handler;
         };
         static const StringMessageDispatch dispatchTable[] = {
-            { "inventory",      &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
-            { "walk",           &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
-            { "step",           &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
-            { "getselectedids", &Sirikata::Graphics::OgreSystem::MouseHandler::getSelectedIDHandler },
-            { NULL,         NULL }
+            { "inventory",              &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
+            { "walk",                   &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
+            { "step",                   &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
+            { "getselectedids",         &Sirikata::Graphics::OgreSystem::MouseHandler::getSelectedIDHandler },
+            { "lightSelectedObject",    &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelectedObjectHandler },
+            { NULL,                     NULL }
         };
         const StringMessageDispatch *dp;
         for (dp = dispatchTable; dp->command != NULL; ++dp)
@@ -1414,6 +1630,7 @@ private:
                         ButtonReleased::getEventId(),
                         std::tr1::bind(&MouseHandler::keyHandler, this, _1)
                     );
+                    std::cout << "dbm debug key up: " << subId << std::endl;
                     mEvents.push_back(subId);
                     mDeviceSubscriptions.insert(DeviceSubMap::value_type(&*ev->mDevice, subId));
                 }
@@ -1438,6 +1655,7 @@ public:
        mLastCameraTime(Task::LocalTime::now()),
        mWhichRayObject(0)
     {
+        mCamSpeed = 1.0;
         mLastHitCount=0;
         mLastHitX=0;
         mLastHitY=0;
@@ -1519,6 +1737,12 @@ public:
         mInputResponses["setDragModeRotateCamera"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "rotateCamera"));
         mInputResponses["setDragModePanCamera"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setDragModeAction, this, "panCamera"));
 
+        mInputResponses["setCameraSpeed1"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 0.1));
+        mInputResponses["setCameraSpeed2"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 0.3));
+        mInputResponses["setCameraSpeed3"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 1.0));
+        mInputResponses["setCameraSpeed4"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 3.0));
+        mInputResponses["setCameraSpeed5"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::setCameraSpeed, this, 10.0));
+
         mInputResponses["cameraPathLoad"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathLoad, this));
         mInputResponses["cameraPathSave"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathSave, this));
         mInputResponses["cameraPathNextKeyFrame"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathNext, this));
@@ -1545,6 +1769,8 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S), mInputResponses["moveBackward"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_D), mInputResponses["moveRight"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_A), mInputResponses["moveLeft"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_PAGEUP), mInputResponses["moveUp"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_PAGEDOWN), mInputResponses["moveDown"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP, Input::MOD_SHIFT), mInputResponses["rotateXPos"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN, Input::MOD_SHIFT), mInputResponses["rotateXNeg"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP), mInputResponses["moveForward"]);
@@ -1574,6 +1800,14 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T, Input::MOD_CTRL), mInputResponses["setDragModeRotateCamera"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y, Input::MOD_CTRL), mInputResponses["setDragModePanCamera"]);
 
+        
+        // camera speeds
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_1), mInputResponses["setCameraSpeed1"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_2), mInputResponses["setCameraSpeed2"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_3), mInputResponses["setCameraSpeed3"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_4), mInputResponses["setCameraSpeed4"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_5), mInputResponses["setCameraSpeed5"]);
+        
         // Mouse Zooming
         mInputBinding.add(InputBindingEvent::Axis(SDLMouse::WHEELY), mInputResponses["zoom"]);
 
@@ -1582,16 +1816,16 @@ public:
         mInputBinding.add(InputBindingEvent::MouseClick(3), mInputResponses["selectObjectReverse"]);
 
         // Camera Path
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathLoad"]);
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathSave"]);
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathNextKeyFrame"]);
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathPreviousKeyFrame"]);
-        //mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_P), mInputResponses["cameraPathInsertKeyFrame"]);
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathDeleteKeyFrame"]);
-        //mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_M), mInputResponses["cameraPathRun"]);
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathSpeedUp"]);
-        //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathSlowDown"]);
-
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F1), mInputResponses["cameraPathLoad"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F2), mInputResponses["cameraPathSave"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F3), mInputResponses["cameraPathNextKeyFrame"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F4), mInputResponses["cameraPathPreviousKeyFrame"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F5), mInputResponses["cameraPathInsertKeyFrame"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F6), mInputResponses["cameraPathDeleteKeyFrame"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F7), mInputResponses["cameraPathRun"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
+        
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navback"), mInputResponses["webBack"]);
