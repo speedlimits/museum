@@ -1,3 +1,5 @@
+
+
 ;(function($){
 
 	$.widget("ui.coverflow", {
@@ -10,11 +12,12 @@
 				$("div.slider").slider("moveTo", self.current, null, true);
 			});
 
+debug('init');
 // Dennis
-			debug('making elements dragable');
+//			debug('making elements dragable');
 
-			this.items.bind("mousedown", function (){debug('mouseDown on item');});
-			debug('done');
+		//	this.items.bind("mousedown", function (event, ui){debug('mouseDown on item'); $(this).remove(); x = self.current; self.init(); self.moveTo(x - 1)});
+	//		debug('done');
 
 // Dennis
 
@@ -102,6 +105,8 @@
 				var mod = i == to ? (1-state) : ( i == from ? state : 1 );				
 
 				var before = (i > from && i != to);
+				
+				
 				
 				$(this).css({
 					webkitTransform: "matrix(1,"+(mod * (side == "right" ? -0.5 : 0.5))+",0,1,0,0) scale("+(1+((1-mod)*0.5))+")",

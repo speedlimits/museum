@@ -32,6 +32,7 @@
 
 
 #picture-info-screen {
+	display: none;
 	position: absolute;
 	background: url(../images/info_screen_bg.png) no-repeat;
 	/*top: 577px;*/

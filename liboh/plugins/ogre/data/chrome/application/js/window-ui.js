@@ -7,7 +7,9 @@ $(document).ready(function() {
       	drop: function(event, ui) {
 			debug("placing object");
 			debug("inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY) ;
+			
 			Client.event("navcommand", "inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY);
+			return false; //reject it so that position gets reverted
 
 		}
 		

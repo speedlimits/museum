@@ -99,11 +99,12 @@
         <div class="ui-slider-handle"></div> 
     </div> 
 <div>
-
+<div id="debug" ></div>
 <script type="text/javascript"> 
 			$("div.magnifyme").ready(function() {
+				debug('before');
 				$("div.magnifyme").coverflow();
-				
+				debug('after');
 				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
 
 	$(".cover-icon").bind('mousedown' , function() {
@@ -126,6 +127,7 @@
 
 
 			});
-			
+			function debug(msg) {
+	$("#debug").prepend("<br>" + msg ); }
 		</script> 
         

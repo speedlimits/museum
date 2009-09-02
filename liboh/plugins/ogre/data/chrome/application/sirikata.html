@@ -19,11 +19,21 @@
 <link href="css/critique-style.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.superbox.css" rel="stylesheet" type="text/css" />
 
-<script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui-1.6.custom.min.js"></script>
+<script type="text/javascript" src="js/old/jquery-1.2.6.min.js"></script>
+<script type="text/javascript" src="js/old/jquery-ui-1.6.custom.min.js"></script>
+
+
+
 <script type="text/javascript" src="js/wizzard.js"></script>
 <script type="text/javascript" src="js/window-controll.js"></script>
 <script type="text/javascript" src="js/window-ui.js"></script>
+
+
+<script type="text/javascript" src="js/ui.coverflow.custom.js"></script> 
+
+
+<script type="text/javascript" src="js/sylvester.js"></script> 
+<script type="text/javascript" src="js/pb.transformie.js"></script> 
 
 
 <script type="text/javascript">  
@@ -45,6 +55,12 @@ function enterLoadGallery() {
 function enterPlaceArtwork2() {
 	leaveModal();
 	loadInfoScreen("select-art.html", false);
+}
+
+
+function cf() {
+	leaveModal();
+	loadInfoScreen("coverflow.html", false);
 }
 
 function developmentMode() {
@@ -81,7 +97,21 @@ function enterSelectFrames2() {
 	
 }
 
-
+function mousedemo() {
+		
+	
+		$("#mouse-cursor").animate( { right: "50px", bottom:"150px"}, 1000);
+		
+		setTimeout('globalcoverflow.moveTo(5)', 1500);
+		
+		setTimeout('$("#mouse-cursor").animate( { right: "150px", bottom:"100px"}, 600);', 1800);
+		
+		setTimeout('$("#mouse-cursor-demo").fadeIn("fast");', 2300);
+		
+		setTimeout('$("#mouse-cursor").animate( { right: "600px", bottom:"300px"}, 2000);', 2700);
+		
+		setTimeout('$("#mouse-cursor-demo").hide();',4300);
+	}
 
 </script>  
 
@@ -158,11 +188,11 @@ function enterSelectFrames2() {
 
 </div>
 <div id="picture-info-screen" class="ui">
-	<ul id="info-screen-tabs" class="menu ui">
+	<!--<ul id="info-screen-tabs" class="menu ui">
     	<li onclick="$('#info-screen-frame').attr('src','http://www.dennisschaaf.com/bornholm/?p=4#content');">Description</li>
       <li onclick="$('#info-screen-frame').attr('src','http://www.dennisschaaf.com/bornholm/?p=4#comments');">Comments</li>
         <li onclick="$('#info-screen-frame').attr('src','http://www.dennisschaaf.com/bornholm/?p=4#respond');">Leave Comment</li>
-    </ul>
+    </ul>-->
     <div id="info-screen-content">
       <iframe id="info-screen-frame" 
       		src="http://www.dennisschaaf.com/bornholm/?p=4&embedded=true" 
@@ -201,9 +231,30 @@ function enterSelectFrames2() {
 	<a href="javascript:$('#picture-navigation-screen').toggle();">Pic Navi</a>
     <a href="javascript:$('#picture-info-screen').toggle();">Info</a>
     <a href="javascript:$('#black-mode-screen').toggle();$('#picture-display-screen').toggle();">pic</a>
-
+	<select id="debugfns" ></select>
+    
 </div>
+<script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
+<script type="text/javascript"> 
+	debugoptions = {
+		"alert('Ahh!')":"Panic",
+		"cf()":"Coverflow",
+		"mousedemo()":"Mouse Demo"
+		
+	}
+	
+	$("#debugfns").ready ( function () {
+		$("#debugfns").addOption(debugoptions,false)
+		$("#debugfns").change(function (event,ui) {
+										
+			var dropdown = document.getElementById("debugfns");  
+        	var index = dropdown.selectedIndex;  
+			
+        	eval(dropdown.options[index].value); 
+		});
+	});
 
+</script>
 <div id="development-console-screen" class="ui" >
 	Console
 	<p id="development-console">&nbsp; 
@@ -214,6 +265,12 @@ function enterSelectFrames2() {
 	</p>
 
 </div>
+
+<div id="mouse-cursor" style="position:absolute; right: 517px; bottom: 500px; z-index: 10000; margin:0px; padding:0px;">
+	<img src="images/mouse_cursor.png" />
+    <img src="images/art/art1.png" id="mouse-cursor-demo" style="display:none;"/>
+</div>
+
 
 </body>
 </html>
