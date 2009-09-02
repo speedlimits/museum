@@ -135,11 +135,13 @@ void CameraPath::load(const String& filename) {
         float32 posx, posy, posz;
         float32 orientx, orienty, orientz, orientw;
         float32 dt;
-        int nitems = fscanf(pathfile, "(%f %f %f) (%f %f %f %f) (%f)",
+        int nitems = fscanf(pathfile, "(%f %f %f) (%f %f %f %f) (%f)\n",
             &posx, &posy, &posz,
             &orientx, &orienty, &orientz, &orientw,
             &dt
         );
+        std::cout << "dbm debug cameraPath load: " << posx<<","<<posy<<","<<posz<<","<<orientx<<","<<orienty<<","<<orientz<<","<<
+                orientw<<","<<dt<<std::endl;
         if (nitems != 8) break;
         CameraPoint cp(
             Vector3d(posx, posy, posz),
