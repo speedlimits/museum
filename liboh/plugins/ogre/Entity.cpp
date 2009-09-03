@@ -179,12 +179,31 @@ void Entity::unsetParent(Time ti, const Location &newLocation) {
 void Entity::destroyed() {
     delete this;
 }
+
 void Entity::extrapolateLocation(TemporalValue<Location>::Time current) {
     Location loc (getProxy().extrapolateLocation(current));
     setOgrePosition(loc.getPosition());
     setOgreOrientation(loc.getOrientation());
     setStatic(getProxy().isStatic(current));
 }
+
+BoundingBox<float32> Entity::getWorldBoundingBox() const {
+    if (!mOgreObject)
+        return BoundingBox<float32>::null();
+    const Ogre::AxisAlignedBox &bbox = mOgreObject->getWorldBoundingBox();
+    const Ogre::Vector3 &min = bbox.getMinimum();
+    const Ogre::Vector3 &max = bbox.getMaximum();
+    return BoundingBox<float32>(Vector3<float32>(min.x, min.y, min.z), Vector3<float32>(max.x, max.y, max.z));
+}
+
+BoundingSphere<float32> Entity::getWorldBoundingSphere() const {
+    if (!mOgreObject)
+        return BoundingSphere<float32>::null();
+    const Ogre::Sphere& sph = mOgreObject->getWorldBoundingSphere();
+    const Ogre::Vector3 &center = sph.getCenter();
+    return BoundingSphere<float32>(Vector3<float32>(center.x, center.y, center.z), sph.getRadius());
+}
+
 
 }
 }

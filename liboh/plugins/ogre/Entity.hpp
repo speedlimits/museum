@@ -113,6 +113,8 @@ public:
     const SpaceObjectReference&id()const{
         return mProxy->getObjectReference();
     }
+    BoundingBox<float32> getWorldBoundingBox() const;
+    BoundingSphere<float32> getWorldBoundingSphere() const;
 };
 typedef std::tr1::shared_ptr<Entity> EntityPtr;
 
