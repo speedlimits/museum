@@ -54,10 +54,16 @@ if not host:
 #
 
 if len(sys.argv) > 1:
-    fin = sys.argv[1]
+    if len(sys.argv) == 2:
+        fin = sys.argv[1]
+    else:
+        fin = ""
+        for i in sys.argv[1:]:
+            fin += i + " "
 else:
     fin = "scene.csv"
-fout = fin[:-4] + ".db"
+
+fout = "scene.db"
 cmd = "python csv_converter.py " + fin +" "+ fout
 print cmd
 sin, sout = os.popen2(cmd)
