@@ -39,7 +39,15 @@ namespace Sirikata {
 class Transform: protected Vector3<float64> {
     Quaternion mOrientation;
 public:
-    Transform(){}
+    Transform() {
+        x = 0;
+        y = 0;
+        z = 0;
+        mOrientation.x = 0;
+        mOrientation.y = 0;
+        mOrientation.z = 0;
+        mOrientation.w = 1;
+    }
     Transform(const Vector3<float64>&position, 
              const Quaternion&orientation):mOrientation(orientation) {
         x=position.x;

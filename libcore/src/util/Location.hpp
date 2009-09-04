@@ -65,7 +65,11 @@ class Location: public Transform {
         setVelocity(inverseOtherOrientation * (getVelocity() - reference.getVelocity()));
     }
 public:
-    Location(){}
+    Location() {
+        mVelocity.set(0, 0, 0);
+        mAxisOfRotation.set(0, 1, 0);
+        mAngularSpeed = 0;
+    }
     Location(const Vector3<float64>&position,
              const Quaternion&orientation,
              const Vector3<float32> &velocity,
