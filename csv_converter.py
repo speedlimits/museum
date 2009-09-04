@@ -116,6 +116,8 @@ class CsvToSql:
         self.name_to_uuid = {}
         self.uuid_objects = {}
         self.table_name = 'persistence'
+        self.camera_count=0
+        self.max_cameras=1
 
     def getTableName(self, uuid):
         return uuid.get_bytes()
@@ -156,30 +158,36 @@ class CsvToSql:
         value = "".join(chr(c) for c in value);
         curs.execute(table_insert, (buffer(object_name), key_name, buffer(value)))
 
-    def go(self, openfile, **csvargs):
+    def go(self, filelist, **csvargs):
         cursor = self.conn.cursor()
         self.addTable(cursor)
 
         uuidlist = Sirikata.UUIDListProperty()
 
-        reader = csv.DictReader(openfile, **csvargs)
-        for row in reader:
-            try:
-                if row['objtype'] not in ALLOWED_TYPES:
-                    continue # blank or bad row
+        for openfile in filelist:
+            reader = csv.DictReader(openfile, **csvargs)
+            for row in reader:
+                try:
+                    if row['objtype'] not in ALLOWED_TYPES:
+                        continue # blank or bad row
 
-                u = self.addUUID(row)
-                self.processRow(u, row, cursor)
-                uuidlist.value.append(u.get_bytes())
-            except:
-                print row
-                raise
+                    u = self.addUUID(row)
+                    self.processRow(u, row, cursor)
+                    uuidlist.value.append(u.get_bytes())
+                except:
+                    print row
+                    raise
         nulluuid = uuid.UUID(int=0)
         self.set(cursor, nulluuid, 'ObjectList', uuidlist.SerializeToString())
         self.conn.commit()
         cursor.close()
 
     def processRow(self, uuid, row, cursor):
+        if row['objtype']=='camera':
+            self.camera_count += 1
+            if self.camera_count > self.max_cameras:
+                print "not a good idea to have too many cameras -- not adding this one"
+                return
         location = Sirikata.ObjLoc()
         self.protovec(location.position, row, 'pos')
         if (row.get('orient_w','')):
@@ -314,22 +322,30 @@ class CsvToSql:
             self.set(cursor, uuid, 'IsCamera', '')
 
 if __name__=='__main__':
+    sqlfile = 'scene.db'
     if len(sys.argv) > 1:
-        csvfile = sys.argv[1]
+        if len(sys.argv) == 2:
+            csvfiles = [sys.argv[1]]
+        else:
+            csvfiles = []
+            for i in sys.argv[1:-1]:
+                csvfiles.append(i)
+            sqlfile = sys.argv[-1]
     else:
-        csvfile = 'scene.csv'
-    if len(sys.argv) > 2:
-        sqlfile = sys.argv[2]
-    else:
-        sqlfile = 'scene.db'
-    if len(sys.argv) > 3:
-        noisy=True
+        csvfiles = ['scene.csv']
+
     try:
         os.rename(sqlfile, sqlfile+'.bak')
     except OSError:
         pass
 
+    print "converting:", csvfiles, "to:", sqlfile
     conn = sqlite3.connect(sqlfile)
     converter = CsvToSql(conn)
-    converter.go(open(csvfile))
+    handles = []
+    for fname in csvfiles:
+        handles.append(open(fname))
+    converter.go(handles)
+    for han in handles:
+        han.close()
     print "Generating scene: SUCCESS!"
