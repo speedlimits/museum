@@ -296,6 +296,9 @@ class CsvToSql:
             if noisy:
                 print "** Adding a Camera ",uuid
             self.set(cursor, uuid, 'IsCamera', '')
+            temp = Sirikata.StringProperty()
+            temp.value = "PrimaryCamera"
+            self.set(cursor, uuid, 'Name', temp.SerializeToString())
 
 if __name__=='__main__':
     sqlfile = 'scene.db'

@@ -15,9 +15,15 @@ DEBUG_OUTPUT=True
 class exampleclass:
     def __init__(self):
         self.paintings={}
+        try:
+            f = open("avatar.id")
+            self.local_avatar = f.read().strip()
+        except:
+            self.local_avatar = None
+        print "PY: init exampleclass, local_avatar:", self.local_avatar
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
-        print "Got an RPC named",name
+        print "PY: Got an RPC named",name
         header = pbHead.Header()
         header.ParseFromString(util.fromByteArray(serialheader))
         if name == "RetObj":
@@ -27,11 +33,10 @@ class exampleclass:
                 retobj.ParseFromString(util.fromByteArray(serialarg))
             except:
                 pass
+            print "PY debug retobj:", dir(retobj)
             self.objid = util.tupleToUUID(retobj.object_reference)
-            print "sendprox1"
             self.spaceid = util.tupleToUUID(header.source_space)
-
-            print self.spaceid
+            if DEBUG_OUTPUT: print "PY: sendprox1", self.spaceid
             self.sendNewProx()
             self.setPosition(angular_speed=0, axis=(0,1,0))
         elif name == "ProxCall":
@@ -67,18 +72,24 @@ class exampleclass:
                 self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
 
     def sawAnotherObject(self,persistence,header,retstatus):
+        if DEBUG_OUTPUT: print "PY: sawAnotherObject1"
         if header.HasField('return_status') or retstatus:
             return
         uuid = util.tupleToUUID(header.source_object)
         myName = ""
+        if DEBUG_OUTPUT: print "PY: sawAnotherObject2"
         for field in persistence.reads:
+            print "PY: field:", field.field_name
             if field.field_name == 'Name':
                 if field.HasField('data'):
                     nameStruct=pbSiri.StringProperty()
                     nameStruct.ParseFromString(field.data)
                     myName = nameStruct.value
+            if field.field_name == "IsCamera":
+                if DEBUG_OUTPUT: print "PY: this is the camera"
         if DEBUG_OUTPUT: print "PY: Object",uuid,"has name-->" + myName + "<--",type(myName)
-        if myName[:6]=="Avatar":
+        if myName==self.local_avatar:
+            if DEBUG_OUTPUT: print "PY: this should be our parent"
             rws=pbPer.ReadWriteSet()
             se=rws.writes.add()
             se.field_name="Parent"
@@ -97,7 +108,7 @@ class exampleclass:
         try:
             self.reallyProcessRPC(header,name,arg)
         except:
-            print "Error processing RPC",name
+            print "PY: Error processing RPC",name
             traceback.print_exc()
 
     def setPosition(self,position=None,orientation=None,velocity=None,angular_speed=None,axis=None,force=False,objid=None):
@@ -136,25 +147,22 @@ class exampleclass:
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def sendNewProx(self):
-        print "sendprox2"
+        print "PY: sendprox2"
         try:
-            print "sendprox3"
             body = pbSiri.MessageBody()
             prox = pbSiri.NewProxQuery()
             prox.query_id = 123
-            print "sendprox4"
             prox.max_radius = 1.0e+30
             body.message_names.append("NewProxQuery")
             body.message_arguments.append(prox.SerializeToString())
             header = pbHead.Header()
-            print "sendprox5"
             header.destination_space = util.tupleFromUUID(self.spaceid);
             print dir(HostedObject)
-            print "time locally ",HostedObject.GetLocalTime().microseconds();
+            print "PY: time locally ",HostedObject.GetLocalTime().microseconds();
 
             from System import Array, Byte
             arry=Array[Byte](tuple(Byte(c) for c in util.tupleFromUUID(self.spaceid)))
-            print "time on spaceA ",HostedObject.GetTimeFromByteArraySpace(arry).microseconds()
+            print "PY: time on spaceA ",HostedObject.GetTimeFromByteArraySpace(arry).microseconds()
             #print "time on spaceB ",HostedObject.GetTime(self.spaceid).microseconds()
             header.destination_object = util.tupleFromUUID(uuid.UUID(int=0))
             header.destination_port = 3 # libcore/src/util/KnownServices.hpp
@@ -162,13 +170,13 @@ class exampleclass:
             bodystr = body.SerializeToString()
             HostedObject.SendMessage(util.toByteArray(headerstr+bodystr))
         except:
-            print "ERORR"
+            print "PY: ERORR"
             traceback.print_exc()
 
     def processMessage(self,header,body):
-        print "Got a message"
+        print "PY: Got a message"
 
     def tick(self,tim):
         x=str(tim)
-        print "Current time is "+x;
+        print "PY: Current time is "+x;
         #HostedObject.SendMessage(tuple(Byte(ord(c)) for c in x));# this seems to get into hosted object...but fails due to bad encoding
