@@ -38,10 +38,47 @@
 
 <script type="text/javascript">  
 
-
-
 setTimeout('enterWelcomeScreen()', 1000);
 //setTimeout('artTest()', 1000);
+
+//modes
+
+screens = ['mode-screen', 'large-screen', 'header', 'navigation','info-screen'];
+
+developmentMode = { screens:['development-console-screen','development-screen']};
+
+curatorWelcomeMode = {
+	screens: ['mode-screen', 'large-screen'],
+	load: {"large-screen":"welcome.html"}
+};
+curatorSetupMode = {
+	screens: ['mode-screen', 'large-screen'],
+	load: {"large-screen":"load-gallery.html"}
+};
+curatorArtMode = {
+	screens: ['header', 'navigation','info-screen'],
+	load: {"info-screen":"coverflow.html"}
+};
+
+
+
+function enterMode(mode) {
+
+	for (s in screens) {
+		if (mode.screens.contains(screens[s]) {
+			$("#" + screens[s]).fadeIn("slow");
+		} else {
+			$("#" + screens[s]).fadeOut("slow");
+		}
+	};
+
+	for (l in mode.load) {
+		mw = $("#" + l);
+		mw.load(mode.load[l]);
+	};
+
+}
+
 
 function enterWelcomeScreen() {
 	loadLargeModal("welcome.html");
@@ -145,7 +182,7 @@ function mousedemo() {
   	<!--<img src="images/screenshot.jpg" width="100%" height="100%" /-->
 </div>
 
-<div id="mode-large-modal" >
+<div id="large-screen" >
  &nbsp;
 </div>
 <div id="mode-small-modal" >
