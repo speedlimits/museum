@@ -62,12 +62,14 @@ OptionValue *cdnConfigFile;
 OptionValue *floatExcept;
 OptionValue *dbFile;
 OptionValue *host;
+OptionValue *camPath;
 InitializeGlobalOptions main_options("",
 //    simulationPlugins=new OptionValue("simulationPlugins","ogregraphics",OptionValueType<String>(),"List of plugins that handle simulation."),
     cdnConfigFile=new OptionValue("cdnConfig","cdn = ($import=cdn.txt)",OptionValueType<String>(),"CDN configuration."),
     floatExcept=new OptionValue("sigfpe","false",OptionValueType<bool>(),"Enable floating point exceptions"),
     dbFile=new OptionValue("db","scene.db",OptionValueType<String>(),"Persistence database"),
     host=new OptionValue("host","localhost",OptionValueType<String>(),"space address"),
+    camPath=new OptionValue("campath","camera_path.csv",OptionValueType<String>(),"camera path file"),
     NULL
 );
 
