@@ -996,6 +996,7 @@ SET(LIBOH_PLUGIN_OGREGRAPHICS_SOURCES
   ${GFX}/OgreMeshRaytrace.cpp
   ${GFX}/CubeMap.cpp
   ${GFX}/OgreSystemMouseHandler.cpp
+  ${GFX}/LightBulb.cpp
   ${GFX}/DragActions.cpp
   ${GFX}/InputBinding.cpp
   ${GFX}/InputBindingEvent.cpp
