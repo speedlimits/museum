@@ -45,7 +45,7 @@ namespace Graphics {
 class OgreSystem;
 
 /** Base class for any ProxyObject that has a representation in Ogre. */
-class Entity 
+class Entity
   : public PositionListener,
     public ProxyObjectListener
 {
@@ -58,6 +58,7 @@ protected:
 
     std::list<Entity*>::iterator mMovingIter;
 
+    // Cross-link the Entity and the MovableObject, and attach the MovableObject to the Ogre scene.
     void init(Ogre::MovableObject *obj);
 
     void setStatic(bool isStatic);
@@ -113,12 +114,39 @@ public:
     const SpaceObjectReference&id()const{
         return mProxy->getObjectReference();
     }
-    BoundingBox<float32> getWorldBoundingBox() const;
-    BoundingSphere<float32> getWorldBoundingSphere() const;
+    
+    void replaceMoveableObject(Ogre::MovableObject *obj) {
+        init(obj);
+    }
+
+
+    // Note: These bounding volume calls need to be called with the explicit type, i.e. getOgreWorldBoundingBox<float>()
+    template<typename real>
+    BoundingBox<real> getOgreWorldBoundingBox() const {
+        return mOgreObject ? fromOgre<real>(mOgreObject->getWorldBoundingBox()) : BoundingBox<real>::null();
+    }
+
+    template<typename real>
+    BoundingSphere<real> getOgreWorldBoundingSphere() const {
+        return mOgreObject ? fromOgre<real>(mOgreObject->getWorldBoundingSphere()) : BoundingSphere<real>::null();
+    }
+
+    template<typename real>
+    BoundingBox<real> getOgreLocalBoundingBox() const {
+        return mOgreObject ? fromOgre<real>(mOgreObject->getBoundingBox()) : BoundingBox<real>::null();
+    }
+
+    template<typename real>
+    BoundingSphere<real> getOgreLocalBoundingSphere() const {
+        return mOgreObject
+            ? fromOgre<real>(Ogre::Sphere( mOgreObject->getBoundingBox().getCenter(), mOgreObject->getBoundingRadius()))
+            : BoundingSphere<real>::null();
+    }
+
 };
 typedef std::tr1::shared_ptr<Entity> EntityPtr;
 
-}
-}
+} // namespace Graphics
+} // namespace Sirikata
 
-#endif
+#endif // SIRIKATA_GRAPHICS_ENTITY_HPP__
