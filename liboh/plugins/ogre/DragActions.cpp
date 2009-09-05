@@ -121,11 +121,11 @@ const DragAction &DragActionRegistry::get(const std::string &name) {
 
 void pixelToRadians(CameraEntity *cam, float deltaXPct, float deltaYPct, float &xRadians, float &yRadians) {
     // This function is useless and hopelessly broken, since radians have no meaning in perspective. Use pixelToDirection instead!!!
-    SILOG(input,info,"FOV Y Radians: "<<cam->getOgreCamera()->getFOVy().valueRadians()<<"; aspect = "<<cam->getOgreCamera()->getAspectRatio());
+    //SILOG(input,info,"FOV Y Radians: "<<cam->getOgreCamera()->getFOVy().valueRadians()<<"; aspect = "<<cam->getOgreCamera()->getAspectRatio());
     xRadians = cam->getOgreCamera()->getFOVy().valueRadians() * cam->getOgreCamera()->getAspectRatio() * deltaXPct;
     yRadians = cam->getOgreCamera()->getFOVy().valueRadians() * deltaYPct;
-    SILOG(input,info,"X = "<<deltaXPct<<"; Y = "<<deltaYPct);
-    SILOG(input,info,"Xradian = "<<xRadians<<"; Yradian = "<<yRadians);
+    //SILOG(input,info,"X = "<<deltaXPct<<"; Y = "<<deltaYPct);
+    //SILOG(input,info,"Xradian = "<<xRadians<<"; Yradian = "<<yRadians);
 }
 // Uses perspective
 Vector3f pixelToDirection(CameraEntity *cam, Quaternion orient, float xPixel, float yPixel) {
@@ -472,6 +472,7 @@ class PanCameraDrag : public ActiveDrag {
     Vector3f toMove;
 public:
     PanCameraDrag(const DragStartInfo &info) {
+        std::cout << "dbm debug PanCameraDrag" << std::endl;
         int hitCount=0;
         camera = info.camera;
         mParent = info.sys;
@@ -508,7 +509,8 @@ public:
         }
     }
 };
-DragActionRegistry::RegisterClass<PanCameraDrag> pancamera("panCamera");
+/// not on my watch ya don't CCRMA: no camera drag (messes with avatar)
+//DragActionRegistry::RegisterClass<PanCameraDrag> pancamera("panCamera");
 
 
 ////////////////////////////////////////////////////////////////////////////////
