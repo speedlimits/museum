@@ -32,6 +32,7 @@
 """
 import sys
 noisy=False
+noisy=1
 try:
     try:
         import sqlite3
@@ -151,6 +152,7 @@ class CsvToSql:
         for openfile in filelist:
             reader = csv.DictReader(openfile, **csvargs)
             for row in reader:
+                print "row:", row
                 try:
                     if row['objtype'] not in ALLOWED_TYPES:
                         continue # blank or bad row

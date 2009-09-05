@@ -1,11 +1,6 @@
 #!/usr/bin/python
 import sys, os, time
 
-host=None
-if len(sys.argv) > 2:
-    host = sys.argv[2]
-
-
 def check_for_proc(proc):
     sin, sout = os.popen2("ps -af")
     s = sout.read()
@@ -37,21 +32,10 @@ else:
         exit()
 
 #
-# Run prox & space daemons (if not already running)
-#
-
-if not host:
-    for proc, delay in (proxserver, 4.5), (spaceserver, .5):
-
-        if not check_for_proc("./"+proc):
-            cmd = 'xterm -e "cd build/cmake; ./' + proc + '" &'
-            print cmd
-            os.system(cmd)
-            time.sleep(delay)
-
-#
 # Convert .csv files into sqlite .db files
 #
+
+host=None
 
 if len(sys.argv) > 1:
     if len(sys.argv) == 2:
@@ -59,7 +43,10 @@ if len(sys.argv) > 1:
     else:
         fin = ""
         for i in sys.argv[1:]:
-            fin += i + " "
+            if not i[0] in "012":
+                fin += i + " "
+            else:
+                host = i
 else:
     fin = "scene.csv"
 
@@ -72,6 +59,19 @@ if not "SUCCESS" in s:
     print s
     print "csv --> db conversion failed, aborting run"
     exit()
+
+#
+# Run prox & space daemons (if not already running)
+#
+
+if not host:
+    for proc, delay in (proxserver, 4.5), (spaceserver, .5):
+
+        if not check_for_proc("./"+proc):
+            cmd = 'xterm -e "cd build/cmake; ./' + proc + '" &'
+            print cmd
+            os.system(cmd)
+            time.sleep(delay)
 
 #
 # Run our object host
