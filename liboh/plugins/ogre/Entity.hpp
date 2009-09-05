@@ -143,6 +143,9 @@ public:
             : BoundingSphere<real>::null();
     }
 
+    void setVisible(bool visible)   { if (mOgreObject) mOgreObject->setVisible(visible); }
+    bool getVisible(void) const     { return mOgreObject ? mOgreObject->getVisible() : false; }
+
 };
 typedef std::tr1::shared_ptr<Entity> EntityPtr;
 
