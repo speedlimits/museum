@@ -65,7 +65,7 @@ public:
     ProxyObject::Extrapolator mUpdatedLocation;
 
     void locationWasReset(Time timestamp, Location loc) {
-        loc.setVelocity(Vector3f::nil());
+        loc.setVelocity(Vector3f::zero());
         loc.setAngularSpeed(0);
         mUpdatedLocation.resetValue(timestamp, loc);
     }
@@ -73,7 +73,7 @@ public:
         Time timestamp = msg.timestamp();
         Location loc = mUpdatedLocation.extrapolate(timestamp);
         ProxyObject::updateLocationWithObjLoc(loc, msg);
-        loc.setVelocity(Vector3f::nil());
+        loc.setVelocity(Vector3f::zero());
         loc.setAngularSpeed(0);
         mUpdatedLocation.updateValue(timestamp, loc);
     }
@@ -171,7 +171,7 @@ struct HostedObject::PrivateCallbacks {
         }
         String scriptName;
         std::map<String,String> scriptParams;
-        Location location(Vector3d::nil(),Quaternion::identity(),Vector3f::nil(),Vector3f(1,0,0),0);
+        Location location(Vector3d::zero(),Quaternion::identity(),Vector3f::zero(),Vector3f(1,0,0),0);
         for (int i = 0; i < msg->body().reads_size(); i++) {
             String name = msg->body().reads(i).field_name();
             if (msg->body().reads(i).has_return_status() || !msg->body().reads(i).has_data()) {
@@ -222,7 +222,7 @@ struct HostedObject::PrivateCallbacks {
             }
         }
         // Temporary Hack because we do not have access to the CDN here.
-        BoundingSphere3f sphere(Vector3f::nil(),1);
+        BoundingSphere3f sphere(Vector3f::zero(),1);
         realThis->sendNewObj(location, sphere, spaceID);
         delete msg;
         if (!scriptName.empty()) {

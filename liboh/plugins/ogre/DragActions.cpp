@@ -298,7 +298,7 @@ public:
                 mOriginalPosition.push_back(currentLoc.getPosition());
             } else {
                 mOriginalRotation.push_back(Quaternion::identity());
-                mOriginalPosition.push_back(Vector3d::nil());
+                mOriginalPosition.push_back(Vector3d::zero());
             }
         }
     }

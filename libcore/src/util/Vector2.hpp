@@ -86,7 +86,7 @@ public:
         y=other;
         return *this;
     }
-    static Vector2 nil() {
+    static Vector2 zero() {
         return Vector2(0,0);
     }
     static Vector2 unitX() {
