@@ -314,6 +314,8 @@ private:
                 mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
             }
             if (mouseOver) {
+                /// for CCRMA, no selection please
+                /*
                 /// FIXME: total kluge!  Need a way to not select walls etc
                 ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
                 if (overMesh) {
@@ -325,6 +327,7 @@ private:
                         // Fire selected event.
                     }
                 }
+                */
             }
             mLastShiftSelected = SpaceObjectReference::null();
         }
