@@ -991,10 +991,10 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
     }
     else if (name == "SetLoc") {
         ObjLoc setloc;
-        printstr<<"Someone wants to set my position: ";
+        printstr<<"Someone wants to set my position, axis = ";
         setloc.ParseFromArray(args.data(), args.length());
         if (thisObj) {
-            printstr<<setloc.position();
+            printstr<<setloc.rotational_axis();
             receivedPositionUpdate(thisObj, setloc, false);
         }
     }
@@ -1148,8 +1148,14 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
             // Do not create a proxy object in this case: This message is for one-time queries
             break;
         }
-    } else {
-        printstr<<"Message to be handled in script: "<<name;
+    }
+    else if (name=="MitoMessage") {
+        String s((char*)args.data());
+        //printstr<<"MitoMessage-->" << s << "<--";
+        mObjectHost->mDumbMsg = s;
+    } 
+    else {
+        //printstr<<"Message to be handled in script: "<<name;
     }
     SILOG(cppoh,debug,printstr.str());
     if (mObjectScript) {

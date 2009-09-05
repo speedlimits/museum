@@ -10,20 +10,20 @@ print dir(HostedObject)
 import System
 import util
 
-DEBUG_OUTPUT=True
+DEBUG_OUTPUT=False
 
 class exampleclass:
     def __init__(self):
-        self.paintings={}
+        self.avatars={}
         try:
             f = open("avatar.id")
             self.local_avatar = f.read().strip()
         except:
             self.local_avatar = None
-        print "PY: init exampleclass, local_avatar:", self.local_avatar
+        if DEBUG_OUTPUT: print "PY: init exampleclass, local_avatar:", self.local_avatar
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
-        print "PY: Got an RPC named",name
+        if DEBUG_OUTPUT: print "PY: Got an RPC named",name
         header = pbHead.Header()
         header.ParseFromString(util.fromByteArray(serialheader))
         if name == "RetObj":
@@ -33,12 +33,12 @@ class exampleclass:
                 retobj.ParseFromString(util.fromByteArray(serialarg))
             except:
                 pass
-            print "PY debug retobj:", dir(retobj)
+            if DEBUG_OUTPUT: print "PY debug retobj:", dir(retobj)
             self.objid = util.tupleToUUID(retobj.object_reference)
             self.spaceid = util.tupleToUUID(header.source_space)
             if DEBUG_OUTPUT: print "PY: sendprox1", self.spaceid
             self.sendNewProx()
-            self.setPosition(angular_speed=0, axis=(0,1,0))
+##            self.setPosition(angular_speed=0, axis=(0,.6,.8))
         elif name == "ProxCall":
             proxcall = pbSiri.ProxCall()
             proxcall.ParseFromString(util.fromByteArray(serialarg))
@@ -55,21 +55,28 @@ class exampleclass:
                 pass
         elif name == "JavascriptMessage":
             s = "".join(chr(i) for i in serialarg)
-            if DEBUG_OUTPUT: print "PY", name, s
+            if DEBUG_OUTPUT: print "PY: JavascriptMessage:", s
             tok = s.split()
-            if tok[1]=="placeObject":
-                painting = tok[2]
-                if not painting in self.paintings:
-                    print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
-                x = float(tok[5])
-                y = float(tok[6])
-                z = float(tok[7])
-                qx = float(tok[8])
-                qy = float(tok[9])
-                qz = float(tok[10])
-                qw = float(tok[11])
-                print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
-                self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
+            if tok[0]=="MitoMessage":
+                recepient = tok[1]
+                if not recepient in self.avatars:
+                    print "PY ERROR from unknown avatar-->" + recepient + "<--"
+                msg = self.local_avatar + "_" + tok[2]
+                if DEBUG_OUTPUT: print "PY: MitoMessage", msg, "to", recepient
+                self.sendMitoMessage(recepient, msg)
+##            if tok[1]=="placeObject":
+##                painting = tok[2]
+##                if not painting in self.paintings:
+##                    print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
+##                x = float(tok[5])
+##                y = float(tok[6])
+##                z = float(tok[7])
+##                qx = float(tok[8])
+##                qy = float(tok[9])
+##                qz = float(tok[10])
+##                qw = float(tok[11])
+##                print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+##                self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if DEBUG_OUTPUT: print "PY: sawAnotherObject1"
@@ -79,7 +86,7 @@ class exampleclass:
         myName = ""
         if DEBUG_OUTPUT: print "PY: sawAnotherObject2"
         for field in persistence.reads:
-            print "PY: field:", field.field_name
+            if DEBUG_OUTPUT: print "PY: field:", field.field_name
             if field.field_name == 'Name':
                 if field.HasField('data'):
                     nameStruct=pbSiri.StringProperty()
@@ -101,8 +108,9 @@ class exampleclass:
             header.destination_object=util.tupleFromUUID(self.objid);
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
-        elif myName[:8]=="artwork_":
-            self.paintings[myName]=uuid
+        if myName[:6]=="Avatar":
+            self.avatars[myName]=uuid
+            if DEBUG_OUTPUT: print "PY: avatar list:", self.avatars.keys()
 
     def processRPC(self,header,name,arg):
         try:
@@ -110,6 +118,16 @@ class exampleclass:
         except:
             print "PY: Error processing RPC",name
             traceback.print_exc()
+
+    def sendMitoMessage(self, recepient, message):
+        if DEBUG_OUTPUT: print "PY: sendMitoMessage", message, "to:", recepient
+        body = pbSiri.MessageBody()
+        body.message_names.append("MitoMessage")
+        body.message_arguments.append(message)
+        header = pbHead.Header()
+        header.destination_space = util.tupleFromUUID(self.spaceid)
+        header.destination_object = util.tupleFromUUID(self.avatars[recepient])
+        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def setPosition(self,position=None,orientation=None,velocity=None,angular_speed=None,axis=None,force=False,objid=None):
         if not objid: objid = self.objid
@@ -147,7 +165,7 @@ class exampleclass:
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def sendNewProx(self):
-        print "PY: sendprox2"
+        if DEBUG_OUTPUT: print "PY: sendprox2"
         try:
             body = pbSiri.MessageBody()
             prox = pbSiri.NewProxQuery()
@@ -157,12 +175,11 @@ class exampleclass:
             body.message_arguments.append(prox.SerializeToString())
             header = pbHead.Header()
             header.destination_space = util.tupleFromUUID(self.spaceid);
-            print dir(HostedObject)
-            print "PY: time locally ",HostedObject.GetLocalTime().microseconds();
+            if DEBUG_OUTPUT: print "PY: time locally ",HostedObject.GetLocalTime().microseconds();
 
             from System import Array, Byte
             arry=Array[Byte](tuple(Byte(c) for c in util.tupleFromUUID(self.spaceid)))
-            print "PY: time on spaceA ",HostedObject.GetTimeFromByteArraySpace(arry).microseconds()
+            if DEBUG_OUTPUT: print "PY: time on spaceA ",HostedObject.GetTimeFromByteArraySpace(arry).microseconds()
             #print "time on spaceB ",HostedObject.GetTime(self.spaceid).microseconds()
             header.destination_object = util.tupleFromUUID(uuid.UUID(int=0))
             header.destination_port = 3 # libcore/src/util/KnownServices.hpp
@@ -174,9 +191,9 @@ class exampleclass:
             traceback.print_exc()
 
     def processMessage(self,header,body):
-        print "PY: Got a message"
+        if DEBUG_OUTPUT: print "PY: Got a message"
 
     def tick(self,tim):
         x=str(tim)
-        print "PY: Current time is "+x;
+        if DEBUG_OUTPUT: print "PY: Current time is "+x;
         #HostedObject.SendMessage(tuple(Byte(ord(c)) for c in x));# this seems to get into hosted object...but fails due to bad encoding

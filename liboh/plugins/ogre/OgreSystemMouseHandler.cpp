@@ -645,7 +645,7 @@ private:
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(about);
         rloc.set_angular_speed(amount);
-        std::cout << "dbm debug: rotateAction: " << about << ", " << amount << std::endl;
+        //std::cout << "dbm debug: rotateAction: " << about << ", " << amount << std::endl;
         cam->requestLocation(now, rloc);
     }
 
@@ -669,7 +669,7 @@ private:
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
         rloc.set_angular_speed(dir*amount);
-        std::cout << "dbm debug: stableRotateAction: " << raxis << ", " << dir*amount << std::endl;
+        //std::cout << "dbm debug: stableRotateAction: " << raxis << ", " << dir*amount << std::endl;
         cam->requestLocation(now, rloc);
     }
 
@@ -680,15 +680,21 @@ private:
     }
 
     void setCameraSpeed(const float& speed) {
-        std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
+        //std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
         mCamSpeed = speed;
     }
 
     void sendOscMsg(const int& msg) {
-        std::cout << "dbm debug sendOscMsg " << msg << std::endl;
         ostringstream s;
-        s << "oscMsg_" << msg;
-        mParent->mDumbMsg = s.str();
+        s << "MitoMessage Avatar_01 " << msg;
+        //std::cout << "dbm debug sendOscMsg: " << s.str() << std::endl;
+        RoutableMessageBody rmsg;
+        rmsg.add_message("JavascriptMessage", s.str());
+        String smsg;
+        rmsg.SerializeToString(&smsg);
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        /// our camera script will send the message to Avatar_01 (he's got a list, he's checking it 2X)
+        cam->sendMessage(MemoryReference(smsg));
     }
 
     void importAction() {

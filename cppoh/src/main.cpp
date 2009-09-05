@@ -288,6 +288,7 @@ int main ( int argc,const char**argv ) {
             (*it)->exchangeDumbMsg(s);
         }
         oh->tick();
+        oh->exchangeDumbMsg(s);
         Network::IOServiceFactory::pollService(ioServ);
     }
 	for(SimList::iterator it = sims.begin(); it != sims.end(); it++) {

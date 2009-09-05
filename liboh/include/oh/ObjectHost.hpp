@@ -149,6 +149,14 @@ public:
     }
     /// Looks up a TopLevelSpaceConnection corresponding to a certain space.
     ProxyManager *getProxyManager(const SpaceID&space) const;
+    
+    String mDumbMsg;
+    void exchangeDumbMsg(String& s) {
+        //std::cout << "dbm debug HostedObject::exchangeDumbMsg" << std::endl;
+        String temp = s;
+        s = mDumbMsg;
+        mDumbMsg=temp;
+    };
 }; // class ObjectHost
 
 } // namespace Sirikata
