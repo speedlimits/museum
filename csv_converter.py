@@ -95,6 +95,22 @@ def veclen(fltarray):
             fltarray[1]*fltarray[1] +
             fltarray[2]*fltarray[2])
 
+DEG2RAD = 0.0174532925
+
+def Euler2Quat(yaw, pitch, roll):
+    k = DEG2RAD*.5
+    yawcos = math.cos(yaw*k)
+    yawsin = math.sin(yaw*k)
+    pitchcos = math.cos(pitch*k)
+    pitchsin = math.sin(pitch*k)
+    rollcos = math.cos(roll*k)
+    rollsin = math.sin(roll*k)
+
+    return (rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin,
+            rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos,
+            rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin,
+            rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin)
+
 class CsvToSql:
     def __init__(self, conn):
         self.conn = conn
@@ -125,8 +141,8 @@ class CsvToSql:
         return myid
 
     def addTable(self, curs):
-        table_create = "CREATE TABLE IF NOT EXISTS ";
-        table_create += "\""+self.table_name+"\"";
+        table_create = "CREATE TABLE IF NOT EXISTS "
+        table_create += "\""+self.table_name+"\""
         table_create += "(object TEXT, key TEXT, value TEXT, PRIMARY KEY(object, key))"
         curs.execute(table_create)
 
@@ -152,7 +168,6 @@ class CsvToSql:
         for openfile in filelist:
             reader = csv.DictReader(openfile, **csvargs)
             for row in reader:
-                print "row:", row
                 try:
                     if row['objtype'] not in ALLOWED_TYPES:
                         continue # blank or bad row
@@ -176,9 +191,10 @@ class CsvToSql:
                 return
         location = Sirikata.ObjLoc()
         self.protovec(location.position, row, 'pos')
-        if (row['orient_w']):
-           self.protovec(location.orientation, row, 'orient')
+        if (row.get('orient_w','')):
+            self.protovec(location.orientation, row, 'orient')
         else:
+            """
             # Convert from angle
             phi = float(row['orient_x'])*math.pi/180.
             theta = float(row['orient_y'])*math.pi/180.
@@ -190,8 +206,14 @@ class CsvToSql:
             location.orientation.append(math.cos(phi/2)*math.cos(theta/2)*math.sin(psi/2)
                                       + math.sin(phi/2)*math.sin(theta/2)*math.cos(psi/2)) #z
             # w is not stored to save space, since quaternions are normalized
-            #location.orientation.append(math.cos(phi/2)*math.cos(theta/2)*math.cos(psi/2)
-            #                          + math.sin(phi/2)*math.sin(theta/2)*math.sin(psi/2)) #w
+            location.orientation.append(math.cos(phi/2)*math.cos(theta/2)*math.cos(psi/2)
+                                      + math.sin(phi/2)*math.sin(theta/2)*math.sin(psi/2)) #w
+            """
+            qx, qy, qz, qw = Euler2Quat(float(row['orient_y']), float(row['orient_x']), float(row['orient_z']))
+            location.orientation.append(qx)
+            location.orientation.append(qy)
+            location.orientation.append(qz)
+            location.orientation.append(qw)
         if row.get('vel_x',''):
             self.protovec(location.velocity, row, 'vel')
         if row.get('rot_axis_x',''):
@@ -233,11 +255,8 @@ class CsvToSql:
                 physical.bounce = float(row['bounce'])
                 physical.collide_mask = int(row['colMask'])
                 physical.collide_msg = int(row['colMsg'])
-                if "gravity" in row:
-                    if not row['gravity'] == "":
-                        physical.gravity = float(row['gravity'])
-                    else:
-                        physical.gravity = 1.0
+                if row.get('gravity',''):
+                    physical.gravity = float(row['gravity'])
                 else:
                     physical.gravity = 1.0
                 if row.get('hull_x',''):
@@ -256,6 +275,8 @@ class CsvToSql:
             if noisy:
                 print "** Adding a Light ",uuid
             lightinfo = Sirikata.LightInfoProperty()
+            if row.get('subtype',''):
+                lightinfo.type = LIGHT_TYPES[row['subtype']]
             self.protovec(lightinfo.diffuse_color, row, 'diffuse')
             self.protovec(lightinfo.specular_color, row, 'specular')
             lightinfo.power = float(row['power'])
@@ -285,6 +306,8 @@ class CsvToSql:
                 lightinfo.constant_falloff = float(row['constantfall'])
             elif 'constfall' in row:
                 lightinfo.constant_falloff = float(row['constfall'])
+                if lightinfo.constant_falloff < 0.01:
+                    lightinfo.constant_falloff = 1.0                #bug in artist exporter -- 0 makes no sense, make it 1
             lightinfo.linear_falloff = float(row['linearfall'])
             lightinfo.quadratic_falloff = float(row['quadfall'])
             lightinfo.cone_inner_radians = float(row['cone_in'])
@@ -298,9 +321,6 @@ class CsvToSql:
             if noisy:
                 print "** Adding a Camera ",uuid
             self.set(cursor, uuid, 'IsCamera', '')
-            temp = Sirikata.StringProperty()
-            temp.value = "PrimaryCamera"
-            self.set(cursor, uuid, 'Name', temp.SerializeToString())
 
 if __name__=='__main__':
     sqlfile = 'scene.db'
