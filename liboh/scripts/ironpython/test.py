@@ -10,7 +10,7 @@ print dir(HostedObject)
 import System
 import util
 
-DEBUG_OUTPUT=True#False
+DEBUG_OUTPUT=False
 
 class exampleclass:
     def __init__(self):
