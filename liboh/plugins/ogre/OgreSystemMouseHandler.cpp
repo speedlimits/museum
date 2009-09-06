@@ -30,32 +30,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <util/Standard.hh>
-#include <oh/Platform.hpp>
-#include "OgreSystem.hpp"
-#include "CameraEntity.hpp"
-#include "LightEntity.hpp"
-#include "MeshEntity.hpp"
-#include "input/SDLInputManager.hpp"
-#include <oh/ProxyManager.hpp>
-#include <oh/ProxyObject.hpp>
-#include <oh/ProxyMeshObject.hpp>
-#include <oh/ProxyLightObject.hpp>
-#include <oh/SpaceTimeOffsetManager.hpp>
-#include "input/InputEvents.hpp"
-#include "input/SDLInputDevice.hpp"
-#include "DragActions.hpp"
-#include "InputResponse.hpp"
-#include "InputBinding.hpp"
-#include <task/Event.hpp>
-#include <task/Time.hpp>
-#include <task/EventManager.hpp>
-#include <SDL_keysym.h>
 #include <set>
 
-#include "WebViewManager.hpp"
+#include <SDL_keysym.h>
+#include <oh/Platform.hpp>
+#include <oh/ProxyLightObject.hpp>
+#include <oh/ProxyManager.hpp>
+#include <oh/ProxyMeshObject.hpp>
+#include <oh/ProxyObject.hpp>
+#include <oh/SpaceTimeOffsetManager.hpp>
+#include <task/Event.hpp>
+#include <task/EventManager.hpp>
+#include <task/Time.hpp>
+#include <util/Standard.hh>
+
+#include "CameraEntity.hpp"
 #include "CameraPath.hpp"
+#include "DragActions.hpp"
+#include "InputBinding.hpp"
+#include "InputResponse.hpp"
+#include "LightBulb.hpp"
+#include "LightEntity.hpp"
+#include "MeshEntity.hpp"
+#include "OgreSystem.hpp"
 #include "Ogre_Sirikata.pbj.hpp"
+#include "WebViewManager.hpp"
+#include "input/InputEvents.hpp"
+#include "input/SDLInputDevice.hpp"
+#include "input/SDLInputManager.hpp"
 #include "util/RoutableMessageBody.hpp"
 
 namespace Sirikata {
@@ -567,8 +569,9 @@ private:
         }
     }
 
+
     void createLightAction() {
-#if 0
+#if 1
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         CameraEntity *camera = mParent->mPrimaryCamera;
@@ -597,6 +600,15 @@ private:
             newLightObject->update(li);
         }
 
+        Entity *ent = mParent->getEntity(newId);
+        if (ent) {
+#if 0
+            // Attach a light bulb mesh
+            LightBulb::AttachLightBulb(camera, ent, String("LightMesh" + newId.toString()).c_str(), loc);
+#endif
+            ent->setSelected(true);
+        }
+
         Entity *parentent = mParent->getEntity(mCurrentGroup);
         if (parentent) {
             Location localLoc = loc.toLocal(parentent->getProxy().globalLocation(now));
@@ -608,13 +620,19 @@ private:
         }
         mSelectedObjects.clear();
         mSelectedObjects.insert(newLightObject);
-        Entity *ent = mParent->getEntity(newId);
-        if (ent) {
-            ent->setSelected(true);
-        }
 #else
-    String command("lightSelectedObject");
-    genericStringMessage(WebViewManager::NavigateCommand, command);
+    genericStringMessage(WebViewManager::NavigateCommand, "lightSelectedObject"
+        " diffusecolor=0,0,1"
+        " specularcolor=0,1,0"
+        " ambientcolor=0.05,0.05,0.05"
+        " shadowcolor=0,0,0"
+        " falloff=1,0.01,0.02"
+        " cone=0.4,0.5,1"
+        " power=1"
+        " lightrange=32"
+        " castsshadow=false"
+        " type=spot"
+    );
 #endif
     }
 	ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
@@ -624,6 +642,40 @@ private:
 		}
 		return camProxy;
 	}
+    
+
+    void controlLightAction() {
+        // Find the selected light
+        
+        // Save current parameters, in case the user wants to cancel
+        
+        // Open light control dialog
+        
+        //
+    }
+    
+    
+    void toggleLightVisibilityAction() {
+        bool foundFirstLight = false;
+        bool visibility = true;
+        OgreSystem::SceneEntitiesMap::const_iterator iter;
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+            iter != mParent->mSceneEntities.end(); ++iter
+        ) {
+            Entity *ent = iter->second;
+            ProxyObject *obj = ent->getProxyPtr().get();
+            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj);
+            if (light) {
+                if (!foundFirstLight) {
+                    visibility = !ent->getVisible();
+                    foundFirstLight = true;
+                }
+                ent->setVisible(visibility);
+            }
+        }
+    }
+
+
     void moveAction(Vector3f dir, float amount) {
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
@@ -829,7 +881,6 @@ private:
             fprintf(fp, "light,%s,,%s,,,%f,%f,%f,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f,%f,,,,,,,,,,,,,",typestr,parent.c_str(),
                     loc.getPosition().x,loc.getPosition().y,loc.getPosition().z,x,y,z,w.c_str(),
                     loc.getVelocity().x, loc.getVelocity().y, loc.getVelocity().z, angAxis.x, angAxis.y, angAxis.z, angSpeed);
-
             fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f,%lf,%f,%f,%f,%f,%f,%f,%f,%d\n",
                     linfo.mDiffuseColor.x,linfo.mDiffuseColor.y,linfo.mDiffuseColor.z,ambientPower,
                     linfo.mSpecularColor.x,linfo.mSpecularColor.y,linfo.mSpecularColor.z,shadowPower,
@@ -1300,7 +1351,7 @@ private:
         Location location(camera->globalLocation(now));
         Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
         double distance;
-        Vector3f normal;
+        Vector3f normal(0, 0, 0);
         bool success = false;
         int numHits = 1, i;
         for (i = 0; i < numHits; i++) {
@@ -1313,14 +1364,13 @@ private:
             success = true;
             break;
         }
-        if (success == false)
+        if (!success || !(normal.normalizeThis()) > 0)
             return false;
 
         // Compute the position, offset from the surface by the specified amount
         *position = location.getPosition() + distance * Vector3d(viewDirection.x, viewDirection.y, viewDirection.z);
         if (viewDirection.dot(normal) > 0)  // backfacing normal
             normal = -normal;               // make it front-facing
-        normal.normalizeThis();
         *position += surfaceOffset * Vector3d(normal.x, normal.y, normal.z);
 
         // Compute the orientation
@@ -1384,7 +1434,7 @@ private:
         }
         size_t hasAttributeName(const char *name) {
             size_t ix = 0;
-            while ((ix = mString->find(name, ix)) != String::npos) {
+            while ((ix = mString->find(name, ix)) != String::npos) {    // FIXME: Prefer a case-insensitive search
                 if (ix > 0 && !isspace((*mString)[ix-1])) {    // No whitespace before the name
                     ix += strlen(name);         // Skip over name
                     continue;                   // Keep looking
@@ -1394,8 +1444,9 @@ private:
                     continue;                   // Keep looking
                 // We know that we have <whitespace> <name> '=', and the index is positioned after the '='
                 // Check for an initial quote
-                if ((*mString)[ix] == '"')
+                if ((*mString)[ix] == '"' || (*mString)[ix] == '\'')
                     ++ix;
+                break;
             }
             return ix;
         }
@@ -1403,8 +1454,15 @@ private:
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
-            // The following does not allow escaping special characters
-            size_t iy = mString->find_first_of(((*mString)[ix-1] == '\"') ? "\"" : " \t\r\n", ix);
+            // FIXME: The following does not allow escaping special characters
+            size_t iy = ix;
+            if ((*mString)[ix-1] == '"') {
+                iy = mString->find_first_of('"', ix);       // Doubly quoted sring
+            } else if ((*mString)[ix-1] == '\'') {
+                iy = mString->find_first_of('\'', ix);      // Singly quoted string
+            } else {
+                iy = mString->find_first_of(" \t\r\n", ix); // Non-quoted string: whitespace delimited
+            }
             *value = String((*mString), ix, iy);
             return true;
         }
@@ -1425,7 +1483,7 @@ private:
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (char *s1; numValues-- && *s1 != 0; value++, s0 = s1 + 1) {
+            for (char *s1; numValues--; value++, s0 = s1 + 1) {
                 *value = strtod(s0, &s1);
                 if (*s1 == 0)
                     break;
@@ -1437,7 +1495,7 @@ private:
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (char *s1; numValues-- && *s1 != 0; value++, s0 = s1 + 1) {
+            for (char *s1; numValues--; value++, s0 = s1 + 1) {
                 *value = strtod(s0, &s1);
                 if (*s1 == 0)
                     break;
@@ -1449,13 +1507,15 @@ private:
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (const char *s1; numValues-- && *s1 != 0; value++, s0 = s1 + 1) {
+            for (const char *s1; numValues--; value++, s0 = s1 + 1) {
                 *value = strtobool(s0, &s1);
                 if (*s1 == 0)
                     break;
             }
             return numValues == -1;
         }
+
+    private:
         static bool strtobool(char const *s0, char const **s1) {
             *s1 = s0;
             if (strncmp(s0, "true", 4) == 0 || strncmp(s0, "TRUE", 4) == 0) {
@@ -1475,11 +1535,10 @@ private:
             return static_cast<bool>(-1);
         }
 
-    private:
         const String *mString;
     };
-    
-    
+
+
     // This parses a string of the form:
     // diffusecolor=1.0,1.0,0.95 specularcolor=1,1,1 ambientcolor=.05,.05,.05 shadowcolor=.02,.02,.02
     // falloff=1.,.01,.02 cone=0,3,0 power=1e2 lightrange=256 castsshadow=true type=spot
@@ -1502,36 +1561,10 @@ private:
             else lightInfo->mWhichFields &= ~LightInfo::TYPE;
         }
     }
-
-
-    void setSelectedObjectLightLocation(float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
-        // Find wall normal and object bounding sphere.
-        // We assume that the object is in front of the wall
-
-        Vector3d objCenter;
-        Vector3f objNormal;
-        float objRadius;
-        Entity *sel;
-        // Get an object's center and radius
-        for (SelectedObjectSet::const_iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it) {
-            ProxyObjectPtr obj(it->lock());
-            sel = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
-            if (sel == NULL)
-                continue;
-            MeshEntity *meshEnt = dynamic_cast<MeshEntity*>(sel);
-            Time now(SpaceTimeOffsetManager::getSingleton().now(mParent->mPrimaryCamera->getProxy().getObjectReference().space()));
-            const BoundingInfo& boundingInfo = meshEnt->getBoundingInfo();
-//            ProxyMeshObject *proxyMesh = dynamic_cast<ProxyMeshObject*>(obj.get());
-            Location loc(obj->globalLocation(now));
-            objCenter = loc.getPosition();
-//            objCenter = boundingInfo.center();
-            objRadius = boundingInfo.radius();
-            break;
-//            Vector3d dViewPosition = mCameraLocation.getPosition();
-//            Vector3f viewDirection(viewDirection.x, viewDirection.y, viewDirection.z);
-        }
-        
-        // Get the floor coordinate
+    
+    
+    // Find the height of the floor underneath the camera
+    double getFloorHeight() const {
         CameraEntity *camera = mParent->mPrimaryCamera;
         Vector3d cameraPosition  =  camera->getOgrePosition();
         Quaternion cameraOrientation = camera->getOgreOrientation();
@@ -1539,28 +1572,74 @@ private:
         double distance;
         Vector3f normal;
         int numHits = 1, i;
-        const Entity *obj = mParent->rayTrace(cameraPosition, Vector3f(0, -1, 0), numHits, distance, normal, 0);
-
-
-
-        double floorY = cameraPosition.y - distance;
-        
+        const Entity *floorObj = mParent->rayTrace(cameraPosition, Vector3f(0, -1, 0), numHits, distance, normal, 0);
+        double floorY = 0;
+        if (floorObj != NULL)    // No floor
+            floorY = cameraPosition.y - distance;
+        return floorY;
+    }
+    
+    
+    Vector3f getPaintingNormal(const Entity *paintingEntity) {
+        // FIXME: We should be able to get it more simply by getting the painting's transformation
+        Vector3f normal(0, 0, 0);
+        // Get an object's center and radius
+        BoundingSphere<float> objSphere = paintingEntity->getOgreWorldBoundingSphere<float>();
+        std::cout << "boundingSphere, center=" << objSphere.center() << ", radius=" << objSphere.radius() << std::endl;
+ 
+        CameraEntity *camera = mParent->mPrimaryCamera;
+        Vector3d cameraPosition = camera->getOgrePosition();
+        Quaternion cameraOrientation = camera->getOgreOrientation();
+        Vector3f cameraAxis = -cameraOrientation.zAxis();
+       
         // Determine the normal to the wall behind the object
-        for (i = 0; i < numHits; i++) {
+        Vector3d objCenter(objSphere.center());
+        Vector3f toObject(objCenter - cameraPosition);
+        if (!(toObject.normalizeThis() > 0)) {
+            SILOG(input, error, "setSelectedObjectLightLocation: object is indistinguishable from camera");
+            return toObject;
+        }
+        int numHits = 1;
+        bool foundObj = false;
+        for (int i = 0; i < numHits; i++) {
             double distance;        // Distance along the ray
-            const Entity *obj = mParent->rayTrace(cameraPosition, cameraAxis, numHits, distance, normal, i);
+            const Entity *obj = mParent->rayTrace(cameraPosition, toObject, numHits, distance, normal, i);
             if (obj == NULL) {      // No object found
                 if (i < numHits)    // Why not?
                     continue;       // Still more objects: keep looking
                 break;              // No more objects: return failure
             }
-            
-            if (obj == sel)
+            if (obj == paintingEntity) {
+                foundObj = true;
                 continue;
-            if (cameraAxis.dot(normal) > 0) // Normal is pointing away from the camera
-                normal = -normal;           // Get normal pointing toward the camera
+            }
+            if (foundObj == false)
+                continue;           // Look for the first object behind the selected object.
         }
-        normal.normalizeThis();
+        if (!(normal.normalizeThis() > 0)) {
+            SILOG(input, error, "setSelectedObjectLightLocation: no wall behind object");
+            return normal;
+        }
+        if (cameraAxis.dot(normal) > 0) // Normal is pointing away from the camera
+            normal = -normal;           // Get normal pointing toward the camera
+        return normal;
+    }
+
+
+    void initPantingLightLocation(Entity *ent, float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
+        // Find wall normal and object bounding sphere.
+        // We assume that the object is in front of the wall
+
+        // Get an object's center and radius
+        BoundingSphere<float> objSphere = ent->getOgreWorldBoundingSphere<float>();
+        Vector3d objCenter(objSphere.center());
+        std::cout << "boundingSphere, center=" << objSphere.center() << ", radius=" << objSphere.radius() << std::endl;
+        
+        // Get the floor coordinate
+        double floorY = getFloorHeight();
+        
+        // Determine the normal to the wall behind the object
+        Vector3f normal = getPaintingNormal(ent);
         
         // Move the light out from the wall, at the given angle
         Vector3d lightPosition;
@@ -1572,16 +1651,55 @@ private:
 
         // Aim it at the artwork
         Vector3f lightZ(objCenter.x - lightPosition.x, objCenter.y - lightPosition.y, objCenter.z - lightPosition.z);
-        lightZ.normalizeThis();
+        if (lightZ.normalizeThis() == 0)
+            return; // Cannot happen by construction.
         Vector3f lightX = Vector3f::unitY().cross(lightZ);
-        lightX.normalizeThis();
-        Vector3f lightY(lightZ.cross(lightY));
+        if (lightX.normalizeThis() == 0) {  // Looking straight down or up
+            // FIXME: do something
+        }
+        Vector3f lightY(lightZ.cross(lightX));
+        if (lightY.normalizeThis() == 0) {  // Looking straight down or up
+            // FIXME: do something
+        }
         lightLocation->setOrientation(Quaternion(lightX, lightY, lightZ));
         
         // Adjust the cone.
-        float coneAngle = atan(objRadius / (objCenter - lightPosition).length());
-        lightInfo->setLightSpotlightCone(0, coneAngle, 0);
-   }
+        float coneAngle = atan(objSphere.radius() / (objCenter - lightPosition).length());
+        float coneInnerAngle = 0;
+        float coneOuterAngle = coneAngle;   // Spotlights don't look as expected
+        float coneFalloff = 0.05;
+        lightInfo->setLightSpotlightCone(0, coneAngle, coneFalloff);
+
+        // FIXME: Remove after debugging
+        std::cout << "objCenter=" << objCenter
+                  << ", objRadius=" << objSphere.radius()
+                  << ", floorY=" << floorY
+                  << ", normal=" << normal
+                  << ", lightPosition=" << lightPosition
+                  << ", lightZ=" << lightZ
+                  << ", coneAngle=" << coneAngle * 180. / M_PI
+                  << std::endl;
+    }
+    
+
+    void initSelectedObjectLightLocation(float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
+        // Find wall normal and object bounding sphere.
+        // We assume that the object is in front of the wall
+        Entity *sel;
+        // Get an object's center and radius
+        for (SelectedObjectSet::const_iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it) {
+            ProxyObjectPtr obj(it->lock());
+            sel = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
+            if (sel == NULL)
+                continue;
+        }
+        if (sel == NULL) {
+            SILOG(input, error, "initSelectedObjectLightLocation: no selected object");
+            return;
+        }
+        initPantingLightLocation(sel, angle, ceilingHeight, lightLocation, lightInfo);
+    }
+
 
     void lightSelectedObjectHandler(WebViewManager::NavigationAction action, const String& arg) {
         // Set defaults
@@ -1593,53 +1711,46 @@ private:
         lightInfo.mPower            = 1;
         lightInfo.mLightRange       = 256;
         lightInfo.mConstantFalloff  = 1.0;
-        lightInfo.mLinearFalloff    = .01;
-        lightInfo.mQuadraticFalloff = .02;
+        lightInfo.mLinearFalloff    = 0.0;
+        lightInfo.mQuadraticFalloff = 0.02;
         lightInfo.mConeInnerRadians = 0;
-        lightInfo.mConeOuterRadians = 3.1415926536;
+        lightInfo.mConeOuterRadians = 1;
         lightInfo.mConeFalloff      = 0;
         lightInfo.mType             = LightInfo::SPOTLIGHT;
         lightInfo.mCastsShadow      = true;
         lightInfo.mWhichFields      = LightInfo::NONE;
 
+        float lightAngle = 45;
+        float ceilingHeight = 4;    // 4 meters ~= 13.1 feet
+        Location lightLocation;
         setLightInfoFromString(arg, &lightInfo);
- 
-        // Aim the light
-        // This light initially aims along the positive Z axis.
-        // We apply a transformation to aim it in a different direction.
-        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
-        if (!camera)
-            return;
-        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
-        Location cameraLocation(camera->globalLocation(now));
-//        Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, cameraLocation.getOrientation(), screenX, screenY));
-        Vector3d totalPosition(averageSelectedPosition(now, mSelectedObjects.begin(), mSelectedObjects.end()));
+        initSelectedObjectLightLocation(lightAngle, ceilingHeight, &lightLocation, &lightInfo);
 
-#if 0
-        Time now(SpaceTimeOffsetManager::getSingleton().now(mParent->mPrimaryCamera->getProxy().getObjectReference().space()));
-        Vector3d dViewPosition = mCameraLocation.getPosition();
-        Vector3f fViewDirection(viewDirection.x, viewDirection.y, viewDirection.z);
-        int numHits = 1, i;
+        CameraEntity *camera = mParent->mPrimaryCamera;
+        if (!camera) return;
+        SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
+        ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
+        Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
 
-        for (i = 0; i < numHits; i++) {
-            double distance;        // Distance along the ray
-            Vector3f normal;
-            const Entity *obj = mParent->rayTrace(dViewPosition, fViewDirection, numHits, distance, normal, i);
-            if (obj == NULL) {      // No object found
-                if (i < numHits)    // Why not?
-                    continue;       // Still more objects: keep looking
-                break;              // No more objects: return failure
-            }
-            if (!isObjectToBeMoved(obj)) {
-                Vector3d surfacePoint = dViewPosition + distance * viewDirection;
-                if (fViewDirection.dot(normal) > 0) // Normal is pointing away from the camera
-                    normal = -normal;               // Get normal pointing toward the camera
-                plane->set(normal, surfacePoint);
-                return true;
-            }
+        std::tr1::shared_ptr<ProxyLightObject> newLightObject(new ProxyLightObject(proxyMgr, newId));
+        proxyMgr->createObject(newLightObject);
+        newLightObject->update(lightInfo);
 
+        Entity *parentent = mParent->getEntity(mCurrentGroup);
+        if (parentent) {
+            Location localLoc = lightLocation.toLocal(parentent->getProxy().globalLocation(now));
+            newLightObject->setParent(parentent->getProxyPtr(), now, lightLocation, localLoc);
+            newLightObject->resetLocation(now, lightLocation);
         }
-#endif
+        else {
+            newLightObject->resetLocation(now, lightLocation);
+        }
+//        mSelectedObjects.clear();
+//        mSelectedObjects.insert(newLightObject);
+//        Entity *ent = mParent->getEntity(newId);
+//        if (ent) {
+//            ent->setSelected(true);
+//        }
     }
     
 
@@ -1794,6 +1905,8 @@ public:
         mInputResponses["stableRotateNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, -1.f, _1), 1, 0);
 
         mInputResponses["createLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::createLightAction, this));
+        mInputResponses["controlLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::controlLightAction, this));
+        mInputResponses["toggleLightVisibility"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::toggleLightVisibilityAction, this));
         mInputResponses["enterObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::enterObjectAction, this));
         mInputResponses["leaveObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::leaveObjectAction, this));
         mInputResponses["groupObjects"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::groupObjectsAction, this));
@@ -1859,6 +1972,8 @@ public:
 
         // Various other actions
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B), mInputResponses["createLight"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_CTRL), mInputResponses["controlLight"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_SHIFT), mInputResponses["toggleLightVisibility"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_ENTER), mInputResponses["enterObject"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RETURN), mInputResponses["enterObject"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_0), mInputResponses["leaveObject"]);
