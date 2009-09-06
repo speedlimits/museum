@@ -50,6 +50,9 @@ using namespace std;
 using std::tr1::placeholders::_1;
 static int core_plugin_refcount = 0;
 
+/// Rob!  this define is our divisor -- 50/OSCDIVIDER = osc rate per sec
+#define OSCDIVIDER 2
+
 #define DEBUG_OUTPUT(x)
 //#define DEBUG_OUTPUT(x) x
 #define DEBUG_ALWAYS(x) x
@@ -449,7 +452,7 @@ bool BulletSystem::tick() {
                 /// OSC hax -- whether bullet-active or not, but only if OSC-active (if we're the server, we need to take care of everyone)
                 DEBUG_OUTPUT(cout << "dbm: debug A" << endl);
                 oscCount++;
-                if (oscCount==10) {
+                if (oscCount==OSCDIVIDER) {
                     oscCount=0;
                     if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6) == "Avatar" && oscplugin::isActive()) {
                         DEBUG_OUTPUT(cout << "dbm: debug B" << endl);
