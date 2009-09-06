@@ -55,7 +55,7 @@ public:
 private:        
     LightBulb();
 
-    static void LightBulb::initialize() {
+    static void initialize() {
         if (inited)
             return;
         initializeMesh();
