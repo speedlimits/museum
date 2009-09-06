@@ -50,9 +50,6 @@ using namespace std;
 using std::tr1::placeholders::_1;
 static int core_plugin_refcount = 0;
 
-/// Rob!  this define is our divisor -- 50/OSCDIVIDER = osc rate per sec
-#define OSCDIVIDER 2
-
 #define DEBUG_OUTPUT(x)
 //#define DEBUG_OUTPUT(x) x
 #define DEBUG_ALWAYS(x) x
@@ -433,7 +430,6 @@ bool BulletSystem::tick() {
     static Task::LocalTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     static int mode = 0;
-    static int oscCount=0;
     static string lastPathSection="in_c_path_0_cell_00";
     Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
@@ -451,72 +447,68 @@ bool BulletSystem::tick() {
 
                 /// OSC hax -- whether bullet-active or not, but only if OSC-active (if we're the server, we need to take care of everyone)
                 DEBUG_OUTPUT(cout << "dbm: debug A" << endl);
-                oscCount++;
-                if (oscCount==OSCDIVIDER) {
-                    oscCount=0;
-                    if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6) == "Avatar" && oscplugin::isActive()) {
-                        DEBUG_OUTPUT(cout << "dbm: debug B" << endl);
-                        double dist;
-                        Vector3f norm;
-                        SpaceObjectReference sor;
-                        string queryName="in_c_path_0_cell_00";
-                        if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
-                            queryName=mLastQuery->mName;
-                            DEBUG_OUTPUT(cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
-                                         << " object: " << queryName << endl);
-                        }
-                        else {
-                            DEBUG_OUTPUT(cout << "dbm debug: queryRay returns nothing" << endl);
-                        }
-                        //cout << "dbm debug queryName: " << queryName << " length: " << queryName.length() << endl;
-                        if (!(queryName.length()>=18 && queryName.substr(4,6) == "_path_" && queryName.substr(11,6) == "_cell_")) {
-                            queryName="in_c_path_0_cell_00";        /// yeah, dat's da ticket
-                        }
-                        if (queryName != lastPathSection) {
-                            DEBUG_ALWAYS(cout << "dbm debug path/cell change from " << lastPathSection << " to " << queryName << endl);
-                            lastPathSection = queryName;
-                        }
-                        /// OSC stuff:
-                        Vector3d pos = objects[i]->mMeshptr->getPosition();
-                        oscplugin::mito_data data;
+                if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6) == "Avatar" && oscplugin::isActive()) {
+                    DEBUG_OUTPUT(cout << "dbm: debug B" << endl);
+                    double dist;
+                    Vector3f norm;
+                    SpaceObjectReference sor;
+                    string queryName="in_c_path_0_cell_00";
+                    if (queryRay(objects[i]->mMeshptr->getPosition(), Vector3f(0,-1,0), 20.0, objects[i]->mMeshptr, dist, norm, sor)) {
+                        queryName=mLastQuery->mName;
+                        DEBUG_OUTPUT(cout << "dbm debug: queryRay returns distance: " << dist << " normal: " << norm
+                                     << " object: " << queryName << endl);
+                    }
+                    else {
+                        DEBUG_OUTPUT(cout << "dbm debug: queryRay returns nothing" << endl);
+                    }
+                    //cout << "dbm debug queryName: " << queryName << " length: " << queryName.length() << endl;
+                    if (!(queryName.length()>=18 && queryName.substr(4,6) == "_path_" && queryName.substr(11,6) == "_cell_")) {
+                        queryName="in_c_path_0_cell_00";        /// yeah, dat's da ticket
+                    }
+                    if (queryName != lastPathSection) {
+                        DEBUG_ALWAYS(cout << "dbm debug path/cell change from " << lastPathSection << " to " << queryName << endl);
+                        lastPathSection = queryName;
+                    }
+                    /// OSC stuff:
+                    Vector3d pos = objects[i]->mMeshptr->getPosition();
+                    oscplugin::mito_data data;
 
-                        istringstream suser(objects[i]->mName.substr(7));
-                        suser >> data.user_id;
+                    istringstream suser(objects[i]->mName.substr(7));
+                    suser >> data.user_id;
 
-                        istringstream spath(queryName.substr(10,1));
-                        spath >> data.path_id;
+                    istringstream spath(queryName.substr(10,1));
+                    spath >> data.path_id;
 
-                        istringstream scell(queryName.substr(17));
-                        scell >> data.cell_id;
+                    istringstream scell(queryName.substr(17));
+                    scell >> data.cell_id;
 
-                        data.global_x=pos.x;
-                        data.global_y=pos.y;
-                        data.global_z=pos.z;
-                        data.relative_x=0;
-                        data.relative_y=0;
-                        DEBUG_OUTPUT(cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z
-                                     << " user: " << data.user_id
-                                     << " path: " << data.path_id
-                                     << " cell: " << data.cell_id
-                                     << endl);
-                        oscplugin::sendOSCmessage(data);
-                        if (mDumbMsg != "") {
-                            DEBUG_OUTPUT(cout << "dbm debug msg from ogreSystem: " << mDumbMsg << endl);
-                            if (mDumbMsg.substr(0,7) == "Avatar_") {
-                                istringstream s(mDumbMsg.substr(7,2));
-                                s >> data.user_id;
-                                istringstream ss(mDumbMsg.substr(10,1));
-                                ss >> data.cell_id;
-                                data.path_id = -1;
-                                DEBUG_ALWAYS(cout << "dbm debug sendOsc ogre msg: "
-                                             << pos.x <<", "<< pos.y <<", "<< pos.z
-                                             << " user: " << data.user_id
-                                             << " path: " << data.path_id
-                                             << " cell: " << data.cell_id
-                                             << endl);
-                                oscplugin::sendOSCmessage(data);
-                                mDumbMsg = "";
-                            }
+                    data.global_x=pos.x;
+                    data.global_y=pos.y;
+                    data.global_z=pos.z;
+                    data.relative_x=0;
+                    data.relative_y=0;
+                    DEBUG_OUTPUT(cout << "dbm debug sendOsc globalpos: " << pos.x <<", "<< pos.y <<", "<< pos.z
+                                 << " user: " << data.user_id
+                                 << " path: " << data.path_id
+                                 << " cell: " << data.cell_id
+                                 << endl);
+                    oscplugin::sendOSCmessage(data);
+                    if (mDumbMsg != "") {
+                        DEBUG_OUTPUT(cout << "dbm debug msg from ogreSystem: " << mDumbMsg << endl);
+                        if (mDumbMsg.substr(0,7) == "Avatar_") {
+                            istringstream s(mDumbMsg.substr(7,2));
+                            s >> data.user_id;
+                            istringstream ss(mDumbMsg.substr(10,1));
+                            ss >> data.cell_id;
+                            data.path_id = -1;
+                            DEBUG_ALWAYS(cout << "dbm debug sendOsc ogre msg: "
+                                         << pos.x <<", "<< pos.y <<", "<< pos.z
+                                         << " user: " << data.user_id
+                                         << " path: " << data.path_id
+                                         << " cell: " << data.cell_id
+                                         << endl);
+                            oscplugin::sendOSCmessage(data);
+                            mDumbMsg = "";
                         }
                     }
                 }
