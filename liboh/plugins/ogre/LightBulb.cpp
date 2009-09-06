@@ -1,10 +1,34 @@
-/*
+/*  Sirikata Graphical Object Host
  *  LightBulb.cpp
- *  Sirikata
  *
  *  Created by Ken Turkowski on 9/4/09.
- *  Copyright 2009 Google. All rights reserved.
+ *  Copyright (c) 2009, Stanford University.
+ *  All rights reserved.
  *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are
+ *  met:
+ *  * Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  * Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *  * Neither the name of Sirikata nor the names of its contributors may
+ *    be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <cmath>
@@ -62,16 +86,16 @@ namespace Graphics {
 void LightBulb::initializeMesh()
 {   // This is just a cube now
 
-	/// Create the mesh via the MeshManager
+	// Create the mesh via the MeshManager
 	MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("LightBulb", "General");
 
-	/// Create one submesh
+	// Create one submesh
 	SubMesh* sub = msh->createSubMesh();
 
     const float size = 15e-2f;  // 15 cm
 	const float sqrt13 = 0.577350269f; /* sqrt(1/3) */
 
-	/// Define the vertices (8 vertices, each consisting of 2 groups of 3 floats
+	// Define the vertices (8 vertices, each consisting of 2 groups of 3 floats
 	const size_t nVertices = 8;
 	const size_t vbufCount = 3*2*nVertices;
 	float vertices[vbufCount] = {
@@ -99,8 +123,8 @@ void LightBulb::initializeMesh()
 	rs->convertColourValue(ColourValue(1.0,1.0,1.0), pColour++); //6 colour
 	rs->convertColourValue(ColourValue(1.0,1.0,1.0), pColour++); //7 colour
 
-	/// Define 12 triangles (two triangles per cube face)
-	/// The values in this table refer to vertices in the above table
+	// Define 12 triangles (two triangles per cube face)
+	// The values in this table refer to vertices in the above table
 	const size_t ibufCount = 36;
 	unsigned short faces[ibufCount] = {
 			0,2,3,
@@ -117,11 +141,11 @@ void LightBulb::initializeMesh()
 			2,6,7
 	};
 
-	/// Create vertex data structure for 8 vertices shared between submeshes
+	// Create vertex data structure for 8 vertices shared between submeshes
 	msh->sharedVertexData = new VertexData();
 	msh->sharedVertexData->vertexCount = nVertices;
 
-	/// Create declaration (memory format) of vertex data
+	// Create declaration (memory format) of vertex data
 	VertexDeclaration* decl = msh->sharedVertexData->vertexDeclaration;
 	size_t offset = 0;
 	// 1st buffer
@@ -129,53 +153,53 @@ void LightBulb::initializeMesh()
 	offset += VertexElement::getTypeSize(VET_FLOAT3);
 	decl->addElement(0, offset, VET_FLOAT3, VES_NORMAL);
 	offset += VertexElement::getTypeSize(VET_FLOAT3);
-	/// Allocate vertex buffer of the requested number of vertices (vertexCount) 
-	/// and bytes per vertex (offset)
-	HardwareVertexBufferSharedPtr vbuf = 
+	// Allocate vertex buffer of the requested number of vertices (vertexCount)
+	// and bytes per vertex (offset)
+	HardwareVertexBufferSharedPtr vbuf =
 		HardwareBufferManager::getSingleton().createVertexBuffer(
 		offset, msh->sharedVertexData->vertexCount, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-	/// Upload the vertex data to the card
+	// Upload the vertex data to the card
 	vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
 
-	/// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
-	VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding; 
+	// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
+	VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding;
 	bind->setBinding(0, vbuf);
 
 	// 2nd buffer
 	offset = 0;
 	decl->addElement(1, offset, VET_COLOUR, VES_DIFFUSE);
 	offset += VertexElement::getTypeSize(VET_COLOUR);
-	/// Allocate vertex buffer of the requested number of vertices (vertexCount) 
-	/// and bytes per vertex (offset)
+	// Allocate vertex buffer of the requested number of vertices (vertexCount)
+	// and bytes per vertex (offset)
 	vbuf = HardwareBufferManager::getSingleton().createVertexBuffer(
 		offset, msh->sharedVertexData->vertexCount, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-	/// Upload the vertex data to the card
+	// Upload the vertex data to the card
 	vbuf->writeData(0, vbuf->getSizeInBytes(), colours, true);
 
-	/// Set vertex buffer binding so buffer 1 is bound to our colour buffer
+	// Set vertex buffer binding so buffer 1 is bound to our colour buffer
 	bind->setBinding(1, vbuf);
 
-	/// Allocate index buffer of the requested number of vertices (ibufCount) 
+	// Allocate index buffer of the requested number of vertices (ibufCount)
 	HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
 		createIndexBuffer(
-		HardwareIndexBuffer::IT_16BIT, 
-		ibufCount, 
+		HardwareIndexBuffer::IT_16BIT,
+		ibufCount,
 		HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
-	/// Upload the index data to the card
+	// Upload the index data to the card
 	ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
 
-	/// Set parameters of the submesh
+	// Set parameters of the submesh
 	sub->useSharedVertices = true;
 	sub->indexData->indexBuffer = ibuf;
 	sub->indexData->indexCount = ibufCount;
 	sub->indexData->indexStart = 0;
 
-	/// Set bounding information (for culling)
+	// Set bounding information (for culling)
 	msh->_setBounds(AxisAlignedBox(-size, -size, -size, size, size, size));
 	msh->_setBoundingSphereRadius(sqrt(3) * size);
 
-	/// Notify Mesh object that it has been loaded
+	// Notify Mesh object that it has been loaded
 	msh->load();
 }
 
@@ -193,7 +217,7 @@ void LightBulb::AttachLightBulb(
         const char *name, const Location &loc
 ) {
     initialize();
-    Ogre::Camera *ogreCamera = camera->getOgreCamera(); 
+    Ogre::Camera *ogreCamera = camera->getOgreCamera();
     Ogre::SceneManager* sceneManager = ogreCamera->getSceneManager();
     Ogre::Entity* ogreEntity = sceneManager->createEntity(name, "LightBulb");
     ogreEntity->setMaterialName("Museum/BulbMaterial");
@@ -216,37 +240,3 @@ bool LightBulb::inited = false;
 
 } // namespace Graphics
 } // namespace Sirikata
-
-
-#if 0
- <pathorn_mac> oh right--there's a pointer you have to set on each mesh object
- <kturkowski> Yes, I want to click on it and bring up a dialog to set the prameter
- <pathorn_mac> essentially a pointer from ogre's clss back to sirikata's entity
- <pathorn_mac> mOgreObject->setUserAny(Ogre::Any(static_cast<Entity*>(this)));
- <pathorn_mac> there we go
- <pathorn_mac> where ogreobject is of type Ogre::MovableObject
- <rob___> danx0r, any thoughts on jcaceres 's building? he seems like he's got everything and tried a fresh checkout and rebuild to no luck
- <pathorn_mac> I think Ogre::Entity (different from Entity) is a subclass of that
- <pathorn_mac> well jcaceres crash seems related to the scene file
- <danx0r> rob___: we're in private IM debugging
- <kturkowski> ok, but don't I have to insert a Sirikata proxy too?
- <pathorn_mac> in that there's an object with a bad name
- <rob___> ok
- <pathorn_mac> no you don't want a sirikata proxy
- <pathorn_mac> this is purely for GUI purposes
- <pathorn_mac> so we want to leave this strictly in the gui system
- <kturkowski> can I select it?
- <pathorn_mac> well the way selection works
- <pathorn_mac> is mouse click runs a raytrace
- <pathorn_mac> (an ogre raytrace)
- <kturkowski> I want to group a light with a mesh
- <pathorn_mac> which returns a list of Ogre::MovableObject
- <argenex> ok ddm csv is fixed, lights fixed
- <argenex> scene_ddm_septemberfina_0904b_jasonfix.csv
- <pathorn_mac> and then it calls Entity::fromMovableObject(mymovableobj)
- <pathorn_mac> which uses that same Any value you set on it
- <pathorn_mac> so that's why you must call myMovableObject->setUserAny(Ogre::Any(static_cast<Entity*>(mysirikataentity)));
- <pathorn_mac> when you create the Ogre::Entity class
-
-#endif
-
