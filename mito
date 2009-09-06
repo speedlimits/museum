@@ -12,6 +12,10 @@ if len(sys.argv)==1:
 
 piece = sys.argv[1]
 id = sys.argv[2]
+if len(sys.argv) > 3:
+    host = sys.argv[3]
+else:
+    host = ""
 
 pieces = {
     "in"   :   "scenes/in_c_",
@@ -33,7 +37,9 @@ else:
     f.close()
     if not "0.0.0.0" in s:
         print "your osc.csv file stipulates a server, but you're not Avatar_01!"
-        exit()
+        print "run anyway?",
+        if raw_input()[0] != "y":
+            exit()
     env = ""
 
 av = "Avatar_0" + id
@@ -42,6 +48,7 @@ f = open("build/cmake/avatar.id", "w")
 f.write(av)
 f.close()
 
-cmd = "./run " + scene + " " + env
+cmd = "./run " + scene + " " + env + " " + host
+cmd = cmd.strip()
 print "command:", cmd
 os.system(cmd)
