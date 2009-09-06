@@ -1,0 +1,47 @@
+#!/usr/bin/python
+import sys, os
+
+if len(sys.argv)==1:
+    print "usage:"
+    print "mito piece user"
+    print "piece = inc, can, ddm, dia"
+    print "user = 1 thru 8"
+    print "example:"
+    print "mito ddm 3"
+    exit()
+
+piece = sys.argv[1]
+id = sys.argv[2]
+
+pieces = {
+    "in"   :   "scenes/in_c_",
+    "ca"   :   "scenes/canned_",
+    "dd"   :   "scenes/ddm_",
+    "de"   :   "scenes/ddm_",
+    "di"   :   "scenes/dialoghi_"
+}
+
+scene = pieces[piece[:2]] + id + ".csv"
+print "scene file:", scene
+
+if id=="1":
+    env = pieces[piece] + "1_env.csv"
+else:
+    print "checking osc.csv"
+    f = open("build/cmake/osc.csv")
+    s = f.read()
+    f.close()
+    if not "0.0.0.0" in s:
+        print "your osc.csv file stipulates a server, but you're not Avatar_01!"
+        exit()
+    env = ""
+
+av = "Avatar_0" + id
+print "writing avatar.id file as", av
+f = open("build/cmake/avatar.id", "w")
+f.write(av)
+f.close()
+
+cmd = "./run " + scene + " " + env
+print "command:", cmd
+os.system(cmd)
