@@ -1,7 +1,8 @@
 /*  Sirikata Graphical Object Host
- *  CameraEntity.hpp
+ *  LightBulb.hpp
  *
- *  Copyright (c) 2009, Ken Turkowski
+ *  Created by Ken Turkowski on 9/4/09.
+ *  Copyright (c) 2009, Stanford University.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -40,9 +41,9 @@ class Location;
 
 namespace Graphics {
 
-
 class CameraEntity;
 class Entity;
+
 
 class LightBulb {
 public:
@@ -52,7 +53,7 @@ public:
         const char *name,               // Name of the mesh (must be unique)
         const Location &loc             // Location of the mesh
     );
-private:        
+private:
     LightBulb();
 
     static void initialize() {
