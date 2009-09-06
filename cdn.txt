@@ -37,9 +37,10 @@ namelookup=(
 
 download=(
     mhash:/// = (
-       0 = http://www.sirikata.com/content/assets
-       1 = http://graphics.stanford.edu/~danielrh/uploadsystem/files/global
-       2 = file:///./Staging
+       0 = file:///./Cache
+       1 = http://www.sirikata.com/content/assets
+       2 = http://graphics.stanford.edu/~danielrh/uploadsystem/files/global
+       3 = file:///./Staging
     )
 )
 
