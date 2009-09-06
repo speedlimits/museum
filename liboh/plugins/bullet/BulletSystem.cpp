@@ -440,7 +440,7 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > Duration::seconds(20.0)) {
+        if ((now-mStartTime) > Duration::seconds(40.0)) {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
