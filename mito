@@ -25,7 +25,7 @@ scene = pieces[piece[:2]] + id + ".csv"
 print "scene file:", scene
 
 if id=="1":
-    env = pieces[piece] + "1_env.csv"
+    env = pieces[piece[:2]] + "1_env.csv"
 else:
     print "checking osc.csv"
     f = open("build/cmake/osc.csv")
