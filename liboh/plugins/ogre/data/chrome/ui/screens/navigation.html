@@ -1,0 +1,79 @@
+<img id="navigation-picture" src="images/navigation/navigation_default.png" border="0" usemap="#map"/>
+    <map name="map" id="map">
+      <area id="navi_up" shape="poly" coords="76,57,136,7,10,6"  />
+      <area id="navi_down" shape="poly" coords="73,93,8,144,138,141"  />
+      <area id="navi_left" shape="poly" coords="55,74,5,133,7,5"  />
+      <area id="navi_right" shape="poly" coords="93,76,144,4,142,137" />
+    </map>
+    
+<script type="text/javascript">
+
+$('#navigation-picture').ready( function () {
+	/* Navigation Stuff */
+	
+	$("#navi_up").bind('mousedown' , function() {
+		navi_pic("up");
+		Client.event("navmoveforward", 1.0);
+	});
+	$("#navi_up").bind('mouseover' , function() {
+		navi_pic("up_h");
+	});
+	$("#navi_up").bind('mouseup' , function() {			
+		navi_pic("up_h");
+		Client.event("navmoveforward", 0.0);
+	});
+	$("#navi_up").bind('mouseout' , function() {
+		navi_pic("default");									 
+		Client.event("navmoveforward", 0.0);
+	});
+	
+	$("#navi_down").bind('mousedown' , function() {
+		navi_pic("down");
+		Client.event("navmoveforward", -1.0);
+	});
+	$("#navi_down").bind('mouseover' , function() {
+		navi_pic("down_h");
+	});
+	$("#navi_down").bind('mouseup' , function() {
+		navi_pic("down_h");
+		Client.event("navmoveforward", 0.0);
+	});
+	$("#navi_down").bind('mouseout' , function() {
+		navi_pic("default");
+		Client.event("navmoveforward", 0.0);
+		
+	});
+
+	$("#navi_left").bind('mousedown' , function() {
+		navi_pic("left");
+		Client.event("navturnleft", 1.0);
+	});
+	$("#navi_left").bind('mouseover' , function() {
+		navi_pic("left_h");
+	});
+	$("#navi_left").bind('mouseup' , function() {
+		navi_pic("left_h");
+		Client.event("navturnleft", 0.0);
+	});
+	$("#navi_left").bind('mouseout' , function() {
+		navi_pic("default");											   
+		Client.event("navturnleft", 0.0);
+	});
+
+	$("#navi_right").bind('mousedown' , function() {
+		navi_pic("right");
+		Client.event("navturnright", 1.0);
+	});
+	$("#navi_right").bind('mouseover' , function() {
+		navi_pic("right_h");
+	});
+	$("#navi_right").bind('mouseup' , function() {
+		navi_pic("right_h");
+		Client.event("navturnright", 0.0);
+	});
+	$("#navi_right").bind('mouseout' , function() {
+		navi_pic("default");
+		Client.event("navturnright", 0.0)
+	});
+});
+</script>

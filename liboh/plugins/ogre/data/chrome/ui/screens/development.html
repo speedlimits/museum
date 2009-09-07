@@ -1,0 +1,61 @@
+
+<div style="background: #CCC">
+	<p>
+	Console
+	</p>
+    <p id="development-console" style="overflow:scroll; height:300px; width: 400px;background: #FFC; text-align: left;">&nbsp; 
+	</p>
+	<p style="text-align: left;">
+    	<form>
+		<input id="console-input" type="text" size="30" >
+		<input type="button" onclick="debug(eval($('#console-input').val()));" value="run">
+        </form>
+        
+	</p>
+
+
+	<a href="javascript:location.reload();">Reload</a>
+	Mode: <select id="debugfns" ></select>
+    
+</div>
+
+<script type="text/javascript"> 
+	debugoptions = {
+		"":"",
+		"curatorMode()":"Curator - 0",
+		"curatorMode(1)":"Curator - 1",
+		"curatorMode(2)":"Curator - 2",
+		"curatorMode(3)":"Curator - 3",
+		"curatorMode(4)":"Curator - 4",
+		"curatorMode(5)":"Curator - 5",
+		
+		"critiqueMode()":"Critique - 0",
+		"critiqueMode(1)":"Critique - 1",
+		"critiqueMode(2)":"Critique - 2",
+		"critiqueMode(3)":"Critique - 3",
+		"mousedemo()":"Mouse Demo"
+		
+	}
+	
+	$("#debugfns").ready ( function () {
+									 
+		//$("#dev-console").draggable();
+
+
+		$("#development-console").bind('mousedown', stopPropagation ) ;
+		
+		$("#debugfns").addOption(debugoptions,false)
+		$("#debugfns").change(function (event,ui) {
+										
+			var dropdown = document.getElementById("debugfns");  
+        	var index = dropdown.selectedIndex;  
+			
+        	eval(dropdown.options[index].value); 
+		});
+		
+		function debug(msg) {
+			$("#development-console").append("<br>" + msg );
+		}
+	});
+
+</script>

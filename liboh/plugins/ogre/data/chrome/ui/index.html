@@ -1,0 +1,103 @@
+<html>
+
+<head>
+
+	<script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.6.custom.min.js"></script>
+    <script type="text/javascript" src="js/ui.coverflow.custom.js"></script> 
+    <script type="text/javascript" src="js/sylvester.js"></script> 
+    <script type="text/javascript" src="js/pb.transformie.js"></script>
+    <script type="text/javascript" src="js/sirikata.main.js"></script>
+ 	<script type="text/javascript" src="js/sirikata.ui.js"></script>
+    <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
+
+<script type="text/javascript">
+	setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html");', 1000);
+		function loadScreen(screen, page) { $(screen).load(page).fadeIn("slow"); }
+		function hideScreen(screen) {$(screen).fadeOut(); }
+		
+		
+		function setup () {
+			loadScreen("#navigation-screen", "screens/navigation.html");	
+		}
+		
+		function curatorMode(mode) {
+			var mode = (mode == null) ? 0 : mode;
+			
+			if (mode == 0) {
+				loadScreen("#modal-screen", "screens/welcome_curator.html");
+			} else {
+				hideScreen("#modal-screen");
+				loadScreen("#top-bar", "screens/topbar_curator.html");	
+				if (mode == 1) { // art 
+					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+				} else if (mode == 2) { // frames 
+					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+				} else if (mode == 3) { // walls 
+					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+				} else if (mode == 4) { // lights 
+					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+				} else if (mode == 5) { // save 
+					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+				}
+			}
+		}
+		
+		function critiqueMode(mode, c2) {
+			var mode = (mode == null) ? 0 : mode;
+			
+			if (mode == 0) {
+				loadScreen("#modal-screen", "screens/welcome_critique.html");
+			} else if (mode == 1) { // load
+					loadScreen("#modal-screen", "screens/load_gallery.html");	
+			} else {
+				hideScreen("#modal-screen");
+				loadScreen("#top-bar", "screens/topbar_curator.html");	
+				 if (mode == 2) { // walk 
+					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+				} else if (mode == 3) { // picture 
+					loadScreen("#detail-screen", c2);
+				}
+			}
+		}
+		
+		function developmentMode() {
+			hideScreen("#modal-screen");
+			loadScreen("#development-screen", "screens/development.html");	
+		}
+	
+		$(document).ready( function () {
+							 
+									 
+		});
+		
+		
+		function debug(msg) {
+			$("#development-console").append("<br>" + msg );
+		}
+	
+	</script>
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<div id="modal-screen" >
+	
+</div>
+
+<div id="detail-screen"></div>
+
+
+<div id="top-bar"></div>
+
+<div id="bottom-bar"></div>
+
+<div id="navigation-screen"></div>
+
+<div id="development-screen"></div>
+
+
+</body>
+</html>
+    
