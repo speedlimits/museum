@@ -10,9 +10,10 @@
     <script type="text/javascript" src="js/sirikata.main.js"></script>
  	<script type="text/javascript" src="js/sirikata.ui.js"></script>
     <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
+<script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
 
 <script type="text/javascript">
-	setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html");', 1000);
+	setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
 		function loadScreen(screen, page) { $(screen).load(page).fadeIn("slow"); }
 		function hideScreen(screen) {$(screen).fadeOut(); }
 		
@@ -73,8 +74,14 @@
 									 
 		});
 
-		function popUpMessage(text,x,y) {debug(text); debug(x); debug(y);}
-		function hidePopUpMessage();
+		function popUpMessage(text,x,y) {
+			$('#popup-message').html(text);
+			$('#popup-message').css('left', x);
+			$('#popup-message').css('top', y);
+			
+			debug(text); debug(x); debug(y);
+		}
+		function hidePopUpMessage() {};
 		
 		
 		function debug(msg) {
@@ -92,8 +99,6 @@
 </div>
 
 <div id="detail-screen"></div>
-
-<div id="message-screen">MESSSAGE</div>
 
 <div id="top-bar"></div>
 
