@@ -47,13 +47,17 @@ struct CameraPoint {
     Task::DeltaTime dt;
     Task::DeltaTime time;
     String msg;
+    int screen_x;
+    int screen_y;
 
     CameraPoint(const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& _dt, const String& s)
             : position(pos),
             orientation(orient),
             dt(_dt),
             time(Task::DeltaTime::zero()),
-            msg(s) {
+            msg(s),
+            screen_x(100),
+            screen_y(100) {
     }
 }; // struct CameraPoint
 
@@ -86,7 +90,7 @@ public:
     void computeDensities();
     void computeTimes();
 
-    bool evaluate(const Task::DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& s);
+    bool evaluate(const Task::DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& s, int*x, int*y);
 private:
     std::vector<CameraPoint> mPathPoints;
     std::vector<double> mDensities;
@@ -180,6 +184,8 @@ private:
             cp.orientation.w = str2dbl(row["rot_w"]);
             cp.dt = Task::DeltaTime::seconds(str2dbl(row["delay"]));
             cp.msg = row["text"];
+            cp.screen_x = str2int(row["text_x"]);
+            cp.screen_y = str2int(row["text_y"]);
             return true;
         }
     }

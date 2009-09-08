@@ -1149,11 +1149,12 @@ private:
             Quaternion orient;
             static String oldmsg;
             String msg;
-            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg);
+            int tx, ty;
+            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg, &tx, &ty);
             if (msg != oldmsg && msg != "") {
                 std::ostringstream ss;
                 //ss << "document.selected='" << msg << "'; debug(document.selected);";
-                ss << "popUpMessage(" << '"' << msg << '"' << ", 100, 100);";
+                ss << "popUpMessage(" << '"' << msg << '"' << "," << tx << ","<< ty << ");";
                 std::cout << "cameraPathTick msg to JS:" << ss.str() << std::endl;
                 WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
             }
