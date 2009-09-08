@@ -89,7 +89,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     tooltipWebView->bind("resizeTooltip", std::tr1::bind(&WebViewManager::onResizeTooltip, this, _1, _2));
     //tooltipWebView->setIgnoresMouse();
 
-        chromeWebView = createWebView("__chrome", 1024, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
+        chromeWebView = createWebView("__chrome", 1336, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
         if (access("mode_flythru", F_OK)==0) {
             chromeWebView->loadFile("application/sirikata_flythru.html");
         }
@@ -98,7 +98,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
         }
         chromeWebView->setTransparent(true);
 
-/*  WebView* chromeUI = createWebView("ui", 1024, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_MIDDLE);
+/*  WebView* chromeUI = createWebView("ui", 1336, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_MIDDLE);
     chromeUI -> loadURL("http://dennisschaaf.com/sirikataui/sirikata.html");
     chromeUI -> setTransparent(true);
 */
