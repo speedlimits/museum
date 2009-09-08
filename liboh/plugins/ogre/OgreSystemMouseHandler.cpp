@@ -1203,11 +1203,12 @@ private:
             bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg);
             if (msg != oldmsg && msg != "") {
                 std::ostringstream ss;
-                ss << "document.selected='" << msg << "'; debug(document.selected);";
+                //ss << "document.selected='" << msg << "'; debug(document.selected);";
+                ss << "popUpMessage(" << '"' << msg << '"' << ", 100, 100);";
+                std::cout << "cameraPathTick msg to JS:" << ss.str() << std::endl;
                 WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
             }
             oldmsg=msg;
-            std::cout << "cameraPathTick--" << oldmsg << std::endl;
         
             if (!success) {
                 mRunningCameraPath = false;

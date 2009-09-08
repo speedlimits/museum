@@ -1,0 +1,107 @@
+body  {
+	font: 100% Verdana, Arial, Helvetica, sans-serif;
+	/*background: #666666;*/
+	margin: 0; 
+	padding: 0;
+	text-align: center; 
+	color: #000000;
+	width:1336px;
+	height: 768px;
+}
+
+/* Top Bar */
+#top-bar {
+	display: none;
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	/*	display:none; 
+	background: #DDDDDD; */ 
+	top: 1px;
+	padding: 0 0px;
+	left: 281px;
+	z-index: 6002;
+}
+#top-bar ul  {
+	height: 37px;
+	padding: 0 118px;
+	margin:0 ;
+	background: url(../images/top_menu_mac.png) no-repeat;
+	list-style: none;
+}
+#top-bar li {
+	float:left;
+	margin:0 ;/*15px;*/
+	padding:0;
+	background: url(../images/top_menu_mac.png);
+	height: 37px;
+	width: 117px;
+	text-align: center;
+}
+
+/* Modal Screen */
+#modal-screen {
+	display: none;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 568px;
+	width: 1216px;
+	background:url(../images/_0000s_0001_Fullscreen-Modal.png) no-repeat;
+	padding: 100px 70px 100px 80px;
+	overflow: hidden;
+	z-index: 7001;
+}
+#modal-screen-buttons {
+	position: absolute;
+	list-style: none;
+	bottom: 100px;
+	right: 100px;
+}
+
+#modal-screen-buttons li {
+	float: left;
+}
+
+#navigation-screen {
+ 	position: absolute;
+	bottom: 50px;
+	left: 50px;
+	z-index: 6001;
+	
+}
+
+#development-screen {
+	display: none;
+ 	position: absolute;
+	top: 650px;
+	left: 0px;
+	width: 400px;
+
+	z-index: 8001;
+	background: #ccc;
+}
+
+#detail-screen {
+	display: none;
+	position: absolute;
+	bottom: 28px;
+	left: 328px;
+	width: 680px;
+	height: 210px;
+	z-index: 6003;
+	background: #ccc;
+	background: url(../images/_0000_Detail.png);
+	
+}
+
+#popup-message {
+	/*display: none;*/
+	position: absolute;
+
+
+	z-index: 8003;
+	background: #ccc;
+
+	
+}

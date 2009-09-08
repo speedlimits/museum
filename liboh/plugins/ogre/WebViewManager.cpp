@@ -94,7 +94,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
             chromeWebView->loadFile("application/sirikata_flythru.html");
         }
         else {
-            chromeWebView->loadFile("application/sirikata.html");
+            chromeWebView->loadFile("ui/index.html?param=test");
         }
         chromeWebView->setTransparent(true);
 
