@@ -1,0 +1,170 @@
+
+    <style type="text/css" media="screen"> 
+			
+			ul.magnifyme {
+				height: 80px;
+				padding: 30px;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				width: 2000px;
+				list-style: none;
+			}
+			
+			div.wrapper {
+				margin: 5px auto;
+				height: 170px;
+				/*border: 2px solid #999;
+				*/
+				overflow: hidden;
+				width: 600px;
+				position: relative;
+			}
+			
+			div.slider {
+				position: absolute;
+				bottom: 0px;
+				left: 30px;
+				width: 542px;
+				height: 19px;
+				background: url(images/productbrowser_scrollbar_20070622.png) no-repeat;
+			}
+			
+			div.ui-slider-handle {
+				position: absolute;
+				cursor: pointer;
+				cursor: hand;
+				top: 0px;
+				left: 0px;
+				height: 100%;
+				width: 181px;
+            	background: url(images/handle.png) no-repeat ;
+				
+			}
+		
+			ul.magnifyme li {
+				width: 64px;
+				height: 64px;
+				float: left;
+				margin: 5px;
+				position: relative;
+				border: 1px solid #999;
+			}
+		</style> 
+<!-- 
+<script type="text/javascript" src="js/old/jquery-1.2.6.min.js"></script> 
+<script type="text/javascript" src="js/old/jquery-ui-1.6.custom.min.js"></script> 
+
+
+
+<script type="text/javascript" src="js/jquery-1.2.6.js"></script> 
+
+
+<script type="text/javascript" src="js/ui.core.js"></script> 
+ 
+<script type="text/javascript" src="js/ui.draggable.js"></script> 
+<script type="text/javascript" src="js/ui.sortable.js"></script>
+<script type="text/javascript" src="js/ui.slider.js"></script> 
+<script type="text/javascript" src="js/effects.core.js"></script> 
+-->
+<script type="text/javascript" src="js/ui.coverflow.custom.js"></script> 
+
+
+<script type="text/javascript" src="js/sylvester.js"></script> 
+<script type="text/javascript" src="js/pb.transformie.js"></script> 
+ 
+<script type="text/javascript"> 
+	globalcoverflow = null;
+	
+	
+	function altDebug(msg) {
+		$("#debug").append("<br>" + msg );
+
+	}
+	
+	if (typeof debug != "function") {
+		debug = altDebug;
+		
+	}
+	
+	$("ul.magnifyme").ready(function() {
+	  //$(document).ready(function() {
+				altDebug('make sortable');
+				$("ul.magnifyme").sortable({ 
+					/*appendTo: 'body',*/
+					start: function () {$("#mainContent").show();},									  
+					stop: function (event, ui) {$("#mainContent").hide(); },
+	 			});
+				$("ul.magnifyme").coverflow();
+				
+				debug('done');
+//				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
+
+	$(".cover-icon").bind('mousedown' , function() {
+		debug('mousedown');
+	});
+	$(".cover-icon").bind('mouseup' , function() {
+		debug('mouseup');
+	});
+	$(".cover-icon").bind('mouseout' , function() {
+		debug('mouseout');
+	});
+
+				
+				debug('disable selection');
+				//$(".wrapper").disableSelection();
+				//$(".magnifyme li").disableSelection();
+				//$(".slider").disableSelection();
+				//$(".ui-slider-handle").disableSelection();
+				debug('done');
+				
+
+
+			});
+	
+	
+	
+    
+</script> 
+ 
+								
+	
+		
+<div class="wrapper"> 
+	<ul class="magnifyme"> 
+		<!--<div class="cover-icon"><img src="icons/1.png" /> </div>
+		<div class="cover-icon"><img src="icons/2.png" /> </div>
+		<div class="cover-icon"><img src="icons/3.png" /> </div>
+		<div class="cover-icon"><img src="icons/4.png" /> </div>
+		<div class="cover-icon"><img src="icons/5.png" /> </div>
+		<div class="cover-icon"><img src="icons/6.png" /> </div> -->
+		<li><img id="artwork_01" src="images/art/art1.png" /></li> 
+		<li><img id="artwork_01" src="images/art/art1.png" /></li> 
+		<li><img id="artwork_01" src="images/art/art1.png" /></li> 
+		<li><img class="cover-icon"  src="icons/5.png" /></li> 
+		<li><img class="cover-icon"  src="icons/6.png" /></li> 
+		<li><img class="cover-icon"  src="icons/7.png" /></li> 
+		<li><img class="cover-icon"  src="icons/8.png" /></li> 
+		<li><img class="cover-icon"  src="icons/9.png" /></li> 
+		<li><img class="cover-icon"  src="icons/10.png" /></li> 
+		<li><img class="cover-icon"  src="icons/1.png" /></li> 
+		<li><img class="cover-icon"  src="icons/2.png" /></li> 
+		<li><img class="cover-icon"  src="icons/3.png" /></li> 
+		<li><img class="cover-icon"  src="icons/4.png" /></li> 
+		<li><img class="cover-icon"  src="icons/5.png" /></li> 
+		<li><img class="cover-icon"  src="icons/6.png" /></li> 
+		<li><img class="cover-icon"  src="icons/7.png" /></li> 
+		<li><img class="cover-icon"  src="icons/8.png" /></li> 
+		<li><img class="cover-icon"  src="icons/9.png" /></li> 
+		<li><img class="cover-icon"  src="icons/10.png" /> </li>
+        
+	</ul> 
+    <div class="slider"> 
+        <div class="ui-slider-handle"></div> 
+    </div> 
+<div>
+
+
+
+
+        
