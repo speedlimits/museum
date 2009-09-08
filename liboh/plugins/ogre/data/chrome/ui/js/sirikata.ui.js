@@ -36,3 +36,8 @@ $(document).ready(function() {
 function navi_pic (pic) {
 	$("#navigation-picture").attr('src', "images/navigation/navigation_" + pic + ".png");
 }
+
+function popUpMessage(text,x,y) {debug(text); debug(x); debug(y);}
+function hidePopUpMessage();
+
+

@@ -94,3 +94,14 @@ body  {
 	background: url(../images/_0000_Detail.png);
 	
 }
+
+#popup-message {
+	/*display: none;*/
+	position: absolute;
+
+
+	z-index: 8003;
+	background: #ccc;
+
+	
+}
