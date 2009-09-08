@@ -10,10 +10,14 @@
     <script type="text/javascript" src="js/sirikata.main.js"></script>
  	<script type="text/javascript" src="js/sirikata.ui.js"></script>
     <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
-<script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
+<script type="text/javascript" src="js/jquery.geturlparam.js"></script>
 
 <script type="text/javascript">
-	setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
+
+
+
+
+
 		function loadScreen(screen, page) { $(screen).load(page).fadeIn("slow"); }
 		function hideScreen(screen) {$(screen).fadeOut(); }
 		
@@ -69,10 +73,7 @@
 			loadScreen("#development-screen", "screens/development.html");	
 		}
 	
-		$(document).ready( function () {
-							 
-									 
-		});
+		
 
 		function popUpMessage(text,x,y) {
 			$('#popup-message').html(text);
@@ -88,6 +89,17 @@
 			$("#development-console").append("<br>" + msg );
 		}
 	
+		$(document).ready( function () {
+			if ($.getURLParam('mode') == "curator") {
+				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome_curator.html"); ', 1000);
+			} else if ($.getURLParam('mode') == "critique") {
+				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome_critique.html"); ', 1000);
+			} else {
+				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
+			}
+			 
+									 
+		});
 	</script>
 <link href="css/style.css" rel="stylesheet" type="text/css" />
 </head>
