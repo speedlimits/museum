@@ -15,7 +15,7 @@ $(document).ready(function() {
 		
 	} ) ;
 
-	$("#development-screen").draggable({ distance: 20, delay: 500 });
+	$("#development-screen").draggable({ distance: 5});
 /*	$("#navigation-screen").draggable();
 	$("#development-console-screen").draggable();
 
@@ -36,3 +36,8 @@ $(document).ready(function() {
 function navi_pic (pic) {
 	$("#navigation-picture").attr('src', "images/navigation/navigation_" + pic + ".png");
 }
+
+function popUpMessage(text,x,y) {debug(text); debug(x); debug(y);}
+function hidePopUpMessage();
+
+

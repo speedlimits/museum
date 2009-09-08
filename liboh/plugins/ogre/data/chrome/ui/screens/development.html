@@ -33,7 +33,7 @@
 		"critiqueMode(1)":"Critique - 1",
 		"critiqueMode(2)":"Critique - 2",
 		"critiqueMode(3)":"Critique - 3",
-		"mousedemo()":"Mouse Demo"
+		"debug($(document).getUrlParam('param'));":"getparameter"
 		
 	}
 	
@@ -43,7 +43,8 @@
 
 
 		$("#development-console").bind('mousedown', stopPropagation ) ;
-		
+		$("#debugfns").bind('mousedown', stopPropagation ) ;
+
 		$("#debugfns").addOption(debugoptions,false)
 		$("#debugfns").change(function (event,ui) {
 										
