@@ -222,12 +222,21 @@ void LightBulb::AttachLightBulb(
     Ogre::Entity* ogreEntity = sceneManager->createEntity(name, "LightBulb");
     ogreEntity->setMaterialName("Museum/BulbMaterial");
 
-#if 0 // FIXME: Is this redundant, or creating two nodes?
+#if 1 // FIXME: Is this redundant, or creating two nodes?
     const Vector3d &pos = loc.getTransform().getPosition();
     SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     thisSceneNode->setPosition(pos.x, pos.y, pos.z);
-#endif
+    thisSceneNode->attachObject(ogreEntity);
+    ogreEntity->setUserAny(Ogre::Any(sirikataEntity));
+#elif 0 // FIXME: Is this redundant, or creating two nodes?
+    const Vector3d &pos = loc.getTransform().getPosition();
+    SceneNode* thisSceneNode = sceneManager->getRootSceneNode()->createChildSceneNode();
+    thisSceneNode->setPosition(pos.x, pos.y, pos.z);
     sirikataEntity->replaceMoveableObject(ogreEntity);
+#elif 0
+    sirikataEntity->replaceMoveableObject(ogreEntity);
+#endif
+
 }
 
 
