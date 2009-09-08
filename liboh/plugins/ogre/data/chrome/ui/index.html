@@ -25,20 +25,20 @@
 			var mode = (mode == null) ? 0 : mode;
 			
 			if (mode == 0) {
-				loadScreen("#modal-screen", "screens/welcome_curator.html");
+				loadScreen("#modal-screen", "screens/curator_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_curator.html");	
 				if (mode == 1) { // art 
-					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					loadScreen("#detail-screen", "screens/curator_art.html");	
 				} else if (mode == 2) { // frames 
-					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					loadScreen("#detail-screen", "screens/curator_frames.html");	
 				} else if (mode == 3) { // walls 
-					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					loadScreen("#detail-screen", "screens/curator_walls.html");	
 				} else if (mode == 4) { // lights 
-					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					loadScreen("#detail-screen", "screens/curator_lights.html");	
 				} else if (mode == 5) { // save 
-					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					loadScreen("#detail-screen", "screens/curator_save.html");	
 				}
 			}
 		}
@@ -47,14 +47,16 @@
 			var mode = (mode == null) ? 0 : mode;
 			
 			if (mode == 0) {
-				loadScreen("#modal-screen", "screens/welcome_critique.html");
+				loadScreen("#modal-screen", "screens/critique_welcome.html");
 			} else if (mode == 1) { // load
-					loadScreen("#modal-screen", "screens/load_gallery.html");	
+					loadScreen("#modal-screen", "screens/critique_load_gallery.html");	
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_curator.html");	
 				 if (mode == 2) { // walk 
-					loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					//loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					hideScreen("#detail-screen");yea
+
 				} else if (mode == 3) { // picture 
 					loadScreen("#detail-screen", c2);
 				}
@@ -70,6 +72,9 @@
 							 
 									 
 		});
+
+		function popUpMessage(text,x,y) {debug(text); debug(x); debug(y);}
+		function hidePopUpMessage();
 		
 		
 		function debug(msg) {
@@ -88,6 +93,7 @@
 
 <div id="detail-screen"></div>
 
+<div id="message-screen">MESSSAGE</div>
 
 <div id="top-bar"></div>
 
