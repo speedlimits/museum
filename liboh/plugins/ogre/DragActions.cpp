@@ -527,7 +527,8 @@ void zoomInOut(Input::AxisValue value, const Input::InputDevicePtr &dev, CameraE
 
 void zoomInOut(float value, const Vector2f& axes, CameraEntity *camera, const std::set<ProxyObjectWPtr>& objects, OgreSystem *parent) {
     SILOG(input,debug,"zoom "<<value);
-
+    if (!camera)
+        return;
     Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
     Location cameraLoc = camera->getProxy().globalLocation(now);
     Vector3d toMove;
