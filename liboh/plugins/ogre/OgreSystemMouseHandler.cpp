@@ -1244,6 +1244,7 @@ private:
     }
 
     void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
+        std::cout << "dbm debug inventoryHandler arg-->" << arg << "<--" << std::endl;
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         if (!cam) return;
         RoutableMessageBody msg;
