@@ -10,7 +10,7 @@
     <script type="text/javascript" src="js/sirikata.main.js"></script>
  	<script type="text/javascript" src="js/sirikata.ui.js"></script>
     <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
-<script type="text/javascript" src="js/jquery.geturlparam.js"></script>
+	<script type="text/javascript" src="js/jquery.geturlparam.js"></script>
 
 <script type="text/javascript">
 
@@ -48,6 +48,9 @@
 		function critiqueMode(mode, c2) {
 			var mode = (mode == null) ? 0 : mode;
 			
+			$("body").unbind('sirikata_item_select', pictureSelectedEvent);
+			$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
+			
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/critique_welcome.html");
 			} else if (mode == 1) { // load
@@ -58,7 +61,10 @@
 				 if (mode == 2) { // walk 
 					//loadScreen("#detail-screen", "screens/detail_coverflow.html");	
 					hideScreen("#detail-screen");
-
+					
+					$("body").bind('sirikata_item_select', pictureSelectedEvent);
+					$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
+			
 				} else if (mode == 3) { // picture 
 					loadScreen("#detail-screen", c2);
 				}
@@ -91,6 +97,14 @@
 			} else {
 				$("body").trigger('sirikata_item_deselect');
 			}
+		}
+		
+		function pictureSelectedEvent(event, data) {
+			debug("selected " + data.intem);
+				
+		}
+		function pictureDeSelectEvent(event) {
+			debug("items deselected");
 		}
 	
 		$(document).ready( function () {
