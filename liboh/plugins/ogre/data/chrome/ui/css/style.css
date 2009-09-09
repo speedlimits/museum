@@ -105,3 +105,15 @@ body  {
 
 	
 }
+
+#drop-screen {
+	display: none;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 768px;
+	width: 1336px;
+	z-index: 6002;
+	background: #000;
+	opacity:0.1;
+}
