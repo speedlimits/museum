@@ -15,9 +15,6 @@
 <script type="text/javascript">
 
 
-
-
-
 		function loadScreen(screen, page) { $(screen).load(page).fadeIn("slow"); }
 		function hideScreen(screen) {$(screen).fadeOut(); }
 		
@@ -76,17 +73,24 @@
 		
 
 		function popUpMessage(text,x,y) {
+			$('#popup-message').fadeIn("slow");
 			$('#popup-message').html(text);
 			$('#popup-message').css('left', x);
 			$('#popup-message').css('top', y);
-			
-			debug(text); debug(x); debug(y);
 		}
-		function hidePopUpMessage() {};
+		function hidePopUpMessage() {$('#popup-message').fadeOut("slow");};
 		
 		
 		function debug(msg) {
 			$("#development-console").append("<br>" + msg );
+		}
+		
+		function pictureSelected(id) {
+			if (id == null) {
+				$("body").trigger('sirikata_item_select', {item: id});	
+			} else {
+				$("body").trigger('sirikata_item_deselect');
+			}
 		}
 	
 		$(document).ready( function () {
@@ -111,6 +115,7 @@
 <div id="detail-screen"></div>
 
 <div id="top-bar"></div>
+
 <div id="bottom-bar"></div>
 
 <div id="bottom-bar"></div>
