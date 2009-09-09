@@ -319,8 +319,8 @@ private:
                 /// FIXME: total kluge!  Need a way to not select walls etc
                 ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
                 if (overMesh) {
-                    Vector3f overScale = overMesh->getScale();
-                    if (overScale.x < 3.0 && overScale.y < 3.0 && overScale.z < 3.0) {
+                    String s=overMesh->getPhysical().name;
+                    if (s.size() >= 8 && s.substr(0,8)=="artwork_") {
                         mSelectedObjects.insert(mouseOver->getProxyPtr());
                         mouseOver->setSelected(true);
                         SILOG(input,info,"Replaced selection with " << mouseOver->id());
@@ -1219,6 +1219,15 @@ private:
             cameraPathSetCamera(pos, orient);
         }
     }
+    
+    void debugAction() {
+        static int pic=0;
+        pic++;
+        WebViewManager::NavigationAction act;
+        ostringstream ss;
+        ss << "inventory placeObject artwork_0" << pic << " 400 300 ";
+        inventoryHandler(act, ss.str());
+    }
 
     /// WebView Actions
     void webViewNavigateAction(WebViewManager::NavigationAction action) {
@@ -1946,6 +1955,7 @@ public:
         mInputResponses["cameraPathRun"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathRun, this));
         mInputResponses["cameraPathSpeedUp"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, -0.1f));
         mInputResponses["cameraPathSlowDown"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, 0.1f));
+        mInputResponses["debugAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
         mInputResponses["webBack"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateBack));
@@ -2021,6 +2031,7 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F7), mInputResponses["cameraPathRun"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction"]);
         
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);

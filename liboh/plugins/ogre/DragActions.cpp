@@ -508,7 +508,8 @@ public:
         }
     }
 };
-DragActionRegistry::RegisterClass<PanCameraDrag> pancamera("panCamera");
+/// no right-click camera movement, conflicts with avatar:
+//DragActionRegistry::RegisterClass<PanCameraDrag> pancamera("panCamera");
 
 
 ////////////////////////////////////////////////////////////////////////////////

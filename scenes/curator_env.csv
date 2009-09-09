@@ -18,3 +18,7 @@
 "mesh","staticmesh","building_08_wall_05",5.72,-1.38,2,0,0,0,1,1,1,1,1,1,1,1,0.2,0.2,1,1,"meru:///building_08_wall_05.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","building_08_window_01",5.82,-1.58,2.81,0,1.75E-007,0,1,1,1,1,1,1,1,1,0.2,0.2,1,1,"meru:///building_08_window_01.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","building_08_window_02",-2.67,-2.03,4.16,0,0,0,1,1,1,1,1,1,1,1,0.2,0.2,1,1,"meru:///building_08_window_02.mesh",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","artwork_01",0,-10,0.3,0,0,0,,1.5,1,0.1,1,1,1,0,0.1,0.2,0,0,"meru:///cube.mesh",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","artwork_02",0,-10,0.3,0,0,0,,1,2,0.1,1,1,1,0,0.1,0.2,0,0,"meru:///cube.mesh",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","artwork_03",0,-10,0.3,0,0,0,,1.2,1.2,0.1,1,1,1,0,0.1,0.2,0,0,"meru:///cube.mesh",,,,,,,,,,,,,,,,,
+"mesh","graphiconly","artwork_04",0,-10,0.3,0,0,0,,0.6,0.6,0.05,1,1,1,0,0.1,0.2,0,0,"meru:///sphere.mesh",,,,,,,,,,,,,,,,,

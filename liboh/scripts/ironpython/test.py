@@ -63,7 +63,7 @@ class exampleclass:
                 qy = float(tok[9])
                 qz = float(tok[10])
                 qw = float(tok[11])
-                print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+                if DEBUG_OUTPUT: print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
                 self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
 
     def sawAnotherObject(self,persistence,header,retstatus):
@@ -91,6 +91,7 @@ class exampleclass:
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
         elif myName[:8]=="artwork_":
+            if DEBUG_OUTPUT: print "PY: adding artwork", myName, ":", uuid
             self.paintings[myName]=uuid
 
     def processRPC(self,header,name,arg):
