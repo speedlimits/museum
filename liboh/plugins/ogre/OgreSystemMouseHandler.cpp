@@ -1035,13 +1035,18 @@ private:
 
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMouseClick(mouseev);
+        
         if (browser_resp == EventResponse::cancel()) {
             return EventResponse::cancel();
         }
+        /// FIXME: temporarily commenting out so ogre gets mouseclicks.  For some reason when the app first starts,
+        /// this logic cancels all mouse clicks so you cannot select a painting
+        /*
         if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
+            std::cout << "dbm debug mouseClickHandler cancelled due to ActiveButtons" << std::endl;
             return EventResponse::cancel();
         }
-
+        */
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
         mInputBinding.handle(inputev);
 
