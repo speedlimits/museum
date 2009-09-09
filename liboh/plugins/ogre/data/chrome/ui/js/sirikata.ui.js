@@ -3,7 +3,7 @@ function stopPropagation(event, ui) { event.stopPropagation() ; }
 
 $(document).ready(function() {	
 	
-	$("#mainContent").droppable({
+	$("#drop-screen").droppable({
       	drop: function(event, ui) {
 			debug("placing object");
 			debug("inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY) ;
@@ -14,7 +14,6 @@ $(document).ready(function() {
 		}
 		
 	} ) ;
-
 	
 /*	$("#navigation-screen").draggable();
 	$("#development-console-screen").draggable();

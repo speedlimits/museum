@@ -15,8 +15,8 @@
 				margin: 5px auto;
 				height: 170px;
 				/*border: 2px solid #999;
-				*/
-				overflow: hidden;
+				
+				overflow: hidden;*/
 				width: 600px;
 				position: relative;
 			}
@@ -89,11 +89,11 @@
 	
 	$("ul.magnifyme").ready(function() {
 	  //$(document).ready(function() {
-				altDebug('make sortable');
+				debug('make sortable');
 				$("ul.magnifyme").sortable({ 
 					/*appendTo: 'body',*/
-					start: function () {$("#mainContent").show();},									  
-					stop: function (event, ui) {$("#mainContent").hide(); },
+					start: function () {$("#drop-screen").show();},									  
+					stop: function (event, ui) {$("#drop-screen").hide(); },
 	 			});
 				$("ul.magnifyme").coverflow();
 				
