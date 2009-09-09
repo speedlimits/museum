@@ -6,9 +6,11 @@ $(document).ready(function() {
 	$("#mainContent").droppable({
       	drop: function(event, ui) {
 			debug("placing object");
-			debug("inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY) ;
+			var msg = "inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY";
+
+			debug(msg) ;
 			
-			Client.event("navcommand", "inventory placeObject " + ui.helper[0].children[0].id + " " + event.pageX + " " + event.pageY);
+			Client.event("navcommand", msg);
 			return false; //reject it so that position gets reverted
 
 		}
