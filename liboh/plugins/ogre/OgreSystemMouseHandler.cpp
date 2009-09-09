@@ -255,6 +255,7 @@ private:
         if (!camera) {
             return;
         }
+        /*
         if (mParent->mInputManager->isModifierDown(Input::MOD_SHIFT)) {
             // add object.
             int numObjectsUnderCursor=0;
@@ -291,6 +292,7 @@ private:
                 // Fire selected event.
             }
             else {
+                
                 ProxyObjectPtr obj(selectIter->lock());
                 Entity *ent = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
                 if (ent) {
@@ -306,15 +308,19 @@ private:
             clearSelection();
             mLastShiftSelected = SpaceObjectReference::null();
         }
-        else {
+        else 
+        */
+        {
             // reset selection.
             clearSelection();
             mWhichRayObject+=direction;
             int numObjectsUnderCursor=0;
             Entity *mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
-            if (recentMouseInRange(p.x, p.y, &mLastHitX, &mLastHitY)==false||numObjectsUnderCursor!=mLastHitCount){
+//            if (recentMouseInRange(p.x, p.y, &mLastHitX, &mLastHitY)==false||numObjectsUnderCursor!=mLastHitCount){
+                std::cout << "dbm debug setting mouseOver" << std::endl;
                 mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
-            }
+//            }
+//            else std::cout << "dbm debug not setting mouseOver" << std::endl;
             if (mouseOver) {
                 /// FIXME: total kluge!  Need a way to not select walls etc
                 ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
@@ -1013,6 +1019,7 @@ private:
             std::tr1::dynamic_pointer_cast<MousePressedEvent>(ev));
         if (!mouseev)
             return EventResponse::nop();
+        std::cout << "dbm debug mousePressed at " << mouseev->mX << "," << mouseev->mY << std::endl;
 
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMousePressed(mouseev);
@@ -1021,6 +1028,7 @@ private:
             return EventResponse::cancel();
         }
 
+        selectObjectAction(Vector2f(mouseev->mX, mouseev->mY), 1);
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
         mInputBinding.handle(inputev);
 
@@ -1028,6 +1036,7 @@ private:
     }
 
     EventResponse mouseClickHandler(EventPtr ev) {
+        std::cout << "dbm debug mouseClicked" << std::endl;
         std::tr1::shared_ptr<MouseClickEvent> mouseev (
             std::tr1::dynamic_pointer_cast<MouseClickEvent>(ev));
         if (!mouseev)
@@ -1435,7 +1444,7 @@ private:
             id += "\"]";
         }
         id += "]";
-        std::cout << "document.selected=" + id + ";" << std::endl;
+        std::cout << "document.selacted=" + id + ";" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript(
             "__chrome", "document.selected=" + id + ";" +
             "debug(document.selected);"
@@ -2025,7 +2034,7 @@ public:
 
         // Selection
         mInputBinding.add(InputBindingEvent::MouseClick(1), mInputResponses["selectObject"]);
-        mInputBinding.add(InputBindingEvent::MouseClick(3), mInputResponses["selectObjectReverse"]);
+        //mInputBinding.add(InputBindingEvent::MouseClick(3), mInputResponses["selectObjectReverse"]);
 
         // Camera Path
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F1), mInputResponses["cameraPathLoad"]);
