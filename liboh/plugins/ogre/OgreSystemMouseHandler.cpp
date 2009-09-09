@@ -128,6 +128,43 @@ vector<String> tokenizeString (const String& str)
 }
 
 
+// does an sprintf of its remaining arguments according to Format,
+// returning the formatted result.
+// from http://www.codecodex.com/wiki/String_printf
+std::string string_printf(const char * Format, ...) {
+    std::string result;
+    char *tempBuf = NULL;
+    unsigned long tempBufSize = 128;            // something reasonable to begin with
+
+    for (;;) {
+        tempBuf = (char*)malloc(tempBufSize);
+        if (tempBuf == NULL)
+            break;
+        va_list args;
+        va_start(args, Format);
+        const long bufSizeNeeded = vsnprintf(tempBuf, tempBufSize, Format, args);               // not including trailing null
+        va_end(args);
+        if (bufSizeNeeded >= 0 && static_cast<unsigned long>(bufSizeNeeded) < tempBufSize) {    // the whole thing did fit 
+            tempBufSize = bufSizeNeeded;        // not including trailing null
+            break;
+        }
+        free(tempBuf);
+        if (bufSizeNeeded < 0) {                // glibc < 2.1
+            tempBufSize *= 2;                   // try something bigger
+        }
+        else {                                  // glibc >= 2.1
+            tempBufSize = bufSizeNeeded + 1;    // now I know how much I need, including trailing null
+        }
+    }
+    if (tempBuf != NULL) {
+        result.append(tempBuf, tempBufSize);
+        free(tempBuf);
+    }
+
+    return result;
+} //string_printf
+
+
 // Defined in DragActions.cpp.
 
 class OgreSystem::MouseHandler {
@@ -636,11 +673,13 @@ private:
         " cone=0.4,0.5,1"
         " power=1"
         " lightrange=32"
-        " castsshadow=false"
+        " castsshadow=true"
         " type=spot"
     );
 #endif
     }
+
+
 	ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
 		ProxyObjectPtr parentProxy;
 		while ((parentProxy=camProxy->getParentProxy())) {
@@ -1710,7 +1749,7 @@ private:
     void initSelectedObjectLightLocation(float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
         // Find wall normal and object bounding sphere.
         // We assume that the object is in front of the wall
-        Entity *sel;
+        Entity *sel = NULL;
         // Get an object's center and radius
         for (SelectedObjectSet::const_iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it) {
             ProxyObjectPtr obj(it->lock());
@@ -1770,12 +1809,136 @@ private:
         else {
             newLightObject->resetLocation(now, lightLocation);
         }
+#if 1
+            // Attach a light bulb mesh
+            Entity *ent = mParent->getEntity(newId);
+            if (ent)
+                LightBulb::AttachLightBulb(camera, ent, String("LightMesh" + newId.toString()).c_str(), lightLocation);
+#endif
 //        mSelectedObjects.clear();
 //        mSelectedObjects.insert(newLightObject);
 //        Entity *ent = mParent->getEntity(newId);
 //        if (ent) {
 //            ent->setSelected(true);
 //        }
+    }
+
+
+    static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
+        String info(string_printf(
+            "%s"                                                                //  1 prelude
+            " diffusecolor=%.7g,%.7g,%.7g"                                      //  2 diffuse
+            " specularcolor=%.7g,%.7g,%.7g"                                     //  3 specular
+            " ambientcolor=%.7g,%.7g,%.7g"                                      //  4 ambient
+            " shadowcolor=%.7g,%.7g,%.7g"                                       //  5 shadow
+            " falloff=%.7g,%.7g,%.7g"                                           //  6 falloff
+            " cone=%.7g,%.7g,%.7g"                                              //  7 cone
+            " power=%.7g"                                                       //  8 power
+            " lightrange=%.7g"                                                  //  9 lightrange
+            " castsshadow=%s"                                                   // 10 castsshadows
+            " type=%s"                                                          // 11 type
+            " %s",                                                              // 12 postlude
+            prelude,                                                            //  1 prelude
+            li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],    //  2 diffuse
+            li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2],   //  3 specular
+            li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2],    //  4 ambient
+            li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2],     //  5 shadow
+            li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,   //  6 falloff
+            li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,        //  7 cone
+            li.mPower,                                                          //  8 power
+            li.mLightRange,                                                     //  9 lightrange
+            li.mCastsShadow ? "true" : "false",                                 // 10 castsshadows
+            (li.mType == LightInfo::POINT)       ? "point" :                    // 11 type
+            (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
+            (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
+            "unknown",
+            postlude                                                            // 12 postlude
+        ));
+        return info;
+    }
+
+
+    void lightHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String token;
+        size_t ix = 0;
+        bool success = true, rotate = false;
+        double speed;
+        getNextToken(arg, &ix, &token);                                 // light (already parsed)
+        success = success && getNextToken(arg, &ix, &token);            // subcommand
+
+        // light list
+        if (token == "list") {
+            bool foundFirstLight = false;
+            bool visibility = true;
+            String list;
+            list = "[";
+            OgreSystem::SceneEntitiesMap::const_iterator iter;
+            for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+                iter != mParent->mSceneEntities.end(); ++iter
+            ) {
+                Entity *ent = iter->second;                                     if (!ent)   continue;
+                ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+                ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+                if (list.size() > 1)
+                    list += ", ";
+                list += obj->getObjectReference().toString();
+            }
+            list += "]";
+            WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
+                "debug('" + list + "');"
+            );
+        }
+
+        // light get              , or
+        // light get 1            , or
+        // light get 292ae805-393b-f239-8df8-8f129f9ddb03:12345678-1111-1111-1111-defa01759ace
+        else if (token == "get") {
+            success = success && getNextToken(arg, &ix, &token);            // id or index
+            if (success) {          // Specified a particular light
+                // Check whether it is an ID or an index
+                bool isIndex = token.find_first_of(':') == String::npos;
+                int index = isIndex ? strtol(token.c_str(), NULL, 10) : std::numeric_limits<int>::max();
+                SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(token);
+                int ix = 0;
+                OgreSystem::SceneEntitiesMap::const_iterator iter;
+                for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+                    iter != mParent->mSceneEntities.end(); ++iter
+                ) {
+                    Entity *ent = iter->second;                                     if (!ent)   continue;
+                    ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+                    ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+                    if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
+                        const LightInfo &li = light->getLastLightInfo();
+                        String prelude(string_printf("{ index=%d id=%s", ix, obj->getObjectReference().toString().c_str()));
+                        String info(printLightInfoToString(prelude.c_str(), li, " }"));
+                        WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
+                            "debug('" + info + "');"
+                        );
+                    }
+                    ++ix;
+                }
+            }
+            else { // No light specified
+                String allInfo;
+                int ix = 0;
+                OgreSystem::SceneEntitiesMap::const_iterator iter;
+                for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+                    iter != mParent->mSceneEntities.end(); ++iter
+                ) {
+                    Entity *ent = iter->second;                                     if (!ent)   continue;
+                    ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+                    ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+                    const LightInfo &li = light->getLastLightInfo();
+                    String prelude(string_printf(" { index=%d id=%s", ix, obj->getObjectReference().toString().c_str()));
+                    String info(printLightInfoToString(prelude.c_str(), li, " }"));
+                    allInfo += info;
+                    ++ix;
+                }
+                WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
+                    "debug('{ " + allInfo + " }');"
+                );
+            }
+        }
     }
     
 
@@ -1801,6 +1964,7 @@ private:
             { "step",                   &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
             { "getselectedids",         &Sirikata::Graphics::OgreSystem::MouseHandler::getSelectedIDHandler },
             { "lightSelectedObject",    &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelectedObjectHandler },
+            { "light",                  &Sirikata::Graphics::OgreSystem::MouseHandler::lightHandler },
             { NULL,                     NULL }
         };
         const StringMessageDispatch *dp;
