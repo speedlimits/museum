@@ -255,6 +255,7 @@ private:
         if (!camera) {
             return;
         }
+        /// we don't want all these fancy selection modes
         /*
         if (mParent->mInputManager->isModifierDown(Input::MOD_SHIFT)) {
             // add object.
@@ -316,11 +317,10 @@ private:
             mWhichRayObject+=direction;
             int numObjectsUnderCursor=0;
             Entity *mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
+            /// force selection even if already selected
 //            if (recentMouseInRange(p.x, p.y, &mLastHitX, &mLastHitY)==false||numObjectsUnderCursor!=mLastHitCount){
-                std::cout << "dbm debug setting mouseOver" << std::endl;
-                mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
+            mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
 //            }
-//            else std::cout << "dbm debug not setting mouseOver" << std::endl;
             if (mouseOver) {
                 /// FIXME: total kluge!  Need a way to not select walls etc
                 ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
@@ -1019,7 +1019,6 @@ private:
             std::tr1::dynamic_pointer_cast<MousePressedEvent>(ev));
         if (!mouseev)
             return EventResponse::nop();
-        std::cout << "dbm debug mousePressed at " << mouseev->mX << "," << mouseev->mY << std::endl;
 
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMousePressed(mouseev);
@@ -1036,7 +1035,6 @@ private:
     }
 
     EventResponse mouseClickHandler(EventPtr ev) {
-        std::cout << "dbm debug mouseClicked" << std::endl;
         std::tr1::shared_ptr<MouseClickEvent> mouseev (
             std::tr1::dynamic_pointer_cast<MouseClickEvent>(ev));
         if (!mouseev)
@@ -1076,10 +1074,12 @@ private:
             if (ev->mType == Input::DRAG_END) {
                 mWebViewActiveButtons.erase(iter);
             }
-
+            /// FIXME: this is another place where initially the browser steals events.  We can't have that!
+            /*
             if (browser_resp == EventResponse::cancel()) {
                 return EventResponse::cancel();
             }
+            */
         }
 
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(evbase));
@@ -1253,7 +1253,6 @@ private:
     }
 
     void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
-        std::cout << "dbm debug inventoryHandler arg-->" << arg << "<--" << std::endl;
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         if (!cam) return;
         RoutableMessageBody msg;
@@ -1846,7 +1845,6 @@ private:
                         ButtonReleased::getEventId(),
                         std::tr1::bind(&MouseHandler::keyHandler, this, _1)
                     );
-                    std::cout << "dbm debug key up: " << subId << std::endl;
                     mEvents.push_back(subId);
                     mDeviceSubscriptions.insert(DeviceSubMap::value_type(&*ev->mDevice, subId));
                 }
