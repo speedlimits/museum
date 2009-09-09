@@ -22,23 +22,38 @@ body  {
 	left: 281px;
 	z-index: 6002;
 }
-#top-bar ul  {
+ul#topbar-curator  {
 	height: 37px;
 	padding: 0 118px;
 	margin:0 ;
-	background: url(../images/top_menu_mac.png) no-repeat;
+	background: url(../images/topbar_curator.png) no-repeat ;
 	list-style: none;
 }
-#top-bar li {
+#topbar-curator li {
 	float:left;
 	margin:0 ;/*15px;*/
 	padding:0;
-	background: url(../images/top_menu_mac.png);
+	background: url(../images/topbar_curator.png);
 	height: 37px;
 	width: 117px;
 	text-align: center;
 }
-
+ul#topbar-critique {
+	height: 37px;
+	padding: 0 118px;
+	margin:0 ;
+	background: url(../images/topbar_critique.png) no-repeat;
+	list-style: none;
+}
+#topbar-critique li {
+	float:left;
+	margin:0 ;/*15px;*/
+	padding:0;
+	background: url(../images/topbar_critique.png);
+	height: 37px;
+	width: 117px;
+	text-align: center;
+}
 /* Modal Screen */
 #modal-screen {
 	display: none;

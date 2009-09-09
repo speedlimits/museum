@@ -18,6 +18,7 @@
 				
 				overflow: hidden;*/
 				width: 600px;
+				max-width: 600px;
 				position: relative;
 			}
 			
@@ -27,7 +28,7 @@
 				left: 30px;
 				width: 542px;
 				height: 19px;
-				background: url(images/productbrowser_scrollbar_20070622.png) no-repeat;
+				background: url(images/productbrowser_scrollbar_20070622.jpg) no-repeat;
 			}
 			
 			div.ui-slider-handle {
@@ -38,7 +39,7 @@
 				left: 0px;
 				height: 100%;
 				width: 181px;
-            	background: url(images/handle.png) no-repeat ;
+            	background: url(images/handle.jpg) no-repeat ;
 				
 			}
 		
@@ -91,7 +92,7 @@
 	  //$(document).ready(function() {
 				debug('make sortable');
 				$("ul.magnifyme").sortable({ 
-					/*appendTo: 'body',*/
+					distance: 10, 
 					start: function () {$("#drop-screen").show();},									  
 					stop: function (event, ui) {$("#drop-screen").hide(); },
 	 			});
@@ -112,10 +113,11 @@
 
 				
 				debug('disable selection');
-				//$(".wrapper").disableSelection();
-				//$(".magnifyme li").disableSelection();
-				//$(".slider").disableSelection();
-				//$(".ui-slider-handle").disableSelection();
+				$(".wrapper").disableSelection();
+				$(".magnifyme li").disableSelection();
+				$(".magnifyme img").disableSelection();
+				$(".slider").disableSelection();
+				$(".ui-slider-handle").disableSelection();
 				debug('done');
 				
 
@@ -132,31 +134,39 @@
 		
 <div class="wrapper"> 
 	<ul class="magnifyme"> 
-		<!--<div class="cover-icon"><img src="icons/1.png" /> </div>
-		<div class="cover-icon"><img src="icons/2.png" /> </div>
-		<div class="cover-icon"><img src="icons/3.png" /> </div>
-		<div class="cover-icon"><img src="icons/4.png" /> </div>
-		<div class="cover-icon"><img src="icons/5.png" /> </div>
-		<div class="cover-icon"><img src="icons/6.png" /> </div> -->
-		<li><img id="artwork_01" src="images/art/art1.png" /></li> 
-		<li><img id="artwork_01" src="images/art/art1.png" /></li> 
-		<li><img id="artwork_01" src="images/art/art1.png" /></li> 
-		<li><img class="cover-icon"  src="icons/5.png" /></li> 
-		<li><img class="cover-icon"  src="icons/6.png" /></li> 
-		<li><img class="cover-icon"  src="icons/7.png" /></li> 
-		<li><img class="cover-icon"  src="icons/8.png" /></li> 
-		<li><img class="cover-icon"  src="icons/9.png" /></li> 
-		<li><img class="cover-icon"  src="icons/10.png" /></li> 
-		<li><img class="cover-icon"  src="icons/1.png" /></li> 
-		<li><img class="cover-icon"  src="icons/2.png" /></li> 
-		<li><img class="cover-icon"  src="icons/3.png" /></li> 
-		<li><img class="cover-icon"  src="icons/4.png" /></li> 
-		<li><img class="cover-icon"  src="icons/5.png" /></li> 
-		<li><img class="cover-icon"  src="icons/6.png" /></li> 
-		<li><img class="cover-icon"  src="icons/7.png" /></li> 
-		<li><img class="cover-icon"  src="icons/8.png" /></li> 
-		<li><img class="cover-icon"  src="icons/9.png" /></li> 
-		<li><img class="cover-icon"  src="icons/10.png" /> </li>
+		<!--<div class="cover-icon"><img src="icons/1.jpg" /> </div>
+		<div class="cover-icon"><img src="icons/2.jpg" /> </div>
+		<div class="cover-icon"><img src="icons/3.jpg" /> </div>
+		<div class="cover-icon"><img src="icons/4.jpg" /> </div>
+		<div class="cover-icon"><img src="icons/5.jpg" /> </div>
+		<div class="cover-icon"><img src="icons/6.jpg" /> </div> -->
+		<li><img id="artwork_01" src="images/art/1.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/2.jpg" /></li> 
+		<li><img id="artwork_03" src="images/art/3.jpg" /></li> 
+		<li><img id="artwork_04" src="images/art/4.jpg" /></li> 
+		<li><img id="artwork_01" src="images/art/5.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/6.jpg" /></li> 
+		<li><img id="artwork_03" src="images/art/7.jpg" /></li> 
+		<li><img id="artwork_04" src="images/art/8.jpg" /></li> 
+		<li><img id="artwork_01" src="images/art/9.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/10.jpg" /></li> 
+		<li><img id="artwork_03" src="images/art/12.jpg" /></li> 
+		<li><img id="artwork_04" src="images/art/13.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/14.jpg" /></li> 
+		<li><img id="artwork_01" src="images/art/1.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/2.jpg" /></li> 
+		<li><img id="artwork_03" src="images/art/3.jpg" /></li> 
+		<li><img id="artwork_04" src="images/art/4.jpg" /></li> 
+		<li><img id="artwork_01" src="images/art/5.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/6.jpg" /></li> 
+		<li><img id="artwork_03" src="images/art/7.jpg" /></li> 
+		<li><img id="artwork_04" src="images/art/8.jpg" /></li> 
+		<li><img id="artwork_01" src="images/art/9.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/10.jpg" /></li> 
+		<li><img id="artwork_03" src="images/art/12.jpg" /></li> 
+		<li><img id="artwork_04" src="images/art/13.jpg" /></li> 
+		<li><img id="artwork_02" src="images/art/14.jpg" /></li> 
+
         
 	</ul> 
     <div class="slider"> 

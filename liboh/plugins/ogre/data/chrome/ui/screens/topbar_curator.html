@@ -1,9 +1,9 @@
 <ul id="topbar-curator">
-        <li class="topbarbutton" style="background-position-x: -118px;" onClick="enterLoadGallery();" />&nbsp;</li>
-        <li class="topbarbutton" style="background-position-x: -235px;" onClick="enterSelectFrames();" />&nbsp;</li>
-        <li class="topbarbutton" style="background-position-x: -352px;" onClick="$('#sidebar1').load('walls.html');" />&nbsp;</li>
-        <li class="topbarbutton" style="background-position-x: -469px;" onClick="$('#sidebar1').load('lighting.html')" />&nbsp;</li>
-        <li class="topbarbutton" style="background-position-x: -586px;" onClick="$('#sidebar1').load('save-share.html')" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -118px;" onClick="curatorMode(1);" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -235px;" onClick="curatorMode(2);" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -352px;" onClick="curatorMode(3);" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -469px;" onClick="curatorMode(4);" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -586px;" onClick="curatorMode(5);" />&nbsp;</li>
 </ul>
 
 <script type="text/javascript">
@@ -11,14 +11,14 @@
 $('#topbar-curator').ready( function () {
 
 	
-	$("li.topbarbutton").bind('mouseover', function(event){
+	$("#topbar-curator li.topbarbutton").bind('mouseover', function(event){
 		$(this).css('background-position-y', '-38px');	
 					
 	});
-	$("li.topbarbutton").bind('mouseout', function(event){
+	$("#topbar-curator li.topbarbutton").bind('mouseout', function(event){
 		$(this).css('background-position-y', '0px');						
 	});
-	$("li.topbarbutton").mousedown( function(event){
+	$("#topbar-curator li.topbarbutton").mousedown( function(event){
 		$(this).css('background-position-y', '-76px');						
 	});
 });

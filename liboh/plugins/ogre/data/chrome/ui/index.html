@@ -57,10 +57,10 @@
 					loadScreen("#modal-screen", "screens/critique_load_gallery.html");	
 			} else {
 				hideScreen("#modal-screen");
-				loadScreen("#top-bar", "screens/topbar_curator.html");	
+				loadScreen("#top-bar", "screens/topbar_critique.html");	
 				 if (mode == 2) { // walk 
 					//loadScreen("#detail-screen", "screens/detail_coverflow.html");	
-					hideScreen("#detail-screen");yea
+					hideScreen("#detail-screen");
 
 				} else if (mode == 3) { // picture 
 					loadScreen("#detail-screen", c2);
@@ -104,13 +104,14 @@
 <link href="css/style.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body>
+<body id="body">
 
 <div id="modal-screen" ></div>
 
 <div id="detail-screen"></div>
 
 <div id="top-bar"></div>
+<div id="bottom-bar"></div>
 
 <div id="bottom-bar"></div>
 
