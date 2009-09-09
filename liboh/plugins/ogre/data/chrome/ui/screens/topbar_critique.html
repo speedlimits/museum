@@ -1,0 +1,25 @@
+<ul id="topbar-critique">
+        <li class="topbarbutton" style="background-position-x: -118px;" onClick="critiqueMode(1);" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -235px;" onClick="critiqueMode(2);" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-x: -352px;" onClick="critiqueMode(3);" />&nbsp;</li>
+</ul>
+
+<script type="text/javascript">
+
+$('#topbar-critique').ready( function () {
+
+	
+	$("#topbar-critique li.topbarbutton").bind('mouseover', function(event){
+		$(this).css('background-position-y', '-38px');	
+					
+	});
+	$("#topbar-critique li.topbarbutton").bind('mouseout', function(event){
+		$(this).css('background-position-y', '0px');						
+	});
+	$("#topbar-critique li.topbarbutton").mousedown( function(event){
+		$(this).css('background-position-y', '-76px');						
+	});
+alert('critique');
+});
+
+</script>
