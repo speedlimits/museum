@@ -487,7 +487,7 @@ struct HostedObject::PrivateCallbacks {
         request->setPersistenceCallback(std::tr1::bind(&PrivateCallbacks::receivedProxObjectProperties,
                                             weakThis, _1, _2, _3,
                                             queryId, objLoc));
-        request->setTimeout(Duration::seconds(5.0));
+        request->setTimeout(Duration::seconds(40.0));
         request->serializeSend();
     }
     static void receivedProxObjectProperties(
@@ -1135,7 +1135,7 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
                     loc.SerializeToString(locRequest->body().add_message("LocRequest"));
 
                   
-                    locRequest->setTimeout(Duration::seconds(5.0));
+                    locRequest->setTimeout(Duration::seconds(40.0));
                     locRequest->serializeSend();
                 }
             } else {
