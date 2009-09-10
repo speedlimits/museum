@@ -1272,7 +1272,7 @@ private:
             cameraPathSetCamera(pos, orient);
         }
     }
-    
+
     /// Bornholm actions
     
     /// fun mode
@@ -1280,7 +1280,16 @@ private:
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         assert(cam);
         RoutableMessageBody msg;
-        msg.add_message("JavascriptMessage", "funmode fire");
+        ostringstream ss;
+        ss << "funmode fire ammo_cannon1 ";
+        ProxyObjectPtr avatar = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        assert(avatar);
+        Time now(SpaceTimeOffsetManager::getSingleton().now(avatar->getObjectReference().space()));
+        Location location(avatar->globalLocation(now));
+        Vector3d pos = location.getPosition();
+        Quaternion rot = location.getOrientation();
+        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w;
+        msg.add_message("JavascriptMessage", ss.str());
         String smsg;
         msg.SerializeToString(&smsg);
         cam->sendMessage(MemoryReference(smsg));
