@@ -14,6 +14,7 @@ DEBUG_OUTPUT=True
 class exampleclass:
     def __init__(self):
         self.paintings={}
+        self.ammo={}
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
         print "Got an RPC named",name
@@ -49,19 +50,34 @@ class exampleclass:
             s = "".join(chr(i) for i in serialarg)
             if DEBUG_OUTPUT: print "PY", name, s
             tok = s.split()
-            if tok[1]=="placeObject":
-                painting = tok[2]
-                if not painting in self.paintings:
-                    print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
-                x = float(tok[5])
-                y = float(tok[6])
-                z = float(tok[7])
-                qx = float(tok[8])
-                qy = float(tok[9])
-                qz = float(tok[10])
-                qw = float(tok[11])
-                if DEBUG_OUTPUT: print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
-                self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
+            if tok[0]=="inventory":
+                if tok[1]=="placeObject":
+                    painting = tok[2]
+                    if not painting in self.paintings:
+                        print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
+                    x = float(tok[5])
+                    y = float(tok[6])
+                    z = float(tok[7])
+                    qx = float(tok[8])
+                    qy = float(tok[9])
+                    qz = float(tok[10])
+                    qw = float(tok[11])
+                    if DEBUG_OUTPUT: print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+                    self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
+            elif tok[0]=="funmode":
+                if tok[1]=="fire":
+                    if DEBUG_OUTPUT: print "PY: fire the cannon!", s
+                    ammo = tok[2]
+                    x = float(tok[3])
+                    y = float(tok[4])
+                    z = float(tok[5])
+                    qx = float(tok[6])
+                    qy = float(tok[7])
+                    qz = float(tok[8])
+                    qw = float(tok[9])
+                    self.setPosition(objid=self.ammo[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw) )                    
+            else:
+                print "PY: unknown JavascriptMessage:", tok
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:
@@ -90,6 +106,9 @@ class exampleclass:
         elif myName[:8]=="artwork_":
             if DEBUG_OUTPUT: print "PY: adding artwork", myName, ":", uuid
             self.paintings[myName]=uuid
+        elif myName[:5]=="ammo_":
+            if DEBUG_OUTPUT: print "PY: adding ammo", myName, ":", uuid
+            self.ammo[myName]=uuid
 
     def processRPC(self,header,name,arg):
         try:
