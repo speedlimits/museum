@@ -16,11 +16,19 @@
 
 	<a href="javascript:location.reload();">Reload</a>
 	Mode: <select id="debugfns" ></select>
+	<br>
+	
+	<a href="javascript:Client.event('navcommand', 'getselectedids');">sel</a>
+	<a href="javascript:Client.event('navcommand', 'light list');">ls_lite</a>
+	<a href="javascript:Client.event('navcommand', 'light get');">get_lite</a>
+	<a href="javascript:top.location = '../artist/lights.html';">toploc</a>
+
 </div>
 
 <script type="text/javascript"> 
 	debugoptions = {
 		"":"",
+		"debug(1+1)":"Calculate what 1 + 1 is",
 		"curatorMode()":"Curator - 0",
 		"curatorMode(1)":"Curator - 1",
 		"curatorMode(2)":"Curator - 2",

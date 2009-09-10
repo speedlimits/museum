@@ -131,7 +131,7 @@ vector<String> tokenizeString (const String& str)
 // does an sprintf of its remaining arguments according to Format,
 // returning the formatted result.
 // from http://www.codecodex.com/wiki/String_printf
-std::string string_printf(const char * Format, ...) {
+std::string string_printf(const char *format, ...) {
     std::string result;
     char *tempBuf = NULL;
     unsigned long tempBufSize = 128;            // something reasonable to begin with
@@ -141,8 +141,8 @@ std::string string_printf(const char * Format, ...) {
         if (tempBuf == NULL)
             break;
         va_list args;
-        va_start(args, Format);
-        const long bufSizeNeeded = vsnprintf(tempBuf, tempBufSize, Format, args);               // not including trailing null
+        va_start(args, format);
+        const long bufSizeNeeded = vsnprintf(tempBuf, tempBufSize, format, args);               // not including trailing null
         va_end(args);
         if (bufSizeNeeded >= 0 && static_cast<unsigned long>(bufSizeNeeded) < tempBufSize) {    // the whole thing did fit 
             tempBufSize = bufSizeNeeded;        // not including trailing null
@@ -614,7 +614,7 @@ private:
 
 
     void createLightAction() {
-#if 1
+#if 0
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         CameraEntity *camera = mParent->mPrimaryCamera;
@@ -665,14 +665,12 @@ private:
         mSelectedObjects.insert(newLightObject);
 #else
     genericStringMessage(WebViewManager::NavigateCommand, "lightSelectedObject"
-        " diffusecolor=0,0,1"
-        " specularcolor=0,1,0"
-        " ambientcolor=0.05,0.05,0.05"
-        " shadowcolor=0,0,0"
-        " falloff=1,0.01,0.02"
-        " cone=0.4,0.5,1"
+        " diffusecolor=1,1,1"
+        " ambientcolor=0,0,0"
+        " falloff=1,-0.1,0.05"
+        " cone=0,0.5,1"
         " power=1"
-        " lightrange=32"
+        " lightrange=10"
         " castsshadow=true"
         " type=spot"
     );
@@ -1369,10 +1367,18 @@ private:
         String token;
         if (!getNextToken(str, pos, &token))
             return false;
-        *d = atof(token.c_str());
+        *d = strtod(token.c_str(), NULL);
         return true;
     }
 
+    static bool getNextTokenAsLong(const String &str, size_t *pos, long *i) {
+        String token;
+        if (!getNextToken(str, pos, &token))
+            return false;
+        *i = strtol(token.c_str(), NULL, 10);   // Use 0 instead of 10 to get dec, hex, oct, etc.
+        return true;
+    }
+	
     // walk [ straight | turn ] speed
     void walkHandler(WebViewManager::NavigationAction action, const String& arg) {
         String token;
@@ -1492,26 +1498,21 @@ private:
 
     void getSelectedIDHandler(WebViewManager::NavigationAction action = WebViewManager::NavigateCommand, const String& arg = "") {
         // Neither the action nor the are are used, yet.
-        String id;
-        id = "[";
-        for (SelectedObjectSet::const_iterator it = mSelectedObjects.begin(); it != mSelectedObjects.end(); ++it) {
-            ProxyObjectPtr obj(it->lock());
-            if (!obj)
-                continue;
-            if (it != mSelectedObjects.begin())
-                id += ", ";
-            id += "[\"";
-            id += obj->getObjectReference().toString();
-            id += "\", \"";
-            id += dynamic_cast<ProxyMeshObject*>(obj.get())->getPhysical().name;
-            id += "\"]";
-        }
-        id += "]";
-        std::cout << "document.selacted=" + id + ";" << std::endl;
-        WebViewManager::getSingleton().evaluateJavaScript(
-            "__chrome", "document.selected=" + id + ";" +
-            "debug(document.selected);"
-        );
+		String id;
+		if (mSelectedObjects.size() > 0) {
+			SelectedObjectSet::const_iterator it = mSelectedObjects.begin();
+			ProxyObjectPtr obj(it->lock());
+            // id = obj->getObjectReference().toString();
+			id = "\"" + dynamic_cast<ProxyMeshObject*>(obj.get())->getPhysical().name + "\"";
+		}
+		else {
+			id = "null";
+		}
+        std::cout << "pictureSelected(" + id + ");" << std::endl;
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
+														  "debug('" + id + "');" +
+														  "pictureSelected(" + id + ");"
+		);
     }
 
 
@@ -1669,59 +1670,17 @@ private:
     }
     
     
-    Vector3f getPaintingNormal(const Entity *paintingEntity) {
-        // FIXME: We should be able to get it more simply by getting the painting's transformation
-        Vector3f normal(0, 0, 0);
-        // Get an object's center and radius
-        BoundingSphere<float> objSphere = paintingEntity->getOgreWorldBoundingSphere<float>();
-        std::cout << "boundingSphere, center=" << objSphere.center() << ", radius=" << objSphere.radius() << std::endl;
- 
-        CameraEntity *camera = mParent->mPrimaryCamera;
-        Vector3d cameraPosition = camera->getOgrePosition();
-        Quaternion cameraOrientation = camera->getOgreOrientation();
-        Vector3f cameraAxis = -cameraOrientation.zAxis();
-       
-        // Determine the normal to the wall behind the object
-        Vector3d objCenter(objSphere.center());
-        Vector3f toObject(objCenter - cameraPosition);
-        if (!(toObject.normalizeThis() > 0)) {
-            SILOG(input, error, "setSelectedObjectLightLocation: object is indistinguishable from camera");
-            return toObject;
-        }
-        int numHits = 1;
-        bool foundObj = false;
-        for (int i = 0; i < numHits; i++) {
-            double distance;        // Distance along the ray
-            const Entity *obj = mParent->rayTrace(cameraPosition, toObject, numHits, distance, normal, i);
-            if (obj == NULL) {      // No object found
-                if (i < numHits)    // Why not?
-                    continue;       // Still more objects: keep looking
-                break;              // No more objects: return failure
-            }
-            if (obj == paintingEntity) {
-                foundObj = true;
-                continue;
-            }
-            if (foundObj == false)
-                continue;           // Look for the first object behind the selected object.
-        }
-        if (!(normal.normalizeThis() > 0)) {
-            SILOG(input, error, "setSelectedObjectLightLocation: no wall behind object");
-            return normal;
-        }
-        if (cameraAxis.dot(normal) > 0) // Normal is pointing away from the camera
-            normal = -normal;           // Get normal pointing toward the camera
-        return normal;
+    static Vector3f getPaintingNormal(const Entity *paintingEntity) {
+        return paintingEntity->getOgreOrientation().zAxis();
     }
 
 
-    void initPantingLightLocation(Entity *ent, float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
+    void initPaintingLightLocation(Entity *ent, float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
         // Find wall normal and object bounding sphere.
         // We assume that the object is in front of the wall
 
         // Get an object's center and radius
-        BoundingSphere<float> objSphere = ent->getOgreWorldBoundingSphere<float>();
-        Vector3d objCenter(objSphere.center());
+        BoundingSphere<double> objSphere = ent->getOgreWorldBoundingSphere<double>();
         std::cout << "boundingSphere, center=" << objSphere.center() << ", radius=" << objSphere.radius() << std::endl;
         
         // Get the floor coordinate
@@ -1733,34 +1692,33 @@ private:
         // Move the light out from the wall, at the given angle
         Vector3d lightPosition;
         lightPosition.y = floorY + ceilingHeight;
-        double f = ((lightPosition.y - objCenter.y) / tan(angle));
-        lightPosition.x = objCenter.x + normal.x * f;
-        lightPosition.z = objCenter.z + normal.z * f;
+        double f = ((lightPosition.y - objSphere.center().y) / tan(angle));
+        lightPosition.x = objSphere.center().x + normal.x * f;
+        lightPosition.z = objSphere.center().z + normal.z * f;
         lightLocation->setPosition(lightPosition);
 
         // Aim it at the artwork
-        Vector3f lightZ(objCenter.x - lightPosition.x, objCenter.y - lightPosition.y, objCenter.z - lightPosition.z);
+        Vector3f lightZ(objSphere.center() - lightPosition);
         if (lightZ.normalizeThis() == 0)
-            return; // Cannot happen by construction.
-        Vector3f lightX = Vector3f::unitY().cross(lightZ);
-        if (lightX.normalizeThis() == 0) {  // Looking straight down or up
-            // FIXME: do something
-        }
+            lightZ = Vector3f::unitNegY();
+        Vector3f lightX(Vector3f::unitY().cross(lightZ));
+        if (lightX.normalizeThis() == 0)    // Looking straight down or up
+            lightX = Vector3f::unitX();
         Vector3f lightY(lightZ.cross(lightX));
-        if (lightY.normalizeThis() == 0) {  // Looking straight down or up
-            // FIXME: do something
-        }
+        if (lightY.normalizeThis() == 0)    // Looking straight down or up
+            lightY = Vector3f::unitZ();
         lightLocation->setOrientation(Quaternion(lightX, lightY, lightZ));
         
         // Adjust the cone.
-        float coneAngle = atan(objSphere.radius() / (objCenter - lightPosition).length());
+        const float coneFactor = 1.7;
+        float coneAngle = atan(objSphere.radius() * coneFactor / (objSphere.center() - lightPosition).length());
         float coneInnerAngle = 0;
         float coneOuterAngle = coneAngle;   // Spotlights don't look as expected
-        float coneFalloff = 0.05;
+        float coneFalloff = 0.5;
         lightInfo->setLightSpotlightCone(0, coneAngle, coneFalloff);
 
         // FIXME: Remove after debugging
-        std::cout << "objCenter=" << objCenter
+        std::cout << "objCenter=" << objSphere.center()
                   << ", objRadius=" << objSphere.radius()
                   << ", floorY=" << floorY
                   << ", normal=" << normal
@@ -1786,7 +1744,7 @@ private:
             SILOG(input, error, "initSelectedObjectLightLocation: no selected object");
             return;
         }
-        initPantingLightLocation(sel, angle, ceilingHeight, lightLocation, lightInfo);
+        initPaintingLightLocation(sel, angle, ceilingHeight, lightLocation, lightInfo);
     }
 
 
@@ -1794,23 +1752,23 @@ private:
         // Set defaults
         LightInfo lightInfo;
         lightInfo.mDiffuseColor.set (1,     1,      1);
-        lightInfo.mSpecularColor.set(1,     1,      1);
-        lightInfo.mAmbientColor.set (.05,   .05,    .05);
-        lightInfo.mShadowColor.set  (.02,   .02,    .02);
+        lightInfo.mSpecularColor.set(0,     0,      0);
+        lightInfo.mAmbientColor.set (0,     0,      0);
+        lightInfo.mShadowColor.set  (0,     0,      0);
         lightInfo.mPower            = 1;
-        lightInfo.mLightRange       = 256;
+        lightInfo.mLightRange       = 10;
         lightInfo.mConstantFalloff  = 1.0;
-        lightInfo.mLinearFalloff    = 0.0;
-        lightInfo.mQuadraticFalloff = 0.02;
+        lightInfo.mLinearFalloff    = -0.1;
+        lightInfo.mQuadraticFalloff = 0.05;
         lightInfo.mConeInnerRadians = 0;
-        lightInfo.mConeOuterRadians = 1;
-        lightInfo.mConeFalloff      = 0;
+        lightInfo.mConeOuterRadians = 30 * (M_PI / 180);
+        lightInfo.mConeFalloff      = 1;
         lightInfo.mType             = LightInfo::SPOTLIGHT;
         lightInfo.mCastsShadow      = true;
         lightInfo.mWhichFields      = LightInfo::NONE;
 
-        float lightAngle = 45;
-        float ceilingHeight = 4;    // 4 meters ~= 13.1 feet
+        float lightAngle = 30 * M_PI / 180;
+        float ceilingHeight = 5;    // 5 meters ~= 16.4 feet
         Location lightLocation;
         setLightInfoFromString(arg, &lightInfo);
         initSelectedObjectLightLocation(lightAngle, ceilingHeight, &lightLocation, &lightInfo);
@@ -1851,35 +1809,66 @@ private:
 
     static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
         String info(string_printf(
-            "%s"                                                                //  1 prelude
-            " diffusecolor=%.7g,%.7g,%.7g"                                      //  2 diffuse
-            " specularcolor=%.7g,%.7g,%.7g"                                     //  3 specular
-            " ambientcolor=%.7g,%.7g,%.7g"                                      //  4 ambient
-            " shadowcolor=%.7g,%.7g,%.7g"                                       //  5 shadow
-            " falloff=%.7g,%.7g,%.7g"                                           //  6 falloff
-            " cone=%.7g,%.7g,%.7g"                                              //  7 cone
-            " power=%.7g"                                                       //  8 power
-            " lightrange=%.7g"                                                  //  9 lightrange
-            " castsshadow=%s"                                                   // 10 castsshadows
-            " type=%s"                                                          // 11 type
-            " %s",                                                              // 12 postlude
-            prelude,                                                            //  1 prelude
-            li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],    //  2 diffuse
-            li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2],   //  3 specular
-            li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2],    //  4 ambient
-            li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2],     //  5 shadow
-            li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,   //  6 falloff
-            li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,        //  7 cone
-            li.mPower,                                                          //  8 power
-            li.mLightRange,                                                     //  9 lightrange
-            li.mCastsShadow ? "true" : "false",                                 // 10 castsshadows
-            (li.mType == LightInfo::POINT)       ? "point" :                    // 11 type
+            "light: { %s"                                                           //  1 prelude
+            " 'diffusecolor':" " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  2 diffuse
+            " 'specularcolor':"" { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  3 specular
+            " 'ambientcolor':" " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  4 ambient
+            " 'shadowcolor':"  " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  5 shadow
+            " 'falloff': { 'constant': %.7g, 'linear': %.7g, 'quadratic': %.7g },"  //  6 falloff
+            " 'cone': { 'inner': %.7g, 'outer': %.7g, 'falloff': %.7g },"           //  7 cone
+            " 'power': %.7g,"                                                       //  8 power
+            " 'lightrange': %.7g,"                                                  //  9 lightrange
+            " 'castsshadow': %s,"                                                   // 10 castsshadows
+            " 'type': '%s'"                                                         // 11 type
+            " %s}",                                                                 // 12 postlude
+            prelude,                                                                //  1 prelude
+            li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],        //  2 diffuse
+            li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2],       //  3 specular
+            li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2],        //  4 ambient
+            li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2],         //  5 shadow
+            li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,       //  6 falloff
+            li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,            //  7 cone
+            li.mPower,                                                              //  8 power
+            li.mLightRange,                                                         //  9 lightrange
+            li.mCastsShadow ? "true" : "false",                                     // 10 castsshadows
+            (li.mType == LightInfo::POINT)       ? "point" :                        // 11 type
             (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
             (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
             "unknown",
-            postlude                                                            // 12 postlude
+            postlude                                                                // 12 postlude
         ));
         return info;
+    }
+
+
+    LightInfo spotLightMoods[4];
+    LightInfo pointLightMoods[4];
+    LightInfo directionalLightMoods[4];
+    static bool moodLightsInited;
+
+    void initLightMoods() {
+        if (moodLightsInited)
+            return;
+        for (int i = 0; i < 4; ++i) {
+            spotLightMoods[i].mWhichFields          = 0;
+            pointLightMoods[i].mWhichFields         = 0;
+            directionalLightMoods[i].mWhichFields   = 0;
+        }
+        spotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 6.).setLightFalloff(1., .00,.20);
+        spotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 7.).setLightFalloff(1.,-.02,.10);
+        spotLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange( 9.).setLightFalloff(1.,-.05,.08);
+        spotLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(10.).setLightFalloff(1.,-.10,.05);
+
+        pointLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 8.).setLightFalloff(1., .00,.20);
+        pointLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange(12.).setLightFalloff(1.,-.02,.10);
+        pointLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange(16.).setLightFalloff(1.,-.05,.08);
+        pointLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(20.).setLightFalloff(1.,-.10,.05);
+
+        directionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.7);
+        directionalLightMoods[1].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.8);
+        directionalLightMoods[2].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.9);
+        directionalLightMoods[3].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(1.);
+        moodLightsInited = true;
     }
 
 
@@ -1897,7 +1886,6 @@ private:
             bool visibility = true;
             String list;
             list = "[";
-            OgreSystem::SceneEntitiesMap::const_iterator iter;
             for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                 iter != mParent->mSceneEntities.end(); ++iter
             ) {
@@ -1925,7 +1913,6 @@ private:
                 int index = isIndex ? strtol(token.c_str(), NULL, 10) : std::numeric_limits<int>::max();
                 SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(token);
                 int ix = 0;
-                OgreSystem::SceneEntitiesMap::const_iterator iter;
                 for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                     iter != mParent->mSceneEntities.end(); ++iter
                 ) {
@@ -1934,19 +1921,20 @@ private:
                     ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                     if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
                         const LightInfo &li = light->getLastLightInfo();
-                        String prelude(string_printf("{ index=%d id=%s", ix, obj->getObjectReference().toString().c_str()));
-                        String info(printLightInfoToString(prelude.c_str(), li, " }"));
+                        String prelude(string_printf("index: %d, id: '%s', ", ix, obj->getObjectReference().toString().c_str()));
+                        String info(printLightInfoToString(prelude.c_str(), li, ""));
                         WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                            "debug('" + info + "');"
+                            "debug(\"" + info + "\");"
                         );
+                        std::cout << info << std::endl;
                     }
                     ++ix;
                 }
             }
             else { // No light specified
                 String allInfo;
+                allInfo = "lights: { ";
                 int ix = 0;
-                OgreSystem::SceneEntitiesMap::const_iterator iter;
                 for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                     iter != mParent->mSceneEntities.end(); ++iter
                 ) {
@@ -1954,16 +1942,48 @@ private:
                     ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
                     ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                     const LightInfo &li = light->getLastLightInfo();
-                    String prelude(string_printf(" { index=%d id=%s", ix, obj->getObjectReference().toString().c_str()));
-                    String info(printLightInfoToString(prelude.c_str(), li, " }"));
+                    String prelude(string_printf("index: %d, id: '%s', ", ix, obj->getObjectReference().toString().c_str()));
+                    String info(printLightInfoToString(prelude.c_str(), li, ""));
+                    if (ix > 0)
+                        allInfo += ", ";
                     allInfo += info;
                     ++ix;
                 }
+                allInfo += " }";
+                std::cout << "debug(\"" + allInfo + " \");" << std::endl;
                 WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                    "debug('{ " + allInfo + " }');"
+                    "debug(\"" + allInfo + "\");"
                 );
             }
         }
+		
+		else if (token == "mood") {
+            if (!moodLightsInited)
+                initLightMoods();
+            long mood;
+			success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
+            if (mood < 0 || mood > (long)(sizeof(spotLightMoods) / sizeof(spotLightMoods[0])))
+                return;
+            for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+                iter != mParent->mSceneEntities.end(); ++iter
+            ) {
+                Entity *ent = iter->second;                                     if (!ent)   continue;
+                ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+                ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+                LightInfo li = light->getLastLightInfo();
+                switch (li.mType) {
+                    case LightInfo::POINT:          li =        pointLightMoods[mood]; break;
+                    case LightInfo::SPOTLIGHT:      li =         spotLightMoods[mood]; break;
+                    case LightInfo::DIRECTIONAL:    li =  directionalLightMoods[mood]; break;
+                    default:                        continue;
+                }
+                light->update(li);
+            }
+        }
+		
+		else {
+            SILOG(input, error, "lightHandler: unknown command \"" + token + "\"");
+		}
     }
     
 
@@ -2283,6 +2303,8 @@ public:
 };
 
 const char OgreSystem::MouseHandler::tokenDelimiter[] = " \t\n\r";
+bool OgreSystem::MouseHandler::moodLightsInited = false;
+
 
 
 void OgreSystem::allocMouseHandler() {
