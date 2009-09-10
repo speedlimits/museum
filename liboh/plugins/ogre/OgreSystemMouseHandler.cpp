@@ -1818,10 +1818,16 @@ private:
 
     LightInfo spotLightMoods[4];
     LightInfo pointLightMoods[4];
+    LightInfo directionalLightMoods[4];
+    static bool moodLightsInited;
+
     void initLightMoods() {
+        if (moodLightsInited)
+            return;
         for (int i = 0; i < 4; ++i) {
-            spotLightMoods[i].mWhichFields  = 0;
-            pointLightMoods[i].mWhichFields = 0;
+            spotLightMoods[i].mWhichFields          = 0;
+            pointLightMoods[i].mWhichFields         = 0;
+            directionalLightMoods[i].mWhichFields   = 0;
         }
         spotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 6.).setLightFalloff(1., .00,.20);
         spotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange( 7.).setLightFalloff(1.,-.02,.10);
@@ -1832,6 +1838,12 @@ private:
         pointLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange(12.).setLightFalloff(1.,-.02,.10);
         pointLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange(16.).setLightFalloff(1.,-.05,.08);
         pointLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(20.).setLightFalloff(1.,-.10,.05);
+
+        directionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.7);
+        directionalLightMoods[1].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.8);
+        directionalLightMoods[2].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.9);
+        directionalLightMoods[3].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(1.);
+        moodLightsInited = true;
     }
 
 
@@ -1915,6 +1927,8 @@ private:
         }
 		
 		else if (token == "mood") {
+            if (!moodLightsInited)
+                initLightMoods();
             long mood;
 			success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
             if (mood < 0 || mood > (long)(sizeof(spotLightMoods) / sizeof(spotLightMoods[0])))
@@ -1927,9 +1941,9 @@ private:
                 ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                 LightInfo li = light->getLastLightInfo();
                 switch (li.mType) {
-                    case LightInfo::POINT:          li = pointLightMoods[mood]; break;
-                    case LightInfo::SPOTLIGHT:      li =  spotLightMoods[mood]; break;
-                    case LightInfo::DIRECTIONAL:    continue;
+                    case LightInfo::POINT:          li =        pointLightMoods[mood]; break;
+                    case LightInfo::SPOTLIGHT:      li =         spotLightMoods[mood]; break;
+                    case LightInfo::DIRECTIONAL:    li =  directionalLightMoods[mood]; break;
                     default:                        continue;
                 }
                 light->update(li);
@@ -2256,6 +2270,8 @@ public:
 };
 
 const char OgreSystem::MouseHandler::tokenDelimiter[] = " \t\n\r";
+bool OgreSystem::MouseHandler::moodLightsInited = false;
+
 
 
 void OgreSystem::allocMouseHandler() {
