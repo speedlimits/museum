@@ -86,9 +86,8 @@ public:
     void removeFromScene();
     void addToScene(Ogre::SceneNode *newParent=NULL);
 
-    OgreSystem *getScene() {
-        return mScene;
-    }
+    OgreSystem*       getScene()        { return mScene; }
+    OgreSystem const* getScene() const  { return mScene; }
 
     virtual void updateLocation(Time ti, const Location &newLocation);
     virtual void resetLocation(Time ti, const Location &newLocation);
@@ -97,10 +96,10 @@ public:
 
     virtual void destroyed();
 
-    Vector3d getOgrePosition() {
+    Vector3d getOgrePosition() const {
         return fromOgre(mSceneNode->getPosition(), getScene()->getOffset());
     }
-    Quaternion getOgreOrientation() {
+    Quaternion getOgreOrientation() const {
         return fromOgre(mSceneNode->getOrientation());
     }
     void extrapolateLocation(TemporalValue<Location>::Time current);
@@ -108,10 +107,10 @@ public:
     virtual void setSelected(bool selected) {
       mSceneNode->showBoundingBox(selected);
     }
-    virtual std::string ogreMovableName() const{
+    virtual std::string ogreMovableName() const {
         return id().toString();
     }
-    const SpaceObjectReference&id()const{
+    const SpaceObjectReference& id() const {
         return mProxy->getObjectReference();
     }
     
