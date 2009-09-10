@@ -1784,33 +1784,33 @@ private:
 
     static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
         String info(string_printf(
-            "%s"                                                                //  1 prelude
-            " diffusecolor=%.7g,%.7g,%.7g"                                      //  2 diffuse
-            " specularcolor=%.7g,%.7g,%.7g"                                     //  3 specular
-            " ambientcolor=%.7g,%.7g,%.7g"                                      //  4 ambient
-            " shadowcolor=%.7g,%.7g,%.7g"                                       //  5 shadow
-            " falloff=%.7g,%.7g,%.7g"                                           //  6 falloff
-            " cone=%.7g,%.7g,%.7g"                                              //  7 cone
-            " power=%.7g"                                                       //  8 power
-            " lightrange=%.7g"                                                  //  9 lightrange
-            " castsshadow=%s"                                                   // 10 castsshadows
-            " type=%s"                                                          // 11 type
-            " %s",                                                              // 12 postlude
-            prelude,                                                            //  1 prelude
-            li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],    //  2 diffuse
-            li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2],   //  3 specular
-            li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2],    //  4 ambient
-            li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2],     //  5 shadow
-            li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,   //  6 falloff
-            li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,        //  7 cone
-            li.mPower,                                                          //  8 power
-            li.mLightRange,                                                     //  9 lightrange
-            li.mCastsShadow ? "true" : "false",                                 // 10 castsshadows
-            (li.mType == LightInfo::POINT)       ? "point" :                    // 11 type
+            "light: { %s"                                                           //  1 prelude
+            " 'diffusecolor':" " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  2 diffuse
+            " 'specularcolor':"" { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  3 specular
+            " 'ambientcolor':" " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  4 ambient
+            " 'shadowcolor':"  " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  5 shadow
+            " 'falloff': { 'constant': %.7g, 'linear': %.7g, 'quadratic': %.7g },"  //  6 falloff
+            " 'cone': { 'inner': %.7g, 'outer': %.7g, 'falloff': %.7g },"           //  7 cone
+            " 'power': %.7g,"                                                       //  8 power
+            " 'lightrange': %.7g,"                                                  //  9 lightrange
+            " 'castsshadow': %s,"                                                   // 10 castsshadows
+            " 'type': '%s'"                                                         // 11 type
+            " %s}",                                                                 // 12 postlude
+            prelude,                                                                //  1 prelude
+            li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],        //  2 diffuse
+            li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2],       //  3 specular
+            li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2],        //  4 ambient
+            li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2],         //  5 shadow
+            li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,       //  6 falloff
+            li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,            //  7 cone
+            li.mPower,                                                              //  8 power
+            li.mLightRange,                                                         //  9 lightrange
+            li.mCastsShadow ? "true" : "false",                                     // 10 castsshadows
+            (li.mType == LightInfo::POINT)       ? "point" :                        // 11 type
             (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
             (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
             "unknown",
-            postlude                                                            // 12 postlude
+            postlude                                                                // 12 postlude
         ));
         return info;
     }
@@ -1829,9 +1829,9 @@ private:
             pointLightMoods[i].mWhichFields         = 0;
             directionalLightMoods[i].mWhichFields   = 0;
         }
-        spotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 6.).setLightFalloff(1., .00,.20);
-        spotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange( 7.).setLightFalloff(1.,-.02,.10);
-        spotLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange( 9.).setLightFalloff(1.,-.05,.08);
+        spotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 6.).setLightFalloff(1., .00,.20);
+        spotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 7.).setLightFalloff(1.,-.02,.10);
+        spotLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange( 9.).setLightFalloff(1.,-.05,.08);
         spotLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(10.).setLightFalloff(1.,-.10,.05);
 
         pointLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 8.).setLightFalloff(1., .00,.20);
@@ -1896,17 +1896,19 @@ private:
                     ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                     if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
                         const LightInfo &li = light->getLastLightInfo();
-                        String prelude(string_printf("{ index=%d id=%s", ix, obj->getObjectReference().toString().c_str()));
-                        String info(printLightInfoToString(prelude.c_str(), li, " }"));
+                        String prelude(string_printf("index: %d, id: '%s', ", ix, obj->getObjectReference().toString().c_str()));
+                        String info(printLightInfoToString(prelude.c_str(), li, ""));
                         WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                            "debug('" + info + "');"
+                            "debug(\"" + info + "\");"
                         );
+                        std::cout << info << std::endl;
                     }
                     ++ix;
                 }
             }
             else { // No light specified
                 String allInfo;
+                allInfo = "lights: { ";
                 int ix = 0;
                 for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                     iter != mParent->mSceneEntities.end(); ++iter
@@ -1915,13 +1917,17 @@ private:
                     ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
                     ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                     const LightInfo &li = light->getLastLightInfo();
-                    String prelude(string_printf(" { index=%d id=%s", ix, obj->getObjectReference().toString().c_str()));
-                    String info(printLightInfoToString(prelude.c_str(), li, " }"));
+                    String prelude(string_printf("index: %d, id: '%s', ", ix, obj->getObjectReference().toString().c_str()));
+                    String info(printLightInfoToString(prelude.c_str(), li, ""));
+                    if (ix > 0)
+                        allInfo += ", ";
                     allInfo += info;
                     ++ix;
                 }
+                allInfo += " }";
+                std::cout << "debug(\"" + allInfo + " \");" << std::endl;
                 WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                    "debug('{ " + allInfo + " }');"
+                    "debug(\"" + allInfo + "\");"
                 );
             }
         }
