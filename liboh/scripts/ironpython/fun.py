@@ -9,7 +9,7 @@ from Sirikata.Runtime import HostedObject
 import System
 import util
 
-DEBUG_OUTPUT=True
+DEBUG_OUTPUT=True and False
 
 class exampleclass:
     def __init__(self):
@@ -75,7 +75,21 @@ class exampleclass:
                     qy = float(tok[7])
                     qz = float(tok[8])
                     qw = float(tok[9])
-                    self.setPosition(objid=self.ammo[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw) )                    
+                    zx = float(tok[10])                          ## we fire down -Z axis (camera view direction)
+                    zy = float(tok[11])
+                    zz = float(tok[12])
+                    zx=0; zy=-1; zz=0
+                    offset = 1.0                                ## move ammo out from inside avatar
+                    x -= zx*offset
+                    y -= zy*offset
+                    z -= zz*offset
+                    vel = 0.0                                  ## initial ammo velocity
+                    vx = -zx*vel
+                    vy = -zy*vel
+                    vz = -zz*vel
+                    if DEBUG_OUTPUT: print "PY: rot:", qx, qy, qz, qw, "axis:", zx, zy, zz, "pos+off:", x, y, z, "vel:", vx, vy, vz
+                    self.setPosition(objid=self.ammo[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
+                                     velocity = (vx, vy, vz))                    
             else:
                 print "PY: unknown JavascriptMessage:", tok
 

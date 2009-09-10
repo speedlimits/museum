@@ -1288,7 +1288,9 @@ private:
         Location location(avatar->globalLocation(now));
         Vector3d pos = location.getPosition();
         Quaternion rot = location.getOrientation();
-        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w;
+        Vector3f z_axis = rot.zAxis();
+        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w 
+                <<" "<< z_axis.x <<" "<< z_axis.y <<" "<< z_axis.z;
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
         msg.SerializeToString(&smsg);
