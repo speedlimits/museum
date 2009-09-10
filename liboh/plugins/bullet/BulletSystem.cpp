@@ -170,6 +170,8 @@ void BulletObj::setBulletState(positionOrientation po) {
     /// more Bullet mojo: dynamic vs kinematic
     if (mDynamic) {
         mBulletBodyPtr->proceedToTransform(trans);           /// how to move dynamic objects
+        mBulletBodyPtr->setAngularVelocity(btVector3(0,0,0));
+        mBulletBodyPtr->setLinearVelocity(btVector3(0,0,0));
     }
     else {
         mBulletBodyPtr->getMotionState()->setWorldTransform(trans);   /// how to move 'kinematic' objects (animated)
