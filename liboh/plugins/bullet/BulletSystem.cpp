@@ -162,7 +162,7 @@ positionOrientation BulletObj::getBulletState() {
     return positionOrientation(system, trans.getOrigin(),trans.getRotation());
 }
 
-void BulletObj::setBulletState(positionOrientation po) {
+void BulletObj::setBulletState(positionOrientation po, Vector3f linVel, Vector3f angVel) {
     btTransform trans;
     mBulletBodyPtr->getMotionState()->getWorldTransform(trans);
     trans.setOrigin(btVector3(po.p.x, po.p.y, po.p.z));
@@ -170,8 +170,8 @@ void BulletObj::setBulletState(positionOrientation po) {
     /// more Bullet mojo: dynamic vs kinematic
     if (mDynamic) {
         mBulletBodyPtr->proceedToTransform(trans);           /// how to move dynamic objects
-        mBulletBodyPtr->setAngularVelocity(btVector3(0,0,0));
-        mBulletBodyPtr->setLinearVelocity(btVector3(0,0,0));
+        mBulletBodyPtr->setLinearVelocity(btVector3(linVel.x, linVel.y, linVel.z));
+        mBulletBodyPtr->setAngularVelocity(btVector3(angVel.x, angVel.y, angVel.z));
     }
     else {
         mBulletBodyPtr->getMotionState()->setWorldTransform(trans);   /// how to move 'kinematic' objects (animated)
@@ -451,11 +451,13 @@ bool BulletSystem::tick() {
                         DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
                                      << " meshpos: " << objects[i]->mMeshptr->getPosition()
                                      << " bulletpos before reset: " << objects[i]->getBulletState().p;)
+                        Location loc=objects[i]->mMeshptr->getLastLocation();
                         objects[i]->setBulletState(
                             positionOrientation (
-                                objects[i]->mMeshptr->getPosition(),
-                                objects[i]->mMeshptr->getOrientation()
-                            ));
+                                loc.getPosition(),
+                                loc.getOrientation()),
+                                loc.getVelocity(), Vector3f(0,0,0)
+                            );
                         DEBUG_OUTPUT(cout << "bulletpos after reset: " << objects[i]->getBulletState().p << endl;)
                     }
 

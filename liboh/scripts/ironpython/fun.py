@@ -78,12 +78,13 @@ class exampleclass:
                     zx = float(tok[10])                          ## we fire down -Z axis (camera view direction)
                     zy = float(tok[11])
                     zz = float(tok[12])
-                    zx=0; zy=-1; zz=0
+##                    ox=-zx; oy=-zy; oz=-zz
+                    ox=0; oy=1; oz=0
                     offset = 1.0                                ## move ammo out from inside avatar
-                    x -= zx*offset
-                    y -= zy*offset
-                    z -= zz*offset
-                    vel = 0.0                                  ## initial ammo velocity
+                    x += ox*offset
+                    y += oy*offset
+                    z += oz*offset
+                    vel = 15.0                                  ## initial ammo velocity
                     vx = -zx*vel
                     vy = -zy*vel
                     vz = -zz*vel

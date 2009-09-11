@@ -353,7 +353,7 @@ public:
     const ObjectReference& getObjectReference()const;
     const SpaceID& getSpaceID()const;
     positionOrientation getBulletState();
-    void setBulletState(positionOrientation pq);
+    void setBulletState(positionOrientation pq, Vector3f lvel, Vector3f avel);
     void buildBulletBody(const unsigned char*, int);
     void buildBulletShape(const unsigned char* meshdata, int meshbytes, float& mass);
     BulletSystem * getBulletSystem() {
