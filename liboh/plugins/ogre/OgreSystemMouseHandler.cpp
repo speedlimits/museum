@@ -1306,6 +1306,20 @@ private:
         cam->sendMessage(MemoryReference(smsg));
     }
 
+    void resetAction() {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        ss << "funmode reset";
+        ProxyObjectPtr avatar = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        assert(avatar);
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
+
     /// curator mode
     void debugAction() {
         static int pic=0;
@@ -2285,6 +2299,7 @@ public:
         mInputResponses["cameraPathSpeedUp"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, -0.1f));
         mInputResponses["cameraPathSlowDown"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, 0.1f));
         mInputResponses["fireAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::fireAction, this));
+        mInputResponses["resetAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::resetAction, this));
         mInputResponses["debugAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
@@ -2362,6 +2377,7 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_SPACE), mInputResponses["fireAction"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction"]);
         
         // WebView Chrome
