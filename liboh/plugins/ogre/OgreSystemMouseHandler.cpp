@@ -1382,7 +1382,7 @@ private:
         assert(cam);
         RoutableMessageBody msg;
         ostringstream ss;
-        ss << "funmode fire ammo_cannon1 ";
+        ss << "funmode fire ammo_cannon ";
         ProxyObjectPtr avatar = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         assert(avatar);
         Time now(SpaceTimeOffsetManager::getSingleton().now(avatar->getObjectReference().space()));
