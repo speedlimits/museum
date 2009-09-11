@@ -80,7 +80,9 @@ using namespace std;
 #define SDL_SCANCODE_PAGEUP 0x61
 #undef SDL_SCANCODE_PAGEDOWN
 #define SDL_SCANCODE_PAGEDOWN 0x5b
-#endif
+#endif // _WIN32
+
+//------------------------------------------------------------------------------
 
 bool compareEntity (const Entity* one, const Entity* two) {
 
@@ -112,6 +114,11 @@ bool compareEntity (const Entity* one, const Entity* two) {
     return one<two;
 }
 
+
+//------------------------------------------------------------------------------
+// Break a string into a vector of tokens.
+//------------------------------------------------------------------------------
+
 vector<String> tokenizeString (const String& str)
 {
     vector<String> tokens;
@@ -128,9 +135,12 @@ vector<String> tokenizeString (const String& str)
 }
 
 
+//------------------------------------------------------------------------------
 // does an sprintf of its remaining arguments according to Format,
 // returning the formatted result.
 // from http://www.codecodex.com/wiki/String_printf
+//------------------------------------------------------------------------------
+
 std::string string_printf(const char *format, ...) {
     std::string result;
     char *tempBuf = NULL;
@@ -144,7 +154,7 @@ std::string string_printf(const char *format, ...) {
         va_start(args, format);
         const long bufSizeNeeded = vsnprintf(tempBuf, tempBufSize, format, args);               // not including trailing null
         va_end(args);
-        if (bufSizeNeeded >= 0 && static_cast<unsigned long>(bufSizeNeeded) < tempBufSize) {    // the whole thing did fit 
+        if (bufSizeNeeded >= 0 && static_cast<unsigned long>(bufSizeNeeded) < tempBufSize) {    // the whole thing did fit
             tempBufSize = bufSizeNeeded;        // not including trailing null
             break;
         }
@@ -165,7 +175,12 @@ std::string string_printf(const char *format, ...) {
 } //string_printf
 
 
-// Defined in DragActions.cpp.
+// Defined in DragActions.cpp. (FIXME this comment)
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                          Mousehandler event handler                        //
+////////////////////////////////////////////////////////////////////////////////
 
 class OgreSystem::MouseHandler {
     OgreSystem *mParent;
@@ -202,6 +217,18 @@ class OgreSystem::MouseHandler {
 
     InputBinding mInputBinding;
 
+    int mWhichRayObject;
+
+    // Class members
+    static const char   mWhiteSpace[];                  // space between tokens
+    static const char   mArraySpace[];                  // space between array elements
+    static LightInfo    mSpotLightMoods[4];             // moods for spot lights        - call initLightMoods() before using
+    static LightInfo    mPointLightMoods[4];            // moods for point lights       - call initLightMoods() before using
+    static LightInfo    mDirectionalLightMoods[4];      // moods for directionallights  - call initLightMoods() before using
+    static bool         mMoodLightsInited;              // indicates when the above moods have been initialized
+    static float        mDefaultSpotLightInclination;   // default inclination of spotlights from normal to the wall
+    static float        mDefaultLightHeight;            // default height of lights
+
     class SubObjectIterator {
         typedef Entity* value_type;
         //typedef ssize_t difference_type;
@@ -237,6 +264,11 @@ class OgreSystem::MouseHandler {
 
     /////////////////// HELPER FUNCTIONS ///////////////
 
+
+    //--------------------------------------------------------------------------
+    // Return the object under the mouse at the given location.
+    //--------------------------------------------------------------------------
+
     Entity *hoverEntity (CameraEntity *cam, Time time, float xPixel, float yPixel, int *hitCount,int which=0) {
         Location location(cam->getProxy().globalLocation(time));
         Vector3f dir (pixelToDirection(cam, location.getOrientation(), xPixel, yPixel));
@@ -259,6 +291,10 @@ class OgreSystem::MouseHandler {
 
     ///////////////////// CLICK HANDLERS /////////////////////
 public:
+
+    //--------------------------------------------------------------------------
+    // Change the state of all of the selected items to deselected.
+    //--------------------------------------------------------------------------
     void clearSelection() {
         for (SelectedObjectSet::const_iterator selectIter = mSelectedObjects.begin();
                 selectIter != mSelectedObjects.end(); ++selectIter) {
@@ -271,7 +307,10 @@ public:
         }
         mSelectedObjects.clear();
     }
+
 private:
+
+    //--------------------------------------------------------------------------
     bool recentMouseInRange(float x, float y, float *lastX, float *lastY) {
         float delx = x-*lastX;
         float dely = y-*lastY;
@@ -286,7 +325,9 @@ private:
         }
         return true;
     }
-    int mWhichRayObject;
+
+
+    //--------------------------------------------------------------------------
     void selectObjectAction(Vector2f p, int direction) {
         CameraEntity *camera = mParent->mPrimaryCamera;
         if (!camera) {
@@ -330,7 +371,7 @@ private:
                 // Fire selected event.
             }
             else {
-                
+
                 ProxyObjectPtr obj(selectIter->lock());
                 Entity *ent = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
                 if (ent) {
@@ -346,7 +387,7 @@ private:
             clearSelection();
             mLastShiftSelected = SpaceObjectReference::null();
         }
-        else 
+        else
         */
         {
             // reset selection.
@@ -379,6 +420,7 @@ private:
 
     ///////////////// KEYBOARD HANDLERS /////////////////
 
+    //--------------------------------------------------------------------------
     void deleteObjectsAction() {
         Task::LocalTime now(Task::LocalTime::now());
         while (doUngroupObjects(now)) {
@@ -394,6 +436,7 @@ private:
         mSelectedObjects.clear();
     }
 
+    //--------------------------------------------------------------------------
     Entity *doCloneObject(Entity *ent, const ProxyObjectPtr &parentPtr, Time now) {
         SpaceObjectReference newId = SpaceObjectReference(ent->id().space(), ObjectReference(UUID::random()));
         Location loc = ent->getProxy().globalLocation(now);
@@ -443,6 +486,7 @@ private:
         return mParent->getEntity(newId);
     }
 
+    //--------------------------------------------------------------------------
     void cloneObjectsAction() {
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
         Task::LocalTime now(Task::LocalTime::now());
@@ -466,6 +510,7 @@ private:
         mSelectedObjects.swap(newSelectedObjects);
     }
 
+    //--------------------------------------------------------------------------
     void groupObjectsAction() {
         if (mSelectedObjects.size()<2) {
             return;
@@ -521,6 +566,7 @@ private:
         newParentEntity->setSelected(true);
     }
 
+    //--------------------------------------------------------------------------
     bool doUngroupObjects(Task::LocalTime now) {
         int numUngrouped = 0;
         SelectedObjectSet newSelectedObjects;
@@ -556,11 +602,13 @@ private:
         return (numUngrouped>0);
     }
 
+    //--------------------------------------------------------------------------
     void ungroupObjectsAction() {
         Task::LocalTime now(Task::LocalTime::now());
         doUngroupObjects(now);
     }
 
+    //--------------------------------------------------------------------------
     void enterObjectAction() {
         Task::LocalTime now(Task::LocalTime::now());
         if (mSelectedObjects.size() != 1) {
@@ -588,6 +636,7 @@ private:
         }
     }
 
+    //--------------------------------------------------------------------------
     void leaveObjectAction() {
         Task::LocalTime now(Task::LocalTime::now());
         for (SelectedObjectSet::iterator iter = mSelectedObjects.begin();
@@ -613,82 +662,71 @@ private:
     }
 
 
+    //--------------------------------------------------------------------------
+    // If nothing is currently selected, throw a lightbulb in front of the user.
+    // Otherwise, shine a spotlight on the selected object.
+    //--------------------------------------------------------------------------
+#define ATTACH_MESH_TO_LIGHTS 1
+
     void createLightAction() {
-#if 0
-        float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
+        if (mSelectedObjects.size() == 0) {
+            float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
-        CameraEntity *camera = mParent->mPrimaryCamera;
-        if (!camera) return;
-        SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
-        ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
-        Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
-        Location loc (camera->getProxy().globalLocation(now));
-        loc.setPosition(loc.getPosition() + Vector3d(direction(loc.getOrientation()))*WORLD_SCALE);
-        loc.setOrientation(Quaternion(0.886995, 0.000000, -0.461779, 0.000000, Quaternion::WXYZ()));
+            CameraEntity *camera = mParent->mPrimaryCamera;
+            if (!camera) return;
+            SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
+            ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
+            Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
+            Location loc (camera->getProxy().globalLocation(now));
+            loc.setPosition(loc.getPosition() + Vector3d(direction(loc.getOrientation()))*WORLD_SCALE);
+            loc.setOrientation(Quaternion(0.886995, 0.000000, -0.461779, 0.000000, Quaternion::WXYZ()));
 
-        std::tr1::shared_ptr<ProxyLightObject> newLightObject (new ProxyLightObject(proxyMgr, newId));
-        proxyMgr->createObject(newLightObject);
-        {
-            LightInfo li;
-            li.setLightDiffuseColor(Color(0.976471, 0.992157, 0.733333));
-            li.setLightAmbientColor(Color(.24,.25,.18));
-            li.setLightSpecularColor(Color(0,0,0));
-            li.setLightShadowColor(Color(0,0,0));
-            li.setLightPower(1.0);
-            li.setLightRange(75);
-            li.setLightFalloff(1,0,0.03);
-            li.setLightSpotlightCone(30,40,1);
-            li.setCastsShadow(true);
-            /* set li according to some sample light in the scene file! */
-            newLightObject->update(li);
-        }
+            std::tr1::shared_ptr<ProxyLightObject> newLightObject (new ProxyLightObject(proxyMgr, newId));
+            proxyMgr->createObject(newLightObject);
+            {
+                LightInfo li;
+                li.setLightDiffuseColor(Color(0.976471, 0.992157, 0.733333));
+                li.setLightAmbientColor(Color(.24,.25,.18));
+                li.setLightSpecularColor(Color(0,0,0));
+                li.setLightShadowColor(Color(0,0,0));
+                li.setLightPower(1.0);
+                li.setLightRange(75);
+                li.setLightFalloff(1,0,0.03);
+                li.setLightSpotlightCone(30,40,1);
+                li.setCastsShadow(true);
+                /* set li according to some sample light in the scene file! */
+                newLightObject->update(li);
+            }
 
-        Entity *ent = mParent->getEntity(newId);
-        if (ent) {
-#if 0
-            // Attach a light bulb mesh
-            LightBulb::AttachLightBulb(camera, ent, String("LightMesh" + newId.toString()).c_str(), loc);
-#endif
-            ent->setSelected(true);
-        }
+            Entity *ent = mParent->getEntity(newId);
+            if (ent) {
+#if ATTACH_MESH_TO_LIGHTS && 0
+                // Attach a light bulb mesh
+                LightBulb::AttachLightBulb(camera, ent, String("LightMesh" + newId.toString()).c_str(), loc);
+#endif // ATTACH_MESH_TO_LIGHTS
+                // FIXME: What good does it do to select a light if you can't do anything with it such as move it?
+                ent->setSelected(true);
+            }
 
-        Entity *parentent = mParent->getEntity(mCurrentGroup);
-        if (parentent) {
-            Location localLoc = loc.toLocal(parentent->getProxy().globalLocation(now));
-            newLightObject->setParent(parentent->getProxyPtr(), now, loc, localLoc);
-            newLightObject->resetLocation(now, localLoc);
+            Entity *parentent = mParent->getEntity(mCurrentGroup);
+            if (parentent) {
+                Location localLoc = loc.toLocal(parentent->getProxy().globalLocation(now));
+                newLightObject->setParent(parentent->getProxyPtr(), now, loc, localLoc);
+                newLightObject->resetLocation(now, localLoc);
+            }
+            else {
+                newLightObject->resetLocation(now, loc);
+            }
+            mSelectedObjects.clear();
+            mSelectedObjects.insert(newLightObject);
         }
         else {
-            newLightObject->resetLocation(now, loc);
+            lightSelected("", 0);
         }
-        mSelectedObjects.clear();
-        mSelectedObjects.insert(newLightObject);
-#else
-    genericStringMessage(WebViewManager::NavigateCommand, "lightSelectedObject"
-#if 1
-        " diffusecolor: 1,1,1"
-        " ambientcolor: [ 0,0,0 ]"
-        " falloff: 1 , -0.1 , 0.05"
-        " \"cone\" : 0,0.5,1"
-        " power:1"
-        " lightrange:10"
-        " castsshadow:true"
-        " type:spot"
-#else
-        " diffusecolor=1,1,1"
-        " ambientcolor=0,0,0"
-        " falloff=1,-0.1,0.05"
-        " cone=0,0.5,1"
-        " power=1"
-        " lightrange=10"
-        " castsshadow=true"
-        " type=spot"
-#endif
-    );
-#endif
     }
 
 
+    //--------------------------------------------------------------------------
     ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
         ProxyObjectPtr parentProxy;
         while ((parentProxy=camProxy->getParentProxy())) {
@@ -696,19 +734,21 @@ private:
         }
         return camProxy;
     }
-    
 
+
+    //--------------------------------------------------------------------------
     void controlLightAction() {
         // Find the selected light
-        
+
         // Save current parameters, in case the user wants to cancel
-        
+
         // Open light control dialog
-        
+
         //
     }
-    
-    
+
+
+    //--------------------------------------------------------------------------
     void toggleLightVisibilityAction() {
         bool foundFirstLight = false;
         bool visibility = true;
@@ -730,6 +770,7 @@ private:
     }
 
 
+    //--------------------------------------------------------------------------
     void moveAction(Vector3f dir, float amount) {
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
@@ -744,6 +785,9 @@ private:
         rloc.set_angular_speed(0);
         cam->requestLocation(now, rloc);
     }
+
+
+    //--------------------------------------------------------------------------
     void rotateAction(Vector3f about, float amount) {
 
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
@@ -760,6 +804,8 @@ private:
         cam->requestLocation(now, rloc);
     }
 
+
+    //--------------------------------------------------------------------------
     void stableRotateAction(float dir, float amount) {
 
         float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
@@ -783,17 +829,23 @@ private:
         cam->requestLocation(now, rloc);
     }
 
+
+    //--------------------------------------------------------------------------
     void setDragModeAction(const String& modename) {
         if (modename == "")
             mDragAction[1] = 0;
         mDragAction[1] = DragActionRegistry::get(modename);
     }
 
+
+    //--------------------------------------------------------------------------
     void setCameraSpeed(const float& speed) {
         std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
         mCamSpeed = speed;
     }
 
+
+    //--------------------------------------------------------------------------
     void importAction() {
         std::cout << "input path name for import: " << std::endl;
         std::string filename;
@@ -820,6 +872,8 @@ private:
         mParent->mInputManager->filesDropped(files);
     }
 
+
+    //--------------------------------------------------------------------------
     void saveSceneAction() {
         std::set<std::string> saveSceneNames;
         std::cout << "saving new scene as scene_new.csv: " << std::endl;
@@ -847,6 +901,8 @@ private:
         fclose(output);
     }
 
+
+    //--------------------------------------------------------------------------
     bool quat2Euler(Quaternion q, double& pitch, double& roll, double& yaw) {
         /// note that in the 'gymbal lock' situation, we will get nan's for pitch.
         /// for now, in that case we should revert to quaternion
@@ -867,6 +923,8 @@ private:
         return true;
     }
 
+
+    //--------------------------------------------------------------------------
     string physicalName(ProxyMeshObject *obj, std::set<std::string> &saveSceneNames) {
         std::string name = obj->getPhysical().name;
         if (name.empty()) {
@@ -889,6 +947,9 @@ private:
         saveSceneNames.insert(name);
         return name;
     }
+
+
+    //--------------------------------------------------------------------------
     void dumpObject(FILE* fp, Entity* e, std::set<std::string> &saveSceneNames) {
         ProxyObject *pp = e->getProxyPtr().get();
         Time now(SpaceTimeOffsetManager::getSingleton().now(pp->getObjectReference().space()));
@@ -899,7 +960,7 @@ private:
 
         double x,y,z;
         std::string w("");
-        /// if feasible, use Eulers: (not feasible == potential gymbal confusion)
+        /// if feasible, use Eulers: (not feasible == potential gimbal confusion)
         if (!quat2Euler(loc.getOrientation(), x, z, y)) {
             x=loc.getOrientation().x;
             y=loc.getOrientation().y;
@@ -992,12 +1053,16 @@ private:
         }
     }
 
+
+    //--------------------------------------------------------------------------
     void zoomAction(float value, Vector2f axes) {
         zoomInOut(value, axes, mParent->mPrimaryCamera, mSelectedObjects, mParent);
     }
 
     ///// Top Level Input Event Handlers //////
 
+
+    //--------------------------------------------------------------------------
     EventResponse keyHandler(EventPtr ev) {
         std::tr1::shared_ptr<ButtonEvent> buttonev (
             std::tr1::dynamic_pointer_cast<ButtonEvent>(ev));
@@ -1016,6 +1081,8 @@ private:
         return EventResponse::nop();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse axisHandler(EventPtr ev) {
         std::tr1::shared_ptr<AxisEvent> axisev (
             std::tr1::dynamic_pointer_cast<AxisEvent>(ev));
@@ -1028,6 +1095,8 @@ private:
         return EventResponse::cancel();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse textInputHandler(EventPtr ev) {
         std::tr1::shared_ptr<TextInputEvent> textev (
             std::tr1::dynamic_pointer_cast<TextInputEvent>(ev));
@@ -1045,6 +1114,8 @@ private:
         return EventResponse::nop();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse mouseHoverHandler(EventPtr ev) {
         std::tr1::shared_ptr<MouseHoverEvent> mouseev (
             std::tr1::dynamic_pointer_cast<MouseHoverEvent>(ev));
@@ -1062,6 +1133,8 @@ private:
         return EventResponse::nop();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse mousePressedHandler(EventPtr ev) {
         std::tr1::shared_ptr<MousePressedEvent> mouseev (
             std::tr1::dynamic_pointer_cast<MousePressedEvent>(ev));
@@ -1082,6 +1155,8 @@ private:
         return EventResponse::nop();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse mouseClickHandler(EventPtr ev) {
         std::tr1::shared_ptr<MouseClickEvent> mouseev (
             std::tr1::dynamic_pointer_cast<MouseClickEvent>(ev));
@@ -1090,11 +1165,11 @@ private:
 
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMouseClick(mouseev);
-        
+
         if (browser_resp == EventResponse::cancel()) {
             return EventResponse::cancel();
         }
-        /// FIXME: temporarily commenting out so ogre gets mouseclicks.  For some reason when the app first starts,
+        /// FIXME: temporarily commenting out so ogre gets mouse clicks.  For some reason when the app first starts,
         /// this logic cancels all mouse clicks so you cannot select a painting
         /*
         if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
@@ -1108,6 +1183,8 @@ private:
         return EventResponse::nop();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse mouseDragHandler(EventPtr evbase) {
         MouseDragEventPtr ev (std::tr1::dynamic_pointer_cast<MouseDragEvent>(evbase));
         if (!ev) {
@@ -1159,6 +1236,8 @@ private:
         return EventResponse::nop();
     }
 
+
+    //--------------------------------------------------------------------------
     EventResponse webviewHandler(EventPtr ev) {
         WebViewEventPtr webview_ev (std::tr1::dynamic_pointer_cast<WebViewEvent>(ev));
         if (!webview_ev)
@@ -1174,6 +1253,9 @@ private:
 
 
     /// Camera Path Utilities
+#define CAMERA_PATH_FILE "camera_path.csv"
+
+    //--------------------------------------------------------------------------
     void cameraPathSetCamera(const Vector3d& pos, const Quaternion& orient) {
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
@@ -1189,6 +1271,7 @@ private:
         cam->setLocation(now, loc);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathSetToKeyFrame(uint32 idx) {
         if (idx < 0 || idx >= mCameraPath.numPoints()) return;
 
@@ -1197,28 +1280,31 @@ private:
         mCameraPathTime = mCameraPath[idx].time;
     }
 
-#define CAMERA_PATH_FILE "camera_path.csv"
-
+    //--------------------------------------------------------------------------
     void cameraPathLoad() {
         std::cout << "dbm debug: cameraPathLoad" << std::endl;
         mCameraPath.load(CAMERA_PATH_FILE);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathSave() {
         std::cout << "dbm debug: cameraPathSave" << std::endl;
         mCameraPath.save(CAMERA_PATH_FILE);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathNext() {
         mCameraPathIndex = mCameraPath.clampKeyIndex(mCameraPathIndex+1);
         cameraPathSetToKeyFrame(mCameraPathIndex);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathPrevious() {
         mCameraPathIndex = mCameraPath.clampKeyIndex(mCameraPathIndex-1);
         cameraPathSetToKeyFrame(mCameraPathIndex);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathInsert() {
         std::cout << "dbm debug: cameraPathInsert" << std::endl;
 
@@ -1231,11 +1317,13 @@ private:
         mCameraPathTime = mCameraPath.keyFrameTime(mCameraPathIndex);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathDelete() {
         mCameraPathIndex = mCameraPath.remove(mCameraPathIndex);
         mCameraPathTime = mCameraPath.keyFrameTime(mCameraPathIndex);
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathRun() {
         mRunningCameraPath = !mRunningCameraPath;
         if (mRunningCameraPath) {
@@ -1247,17 +1335,19 @@ private:
         }
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathChangeSpeed(float factor) {
         mCameraPath.changeTimeDelta(mCameraPathIndex, Task::DeltaTime::seconds(factor));
     }
 
+    //--------------------------------------------------------------------------
     void cameraPathTick(const Task::LocalTime& t) {
         Task::DeltaTime dt = t - mLastCameraTime;
         mLastCameraTime = t;
 
         if (mRunningCameraPath) {
             mCameraPathTime += dt;
-        
+
             Vector3d pos;
             Quaternion orient;
             static String oldmsg;
@@ -1272,16 +1362,17 @@ private:
                 WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
             }
             oldmsg=msg;
-        
+
             if (!success) {
                 mRunningCameraPath = false;
                 return;
             }
-        
+
             cameraPathSetCamera(pos, orient);
         }
     }
-    
+
+    //--------------------------------------------------------------------------
     void debugAction() {
         static int pic=0;
         pic++;
@@ -1292,14 +1383,18 @@ private:
     }
 
     /// WebView Actions
+
+    //--------------------------------------------------------------------------
     void webViewNavigateAction(WebViewManager::NavigationAction action) {
         WebViewManager::getSingleton().navigate(action);
     }
 
+    //--------------------------------------------------------------------------
     void webViewNavigateStringAction(WebViewManager::NavigationAction action, const String& arg) {
         WebViewManager::getSingleton().navigate(action, arg);
     }
 
+    //--------------------------------------------------------------------------
     void inventoryHandler(WebViewManager::NavigationAction action, const String& arg) {
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         if (!cam) return;
@@ -1316,7 +1411,7 @@ private:
         double width = mParent->mPrimaryCamera->getViewport()->getActualWidth();
         double height = mParent->mPrimaryCamera->getViewport()->getActualHeight();
         mx = (mx-width*.5) / (width*.5);
-        my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for titlebar?
+        my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for title bar?
         Vector3d position;
         Quaternion orientation;
         bool err=getPositionAndOrientationForNewArt(mx, my, 0.1, false, &position, &orientation);
@@ -1333,12 +1428,20 @@ private:
         cam->sendMessage(MemoryReference(smsg));
     }
 
-    static const char whiteSpace[]; // space between tokens
-    static const char arraySpace[]; // space between array elements
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Utilities for parsing text tokens
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    //--------------------------------------------------------------------------
+    // Get the next token or string
+    //--------------------------------------------------------------------------
+
     static bool getNextToken(const String &str, size_t *pos, String *token) {
         if (*pos >= str.length())
             return false;
-        size_t first = str.find_first_not_of(whiteSpace, *pos);
+        size_t first = str.find_first_not_of(mWhiteSpace, *pos);
         if (first == String::npos)
             return false;
         size_t last = first;
@@ -1353,7 +1456,7 @@ private:
                 *pos = last + 1;
         }
         else {                                                      // Unquoted token
-            last = str.find_first_of(whiteSpace, first);
+            last = str.find_first_of(mWhiteSpace, first);
             if (last == String::npos)
                 last = str.length();
             *pos = last;
@@ -1361,6 +1464,11 @@ private:
         *token = str.substr(first, last - first);
         return true;
     }
+
+
+    //--------------------------------------------------------------------------
+    // Get the next double
+    //--------------------------------------------------------------------------
 
     static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
         const char *start = str.c_str() + *pos;
@@ -1370,6 +1478,11 @@ private:
         return start != end;
     }
 
+
+    //--------------------------------------------------------------------------
+    // Get the next long
+    //--------------------------------------------------------------------------
+
     static bool getNextTokenAsLong(const String &str, size_t *pos, long *i) {
         const char *start = str.c_str() + *pos;
         char *end;
@@ -1377,8 +1490,12 @@ private:
         *pos = end - str.c_str();
         return start != end;
     }
-    
+
+
+    //--------------------------------------------------------------------------
     // walk [ straight | turn ] speed
+    //--------------------------------------------------------------------------
+
     void walkHandler(WebViewManager::NavigationAction action, const String& arg) {
         String token;
         size_t ix = 0;
@@ -1397,7 +1514,11 @@ private:
         else            stableRotateAction(1, speed);
     }
 
+
+    //--------------------------------------------------------------------------
     // step [ straight | turn ] distance
+    //--------------------------------------------------------------------------
+
     void stepHandler(WebViewManager::NavigationAction action, const String& arg) {
         String token;
         size_t ix = 0;
@@ -1418,6 +1539,7 @@ private:
     }
 
 
+    //--------------------------------------------------------------------------
     // Determine the appropriate position and orientation for a piece of artwork
     // to be placed at the given mouse coordinates.
     //
@@ -1430,6 +1552,8 @@ private:
     // also assumed that paintings are done in the X-Y plane, and that a
     // sculpture's vertical axis is the Y axis, with the primary view points its
     // Z axis toward the user.
+    //--------------------------------------------------------------------------
+
     bool getPositionAndOrientationForNewArt(
         double screenX, double screenY, // Location on screen
         double surfaceOffset,           // Optional offset from surface of ray intersection
@@ -1494,6 +1618,10 @@ private:
         return true;
     }
 
+    //--------------------------------------------------------------------------
+    // Return to Javascript the id of the currently select item, or the first one
+    // if there are multiple selections.
+    //--------------------------------------------------------------------------
 
     void getSelectedIDHandler(WebViewManager::NavigationAction action = WebViewManager::NavigateCommand, const String& arg = "") {
         // Neither the action nor the are are used, yet.
@@ -1508,15 +1636,51 @@ private:
             id = "null";
         }
         std::cout << "pictureSelected(" + id + ");" << std::endl;
-        WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome",
                                                           "debug('" + id + "');" +
                                                           "pictureSelected(" + id + ");"
         );
     }
 
 
-    // This provides an easy way to get values from a string of the form name=value name=value ... or name:value name:value ...
+    //--------------------------------------------------------------------------
+    // Case-insensitive string comparison
+    //--------------------------------------------------------------------------
+
+    static bool strcaseeq(const char *s1, const char *s2) {
+        #ifdef _WIN32
+            return stricmp(s1, s2) == 0;
+        #else // _WIN32
+            return strcasecmp(s1, s2) == 0;
+        #endif // _WIN32
+    }
+
+    static bool strncaseeq(const char *s1, const char *s2, size_t n) {
+        #ifdef _WIN32
+            return strnicmp(s1, s2, n) == 0;
+        #else // _WIN32
+            return strncasecmp(s1, s2, n) == 0;
+        #endif // _WIN32
+    }
+
+
+    //--------------------------------------------------------------------------
+    // This provides an easy way to get values from a string of the form
+    //    name=value name=value ...
+    // or
+    //    name:value name:value ...
     // Suitable for parsing element atributes or JSON members.
+    //
+    // Usage:
+    //    JavascriptArgumentParser parser(argString);
+    //    char attrName[] = "sampleAttributeName";
+    //    AttrType attrValue;
+    //    if (!getAttributeValue(attrName, &attrValue)
+    //        printf("Cannot find attribute \"%s\"\n", attrName);
+    //    getAttributeValue(anotherAttr, arrayOf10Values, 10);
+    // When the array form is used, an optional leading '[' is skipped.
+    //--------------------------------------------------------------------------
+
     class JavascriptArgumentParser {
     public:
         JavascriptArgumentParser(const String &str) {
@@ -1540,10 +1704,10 @@ private:
                     }
                 }
                 ix += strlen(name);                                     // Skip over name
-                ix = mString->find_first_not_of(whiteSpace, ix);        // Skip spaces
+                ix = mString->find_first_not_of(mWhiteSpace, ix);        // Skip spaces
                 if ((*mString)[ix] != '=' && (*mString)[ix] != ':')     // There should have been an '=' or ':' here
                     continue;                                           // Keep looking
-                ix = mString->find_first_not_of(whiteSpace, ix + 1);    // Skip over the '=' or ':'
+                ix = mString->find_first_not_of(mWhiteSpace, ix + 1);    // Skip over the '=' or ':'
                 // We know that we have <whitespace> <name> [ '=' | ':' ], and the index is positioned after the '=' or ':'
                 break;
             }
@@ -1551,15 +1715,19 @@ private:
                 ++ix;                   // Position at the first element
             return ix;
         }
+
+        // Get string value
         bool getAttributeValue(const char *name, String *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
-            for (; numValues--; ++value, ix = mString->find_first_not_of(arraySpace, ix))
+            for (; numValues--; ++value, ix = mString->find_first_not_of(mArraySpace, ix))
                 if (!getNextToken(*mString, &ix, value))
                     return false;
             return true;
         }
+
+        // Get int value
         bool getAttributeValue(const char *name, int *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
@@ -1569,10 +1737,12 @@ private:
                 *value = strtol(s0, &s1, 10);
                 if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
-                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
+                s0 = s1 + strspn(s1, mArraySpace);  // Skip spaces and commas
             }
             return numValues == -1;
         }
+
+        // Get double value
         bool getAttributeValue(const char *name, double *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
@@ -1582,10 +1752,12 @@ private:
                 *value = strtod(s0, &s1);
                 if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
-                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
+                s0 = s1 + strspn(s1, mArraySpace);  // Skip spaces and commas
             }
             return numValues == -1;
         }
+
+        // Get float value
         bool getAttributeValue(const char *name, float *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
@@ -1595,10 +1767,12 @@ private:
                 *value = strtod(s0, &s1);
                 if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
-                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
+                s0 = s1 + strspn(s1, mArraySpace);  // Skip spaces and commas
             }
             return numValues == -1;
         }
+
+        // Get bool value
         bool getAttributeValue(const char *name, bool *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
@@ -1606,24 +1780,26 @@ private:
             const char *s0 = &(*mString)[ix];
             for (const char *s1; numValues--; value++) {
                 *value = strtobool(s0, &s1);
-                if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
+                if (s0 == s1 || *s1 == 0)           // Didn't find a Boolean or it is the end of the string
                     break;
-                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
+                s0 = s1 + strspn(s1, mArraySpace);  // Skip spaces and commas
             }
             return numValues == -1;
         }
 
     private:
         static bool strtobool(char const *s0, char const **s1) {
+            s0 += strspn(s0, mWhiteSpace);
             *s1 = s0;
-            if (strncmp(s0, "true", 4) == 0 || strncmp(s0, "TRUE", 4) == 0) {
+            
+            if (strncaseeq(s0, "true", 4)) {
                 *s1 += 4;
                 return true;
             } else if (s0[0] == '1') {
                 *s1 += 1;
                 return true;
             }
-            if (strncmp(s0, "false", 5) == 0 || strncmp(s0, "FALSE", 5) == 0) {
+            if (strncaseeq(s0, "false", 5)) {
                 *s1 += 5;
                 return false;
             } else if (s0[0] == '0') {
@@ -1637,9 +1813,12 @@ private:
     };
 
 
+    //--------------------------------------------------------------------------
     // This parses a string of the form:
     // diffusecolor=1.0,1.0,0.95 specularcolor=1,1,1 ambientcolor=.05,.05,.05 shadowcolor=.02,.02,.02
     // falloff=1.,.01,.02 cone=0,3,0 power=1e2 lightrange=256 castsshadow=true type=spot
+    //--------------------------------------------------------------------------
+
     static void setLightInfoFromString(const String &str, LightInfo *lightInfo) {
         JavascriptArgumentParser jap(str);
         String type;
@@ -1659,9 +1838,12 @@ private:
             else lightInfo->mWhichFields &= ~LightInfo::TYPE;
         }
     }
-    
-    
+
+
+    //--------------------------------------------------------------------------
     // Find the height of the floor underneath the camera
+    //--------------------------------------------------------------------------
+
     double getFloorHeight() const {
         CameraEntity *camera = mParent->mPrimaryCamera;
         Vector3d cameraPosition  =  camera->getOgrePosition();
@@ -1676,30 +1858,40 @@ private:
             floorY = cameraPosition.y - distance;
         return floorY;
     }
-    
-    
+
+
+    //--------------------------------------------------------------------------
+    // Get front facing normal of a painting
+    //--------------------------------------------------------------------------
+
     static Vector3f getPaintingNormal(const Entity *paintingEntity) {
         return paintingEntity->getOgreOrientation().zAxis();
     }
 
 
-    void initPaintingLightLocation(Entity *ent, float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
+    //--------------------------------------------------------------------------
+    // Set the position and orientation of a light on a painting entity.
+    // The light is mounted on the ceiling
+    // and aims at the painting by the given angle from normal.
+    //--------------------------------------------------------------------------
+
+    void initPaintingLightLocation(Entity *ent, float angle, float mDefaultLightHeight, Location *lightLocation, LightInfo *lightInfo) {
         // Find wall normal and object bounding sphere.
         // We assume that the object is in front of the wall
 
         // Get an object's center and radius
         BoundingSphere<double> objSphere = ent->getOgreWorldBoundingSphere<double>();
         std::cout << "boundingSphere, center=" << objSphere.center() << ", radius=" << objSphere.radius() << std::endl;
-        
+
         // Get the floor coordinate
         double floorY = getFloorHeight();
-        
+
         // Determine the normal to the wall behind the object
         Vector3f normal = getPaintingNormal(ent);
-        
+
         // Move the light out from the wall, at the given angle
         Vector3d lightPosition;
-        lightPosition.y = floorY + ceilingHeight;
+        lightPosition.y = floorY + mDefaultLightHeight;
         double f = ((lightPosition.y - objSphere.center().y) / tan(angle));
         lightPosition.x = objSphere.center().x + normal.x * f;
         lightPosition.z = objSphere.center().z + normal.z * f;
@@ -1716,7 +1908,7 @@ private:
         if (lightY.normalizeThis() == 0)    // Looking straight down or up
             lightY = Vector3f::unitZ();
         lightLocation->setOrientation(Quaternion(lightX, lightY, lightZ));
-        
+
         // Adjust the cone.
         const float coneFactor = 1.7;
         float coneAngle = atan(objSphere.radius() * coneFactor / (objSphere.center() - lightPosition).length());
@@ -1735,9 +1927,14 @@ private:
                   << ", coneAngle=" << coneAngle * 180. / M_PI
                   << std::endl;
     }
-    
 
-    void initSelectedObjectLightLocation(float angle, float ceilingHeight, Location *lightLocation, LightInfo *lightInfo) {
+
+    //--------------------------------------------------------------------------
+    // Set the position and orientation of the light based on
+    // the location, size and orientation on the selected object.
+    //--------------------------------------------------------------------------
+
+    void initSelectedObjectLightLocation(float angle, float mDefaultLightHeight, Location *lightLocation, LightInfo *lightInfo) {
         // Find wall normal and object bounding sphere.
         // We assume that the object is in front of the wall
         Entity *sel = NULL;
@@ -1752,73 +1949,20 @@ private:
             SILOG(input, error, "initSelectedObjectLightLocation: no selected object");
             return;
         }
-        initPaintingLightLocation(sel, angle, ceilingHeight, lightLocation, lightInfo);
+        initPaintingLightLocation(sel, angle, mDefaultLightHeight, lightLocation, lightInfo);
     }
 
 
-    void lightSelectedObjectHandler(WebViewManager::NavigationAction action, const String& arg) {
-        // Set defaults
-        LightInfo lightInfo;
-        lightInfo.mDiffuseColor.set (1,     1,      1);
-        lightInfo.mSpecularColor.set(0,     0,      0);
-        lightInfo.mAmbientColor.set (0,     0,      0);
-        lightInfo.mShadowColor.set  (0,     0,      0);
-        lightInfo.mPower            = 1;
-        lightInfo.mLightRange       = 10;
-        lightInfo.mConstantFalloff  = 1.0;
-        lightInfo.mLinearFalloff    = -0.1;
-        lightInfo.mQuadraticFalloff = 0.05;
-        lightInfo.mConeInnerRadians = 0;
-        lightInfo.mConeOuterRadians = 30 * (M_PI / 180);
-        lightInfo.mConeFalloff      = 1;
-        lightInfo.mType             = LightInfo::SPOTLIGHT;
-        lightInfo.mCastsShadow      = true;
-        lightInfo.mWhichFields      = LightInfo::NONE;
+    //--------------------------------------------------------------------------
+    // Print the light info in JSON-compatible format,
+    // with the given prelude and postlude.
+    //
+    // FIXME: Shouldn't we only print the parameters that have been set?
+    //--------------------------------------------------------------------------
 
-        float lightAngle = 30 * M_PI / 180;
-        float ceilingHeight = 5;    // 5 meters ~= 16.4 feet
-        Location lightLocation;
-        setLightInfoFromString(arg, &lightInfo);
-        initSelectedObjectLightLocation(lightAngle, ceilingHeight, &lightLocation, &lightInfo);
-
-        CameraEntity *camera = mParent->mPrimaryCamera;
-        if (!camera) return;
-        SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
-        ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
-        Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
-
-        std::tr1::shared_ptr<ProxyLightObject> newLightObject(new ProxyLightObject(proxyMgr, newId));
-        proxyMgr->createObject(newLightObject);
-        newLightObject->update(lightInfo);
-
-        Entity *parentent = mParent->getEntity(mCurrentGroup);
-        if (parentent) {
-            Location localLoc = lightLocation.toLocal(parentent->getProxy().globalLocation(now));
-            newLightObject->setParent(parentent->getProxyPtr(), now, lightLocation, localLoc);
-            newLightObject->resetLocation(now, lightLocation);
-        }
-        else {
-            newLightObject->resetLocation(now, lightLocation);
-        }
-#if 1
-            // Attach a light bulb mesh
-            Entity *ent = mParent->getEntity(newId);
-            if (ent)
-                LightBulb::AttachLightBulb(camera, ent, String("LightMesh" + newId.toString()).c_str(), lightLocation);
-#endif
-//        mSelectedObjects.clear();
-//        mSelectedObjects.insert(newLightObject);
-//        Entity *ent = mParent->getEntity(newId);
-//        if (ent) {
-//            ent->setSelected(true);
-//        }
-    }
-
-
-    // FIXME: Should we only print the parameters that have neen set?
     static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
         String info(string_printf(
-            "{%s"                                                                  //  1 prelude
+            "{%s"                                                                   //  1 prelude
             " 'diffusecolor':" "[%.7g, %.7g, %.7g],"                                //  2 diffuse
             " 'specularcolor':""[%.7g, %.7g, %.7g],"                                //  3 specular
             " 'ambientcolor':" "[%.7g, %.7g, %.7g],"                                //  4 ambient
@@ -1827,8 +1971,8 @@ private:
             " 'cone':"         "[%.7g, %.7g, %.7g],"                                //  7 cone
 //          " 'cone':{'inner':%.7g, 'outer':%.7g, 'falloff':%.7g},"                 //  7 cone (this is too advanced for the current parser)
             " 'power':%.7g,"                                                        //  8 power
-            " 'lightrange':%.7g,"                                                   //  9 lightrange
-            " 'castsshadow':%s,"                                                    // 10 castsshadows
+            " 'lightrange':%.7g,"                                                   //  9 light range
+            " 'castsshadow':%s,"                                                    // 10 casts shadows
             " 'type':'%s'"                                                          // 11 type
             " %s}",                                                                 // 12 postlude
             prelude,                                                                //  1 prelude
@@ -1839,8 +1983,8 @@ private:
             li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,       //  6 falloff
             li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,            //  7 cone
             li.mPower,                                                              //  8 power
-            li.mLightRange,                                                         //  9 lightrange
-            li.mCastsShadow ? "true" : "false",                                     // 10 castsshadows
+            li.mLightRange,                                                         //  9 light range
+            li.mCastsShadow ? "true" : "false",                                     // 10 casts shadows
             (li.mType == LightInfo::POINT)       ? "point" :                        // 11 type
             (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
             (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
@@ -1851,205 +1995,130 @@ private:
     }
 
 
-    LightInfo spotLightMoods[4];
-    LightInfo pointLightMoods[4];
-    LightInfo directionalLightMoods[4];
-    static bool moodLightsInited;
+    //--------------------------------------------------------------------------
+    // Initialize the light moods. These can be changed later.
+    //--------------------------------------------------------------------------
 
     void initLightMoods() {
-        if (moodLightsInited)
+        if (mMoodLightsInited)
             return;
         for (int i = 0; i < 4; ++i) {
-            spotLightMoods[i].mWhichFields          = 0;
-            pointLightMoods[i].mWhichFields         = 0;
-            directionalLightMoods[i].mWhichFields   = 0;
+            mSpotLightMoods[i].mWhichFields          = 0;
+            mPointLightMoods[i].mWhichFields         = 0;
+            mDirectionalLightMoods[i].mWhichFields   = 0;
         }
-        spotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 6.).setLightFalloff(1., .00,.20);
-        spotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 7.).setLightFalloff(1.,-.02,.10);
-        spotLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange( 9.).setLightFalloff(1.,-.05,.08);
-        spotLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(10.).setLightFalloff(1.,-.10,.05);
+        mSpotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 6.).setLightFalloff(1., .00,.20).setLightType(LightInfo::SPOTLIGHT);
+        mSpotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 7.).setLightFalloff(1.,-.02,.10).setLightType(LightInfo::SPOTLIGHT);
+        mSpotLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange( 9.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::SPOTLIGHT);
+        mSpotLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT);
 
-        pointLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 8.).setLightFalloff(1., .00,.20);
-        pointLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange(12.).setLightFalloff(1.,-.02,.10);
-        pointLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange(16.).setLightFalloff(1.,-.05,.08);
-        pointLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(20.).setLightFalloff(1.,-.10,.05);
+        mPointLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 8.).setLightFalloff(1., .00,.20).setLightType(LightInfo::POINT);
+        mPointLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange(12.).setLightFalloff(1.,-.02,.10).setLightType(LightInfo::POINT);
+        mPointLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange(16.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::POINT);
+        mPointLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(20.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::POINT);
 
-        directionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.7);
-        directionalLightMoods[1].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.8);
-        directionalLightMoods[2].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.9);
-        directionalLightMoods[3].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(1.);
-        moodLightsInited = true;
+        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.7).setLightType(LightInfo::DIRECTIONAL);
+        mDirectionalLightMoods[1].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.8).setLightType(LightInfo::DIRECTIONAL);
+        mDirectionalLightMoods[2].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.9).setLightType(LightInfo::DIRECTIONAL);
+        mDirectionalLightMoods[3].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(1.).setLightType(LightInfo::DIRECTIONAL);
+        mMoodLightsInited = true;
     }
 
 
-    // light list
-    // light get [<id>]
-    // light set <id> { ... }
-    // light mood <level>
-    // light editmood <level> { type=<type> ... }
-    void lightHandler(WebViewManager::NavigationAction action, const String& arg) {
-        String token;
-        size_t ix = 0;
-        bool success = true, rotate = false;
-        double speed;
-        getNextToken(arg, &ix, &token);                                 // light (already parsed)
-        success = success && getNextToken(arg, &ix, &token);            // subcommand
+    //--------------------------------------------------------------------------
+    // JSON list of the IDs of the lights
+    // Invoked as
+    //      light list
+    //--------------------------------------------------------------------------
 
-        // light list
-        if (token == "list") {
-            bool foundFirstLight = false;
-            bool visibility = true;
-            String list;
-            list = "[";
+    void lightList(const String& arg, size_t argCaret) {
+        bool foundFirstLight = false;
+        bool visibility = true;
+        String list;
+        list = "[";
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+            iter != mParent->mSceneEntities.end(); ++iter
+        ) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            if (list.size() > 1)
+                list += ", ";
+            list += obj->getObjectReference().toString();
+        }
+        list += "]";
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+            "debug('" + list + "');"
+        );
+    }
+
+
+    //--------------------------------------------------------------------------
+    // JSON dump of the light info of one or all of the lights.
+    // Invoked as
+    //     light get              , or
+    //     light get 1            , or
+    //     light get 292ae805-393b-f239-8df8-8f129f9ddb03:12345678-1111-1111-1111-defa01759ace
+    //--------------------------------------------------------------------------
+
+    void lightGet(const String& arg, size_t argCaret) {
+        String token;
+        bool success = true;
+        success = success && getNextToken(arg, &argCaret, &token);            // id or index
+        if (success) {          // Specified a particular light
+            // Check whether it is an ID or an index
+            bool isIndex = token.find_first_of(':') == String::npos;
+            int index = isIndex ? strtol(token.c_str(), NULL, 10) : std::numeric_limits<int>::max();
+            SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(token);
+            int ix = 0;
             for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                 iter != mParent->mSceneEntities.end(); ++iter
             ) {
                 Entity *ent = iter->second;                                     if (!ent)   continue;
                 ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
                 ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
-                if (list.size() > 1)
-                    list += ", ";
-                list += obj->getObjectReference().toString();
-            }
-            list += "]";
-            WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                "debug('" + list + "');"
-            );
-        }
-
-        //----------------------------------------------------------------------
-        // light get              , or
-        // light get 1            , or
-        // light get 292ae805-393b-f239-8df8-8f129f9ddb03:12345678-1111-1111-1111-defa01759ace
-        else if (token == "get") {
-            success = success && getNextToken(arg, &ix, &token);            // id or index
-            if (success) {          // Specified a particular light
-                // Check whether it is an ID or an index
-                bool isIndex = token.find_first_of(':') == String::npos;
-                int index = isIndex ? strtol(token.c_str(), NULL, 10) : std::numeric_limits<int>::max();
-                SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(token);
-                int ix = 0;
-                for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
-                    iter != mParent->mSceneEntities.end(); ++iter
-                ) {
-                    Entity *ent = iter->second;                                     if (!ent)   continue;
-                    ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-                    ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
-                    if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
-                        const LightInfo &li = light->getLastLightInfo();
-                        String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
-                        String info(printLightInfoToString(prelude.c_str(), li, ""));
-                        WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                            "debug(\"" + info + "\");"
-                        );
-                        std::cout << info << std::endl;
-                    }
-                    ++ix;
-                }
-            }
-            else { // No light specified
-                String allInfo;
-                allInfo = "[ ";
-                int ix = 0;
-                for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
-                    iter != mParent->mSceneEntities.end(); ++iter
-                ) {
-                    Entity *ent = iter->second;                                     if (!ent)   continue;
-                    ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-                    ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+                if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
                     const LightInfo &li = light->getLastLightInfo();
                     String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
                     String info(printLightInfoToString(prelude.c_str(), li, ""));
-                    if (ix > 0)
-                        allInfo += ", ";
-                    allInfo += info;
-                    ++ix;
+                    WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+                        "debug(\"" + info + "\");"
+                    );
+                    std::cout << info << std::endl;
                 }
-                allInfo += " ]";
-                std::cout << "debug(\"" + allInfo + " \");" << std::endl;
-                WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-                    "debug(\"" + allInfo + "\");"
-                );
+                ++ix;
             }
         }
-        
-        //----------------------------------------------------------------------
-        // light set { ... }
-        else if (token == "set") {
-            String params(arg.substr(ix));
-            JavascriptArgumentParser jap(params);
-            if (!jap.getAttributeValue("id", &token)) {
-                SILOG(input, error, "lightHandler: no light id specified");
-                return;
-            }
-            
-            ProxyLightObject *light = getLightProxyForID(token);
-            if (light == NULL) {
-                SILOG(input, error, "lightHandler set: canot find light id \"" + token + "\"");
-                return;
-            }
-            LightInfo li = light->getLastLightInfo();
-            setLightInfoFromString(params, &li);
-            light->update(li);
-        }
-        
-        //----------------------------------------------------------------------
-        // light mood <level>
-        else if (token == "mood") {
-            if (!moodLightsInited)
-                initLightMoods();
-            long mood;
-            success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
-            if (mood < 0 || mood > (long)(sizeof(spotLightMoods) / sizeof(spotLightMoods[0])))
-                return;
+        else { // No light specified
+            String allInfo;
+            allInfo = "[ ";
+            int ix = 0;
             for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                 iter != mParent->mSceneEntities.end(); ++iter
             ) {
                 Entity *ent = iter->second;                                     if (!ent)   continue;
                 ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
                 ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
-                LightInfo li = light->getLastLightInfo();
-                switch (li.mType) {
-                    case LightInfo::POINT:          li =        pointLightMoods[mood]; break;
-                    case LightInfo::SPOTLIGHT:      li =         spotLightMoods[mood]; break;
-                    case LightInfo::DIRECTIONAL:    li =  directionalLightMoods[mood]; break;
-                    default:                        continue;
-                }
-                light->update(li);
+                const LightInfo &li = light->getLastLightInfo();
+                String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
+                String info(printLightInfoToString(prelude.c_str(), li, ""));
+                if (ix > 0)
+                    allInfo += ", ";
+                allInfo += info;
+                ++ix;
             }
-        }
-        
-        //----------------------------------------------------------------------
-        // light editmood <level> { ... }
-        else if (token == "editmood") {
-            if (!moodLightsInited)
-                initLightMoods();
-            long mood;
-            success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
-            if (mood < 0 || mood > (long)(sizeof(spotLightMoods) / sizeof(spotLightMoods[0])))
-                return;
-            String params(arg.substr(ix));
-            JavascriptArgumentParser jap(params);
-            if (!jap.getAttributeValue("type", &token)) {
-                SILOG(input, error, "lightHandler editmood: no light type specified");
-                return;
-            }
-            LightInfo li;
-            li.mWhichFields = 0;
-            setLightInfoFromString(params, &li);
-            if      (token == "spotlight")      spotLightMoods[mood] = li;
-            else if (token == "directional")    directionalLightMoods[mood] = li;
-            else if (token == "point")          pointLightMoods[mood] = li;
-            else SILOG(input, error, "lightHandler editmood: unknown light type \"" + token + "\"");
-        }
-        
-        //----------------------------------------------------------------------
-        else {
-            SILOG(input, error, "lightHandler: unknown command \"" + token + "\"");
+            allInfo += " ]";
+            std::cout << "debug(\"" + allInfo + " \");" << std::endl;
+            WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+                "debug(\"" + allInfo + "\");"
+            );
         }
     }
-    
-    
+
+    //--------------------------------------------------------------------------
+    // Find the light proxy for the given ID.
+    //--------------------------------------------------------------------------
+
     ProxyLightObject* getLightProxyForID(SpaceObjectReference sor) {
         for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
             iter != mParent->mSceneEntities.end(); ++iter
@@ -2062,14 +2131,207 @@ private:
         }
         return NULL;
     }
-
-
     ProxyLightObject* getLightProxyForID(String id) {
         return getLightProxyForID(SpaceObjectReference(id));
     }
-    
 
+
+    //--------------------------------------------------------------------------
+    // Set the parameters of a light, with specifications in JSON format.
+    // Invoked as
+    //     light set <id> { ... }
+    //--------------------------------------------------------------------------
+
+    void lightSet(const String& arg, size_t argCaret) {
+        String token;
+        String params(arg.substr(argCaret));
+        JavascriptArgumentParser jap(params);
+        if (!jap.getAttributeValue("id", &token)) {
+            SILOG(input, error, "lightHandler: no light id specified");
+            return;
+        }
+
+        ProxyLightObject *light = getLightProxyForID(token);
+        if (light == NULL) {
+            SILOG(input, error, "lightHandler set: cannot find light id \"" + token + "\"");
+            return;
+        }
+        LightInfo li = light->getLastLightInfo();
+        setLightInfoFromString(params, &li);
+        light->update(li);
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Set the lighting mood. Choose from { 0, 1, 2, 3}
+    // Invoked as
+    //     light mood <level>
+    //--------------------------------------------------------------------------
+
+    void lightMood(const String& arg, size_t argCaret) {
+        initLightMoods();
+        long mood;
+        if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
+            SILOG(input, error, "lightMood: no mood level was specified");
+            return;
+        }
+        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+            SILOG(input, error, "lightMood: mood level out of range");
+            return;
+        }
+
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+            iter != mParent->mSceneEntities.end(); ++iter
+        ) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            LightInfo li = light->getLastLightInfo();
+            switch (li.mType) {
+                case LightInfo::POINT:          li =        mPointLightMoods[mood]; break;
+                case LightInfo::SPOTLIGHT:      li =         mSpotLightMoods[mood]; break;
+                case LightInfo::DIRECTIONAL:    li =  mDirectionalLightMoods[mood]; break;
+                default:                        continue;
+            }
+            light->update(li);
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Set the lighting mood. Choose from { 0, 1, 2, 3}
+    // Invoked as
+    //     light editmood <level> { type=<type> ... }
+    //--------------------------------------------------------------------------
+
+    void lightEditMood(const String& arg, size_t argCaret) {
+        initLightMoods();
+        long mood;
+        if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
+            SILOG(input, error, "lightEditMood: no mood level was specified");
+            return;
+        }
+        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+            SILOG(input, error, "lightEditMood: mood level out of range");
+            return;
+        }
+        String params(arg.substr(argCaret));
+        JavascriptArgumentParser jap(params);
+        String lightType;
+        if (!jap.getAttributeValue("type", &lightType)) {
+            SILOG(input, error, "lightHandler editmood: no light type specified");
+            return;
+        }
+        LightInfo *moodPtr = NULL;
+        if      (lightType == "spotlight")      moodPtr = &mSpotLightMoods[mood];
+        else if (lightType == "directional")    moodPtr = &mDirectionalLightMoods[mood];
+        else if (lightType == "point")          moodPtr = &mPointLightMoods[mood];
+        else {
+            SILOG(input, error, "lightHandler editmood: unknown light type \"" + lightType + "\"");
+            return;
+        }
+
+        setLightInfoFromString(params, moodPtr);
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Place a spotlight on the selected object.
+    // Invoked as
+    //     light selected
+    //     light selected { ... }
+    // The latter form allows you to initalize it with specific parameters rather than the default.
+    //--------------------------------------------------------------------------
+
+    void lightSelected(const String& arg, size_t argCaret) {
+        initLightMoods();
+        LightInfo li = mSpotLightMoods[sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]) - 1];     // Initialize with the max mood.
+        Location lightLocation;
+        setLightInfoFromString(arg, &li);
+        initSelectedObjectLightLocation(mDefaultSpotLightInclination, mDefaultLightHeight, &lightLocation, &li);
+
+        CameraEntity *camera = mParent->mPrimaryCamera;
+        if (!camera) return;
+        SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
+        ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
+        Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
+
+        std::tr1::shared_ptr<ProxyLightObject> newLightObject(new ProxyLightObject(proxyMgr, newId));
+        proxyMgr->createObject(newLightObject);
+        newLightObject->update(li);
+
+        Entity *parentent = mParent->getEntity(mCurrentGroup);
+        if (parentent) {
+            Location localLoc = lightLocation.toLocal(parentent->getProxy().globalLocation(now));
+            newLightObject->setParent(parentent->getProxyPtr(), now, lightLocation, localLoc);
+            newLightObject->resetLocation(now, lightLocation);
+        }
+        else {
+            newLightObject->resetLocation(now, lightLocation);
+        }
+#if ATTACH_MESH_TO_LIGHTS
+            // Attach a light bulb mesh
+            Entity *ent = mParent->getEntity(newId);
+            if (ent)
+                LightBulb::AttachLightBulb(camera, ent, String("LightMesh" + newId.toString()).c_str(), lightLocation);
+#endif // ATTACH_MESH_TO_LIGHTS
+    //    mSelectedObjects.clear();
+    //    mSelectedObjects.insert(newLightObject);
+    //    Entity *ent = mParent->getEntity(newId);
+    //    if (ent) {
+    //        ent->setSelected(true);
+    //    }
+    }
+
+
+    //--------------------------------------------------------------------------
+    //  light list
+    //  light get [<id>]
+    //  light set <id> { ... }
+    //  light mood <level>
+    //  light editmood <level> { type=<type> ... }
+    //  light selected
+    //--------------------------------------------------------------------------
+
+    void lightHandler(WebViewManager::NavigationAction action, const String& arg) {
+        String token;
+        size_t argCaret = 0;
+        bool success = true, rotate = false;
+        double speed;
+        typedef void (OgreSystem::MouseHandler::*LightHandlerProc)(const String& arg, size_t argCaret);
+        struct LightDispatch {
+            const char              *command;
+            LightHandlerProc        handler;
+        };
+        static const LightDispatch dispatchTable[] = {
+            { "list",           &Sirikata::Graphics::OgreSystem::MouseHandler::lightList        },
+            { "get",            &Sirikata::Graphics::OgreSystem::MouseHandler::lightGet         },
+            { "set",            &Sirikata::Graphics::OgreSystem::MouseHandler::lightSet         },
+            { "mood",           &Sirikata::Graphics::OgreSystem::MouseHandler::lightMood        },
+            { "editmood",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightEditMood    },
+            { "selected",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelected    },
+            { NULL,             NULL                                                            }
+        };
+
+        String command;
+        getNextToken(arg, &argCaret, &command);                         // light (already parsed)
+        success = success && getNextToken(arg, &argCaret, &command);    // subcommand
+
+        const LightDispatch *dp;
+        for (dp = dispatchTable; dp->command != NULL; ++dp)
+            if (dp->command == command)
+                break;
+        if (dp->handler != NULL)
+            (this->*(dp->handler))(arg, argCaret);
+        else
+            SILOG(input, error, "lightHandler: unknown command: \"" << command << "\"");
+    }
+
+
+    //--------------------------------------------------------------------------
     /// generic message mechanism (to send messages from JScript to Camera/Python thru C++, for instance)
+    //--------------------------------------------------------------------------
+
     void genericStringMessage(WebViewManager::NavigationAction action, const String& arg) {
         // Get the command (first word)
         String command;
@@ -2090,7 +2352,6 @@ private:
             { "walk",                   &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
             { "step",                   &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },
             { "getselectedids",         &Sirikata::Graphics::OgreSystem::MouseHandler::getSelectedIDHandler },
-            { "lightSelectedObject",    &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelectedObjectHandler },
             { "light",                  &Sirikata::Graphics::OgreSystem::MouseHandler::lightHandler },
             { NULL,                     NULL }
         };
@@ -2310,14 +2571,14 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T, Input::MOD_CTRL), mInputResponses["setDragModeRotateCamera"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y, Input::MOD_CTRL), mInputResponses["setDragModePanCamera"]);
 
-        
+
         // camera speeds
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_1), mInputResponses["setCameraSpeed1"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_2), mInputResponses["setCameraSpeed2"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_3), mInputResponses["setCameraSpeed3"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_4), mInputResponses["setCameraSpeed4"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_5), mInputResponses["setCameraSpeed5"]);
-        
+
         // Mouse Zooming
         mInputBinding.add(InputBindingEvent::Axis(SDLMouse::WHEELY), mInputResponses["zoom"]);
 
@@ -2336,7 +2597,7 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction"]);
-        
+
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navback"), mInputResponses["webBack"]);
@@ -2382,11 +2643,21 @@ public:
     }
 };
 
-const char OgreSystem::MouseHandler::whiteSpace[] = " \t\n\r";  // Space betwen tokens  
-const char OgreSystem::MouseHandler::arraySpace[] = " \t\n\r,"; // Space betwen array elements
-bool OgreSystem::MouseHandler::moodLightsInited = false;
+
+// MouseHandler static members and their initialization
+const char  OgreSystem::MouseHandler::mWhiteSpace[]          = " \t\n\r";        // Space between tokens
+const char  OgreSystem::MouseHandler::mArraySpace[]          = " \t\n\r,";       // Space between array elements
+float       OgreSystem::MouseHandler::mDefaultSpotLightInclination       = 30 * M_PI / 180;  // 30 degree default
+float       OgreSystem::MouseHandler::mDefaultLightHeight        = 5;                // 5 meters ~= 16.4 feet
+bool        OgreSystem::MouseHandler::mMoodLightsInited     = false;            // This indicates when the moods below have been initialized
+LightInfo   OgreSystem::MouseHandler::mSpotLightMoods[4];                       // These moods are initialized programatically
+LightInfo   OgreSystem::MouseHandler::mPointLightMoods[4];
+LightInfo   OgreSystem::MouseHandler::mDirectionalLightMoods[4];
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                  OgreSystem                                //
+////////////////////////////////////////////////////////////////////////////////
 
 void OgreSystem::allocMouseHandler() {
     mMouseHandler = new MouseHandler(this);
