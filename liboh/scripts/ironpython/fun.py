@@ -34,7 +34,7 @@ class exampleclass:
         if DEBUG_OUTPUT: print "exampleclass.__init__"
         self.objects={}
         self.ammoNum=0
-        self.ammoMod=3
+        self.ammoMod=6
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -95,6 +95,9 @@ class exampleclass:
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s
                     ammo = tok[2] + "_" + str(self.ammoNum)
                     self.ammoNum = (self.ammoNum+1) % self.ammoMod
+                    retire = tok[2] + "_" + str(self.ammoNum)
+                    self.setPosition(objid=self.objects[retire], position = (0, -10, 0), orientation = (0, 0, 0, 1),
+                                     velocity = (0, 0, 0), axis=(0,1,0), angular_speed=0)
                     x = float(tok[3])
                     y = float(tok[4])
                     z = float(tok[5])
