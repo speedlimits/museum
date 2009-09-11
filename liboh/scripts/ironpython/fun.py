@@ -33,6 +33,8 @@ class exampleclass:
     def __init__(self):
         if DEBUG_OUTPUT: print "exampleclass.__init__"
         self.objects={}
+        self.ammoNum=0
+        self.ammoMod=3
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -91,7 +93,8 @@ class exampleclass:
             elif tok[0]=="funmode":
                 if tok[1]=="fire":
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s
-                    ammo = tok[2]
+                    ammo = tok[2] + "_" + str(self.ammoNum)
+                    self.ammoNum = (self.ammoNum+1) % self.ammoMod
                     x = float(tok[3])
                     y = float(tok[4])
                     z = float(tok[5])
