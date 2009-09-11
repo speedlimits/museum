@@ -665,6 +665,16 @@ private:
         mSelectedObjects.insert(newLightObject);
 #else
     genericStringMessage(WebViewManager::NavigateCommand, "lightSelectedObject"
+#if 1
+        " diffusecolor: 1,1,1"
+        " ambientcolor: [ 0,0,0 ]"
+        " falloff: 1 , -0.1 , 0.05"
+        " \"cone\" : 0,0.5,1"
+        " power:1"
+        " lightrange:10"
+        " castsshadow:true"
+        " type:spot"
+#else
         " diffusecolor=1,1,1"
         " ambientcolor=0,0,0"
         " falloff=1,-0.1,0.05"
@@ -673,18 +683,19 @@ private:
         " lightrange=10"
         " castsshadow=true"
         " type=spot"
+#endif
     );
 #endif
     }
 
 
-	ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
-		ProxyObjectPtr parentProxy;
-		while ((parentProxy=camProxy->getParentProxy())) {
-			camProxy=parentProxy;
-		}
-		return camProxy;
-	}
+    ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
+        ProxyObjectPtr parentProxy;
+        while ((parentProxy=camProxy->getParentProxy())) {
+            camProxy=parentProxy;
+        }
+        return camProxy;
+    }
     
 
     void controlLightAction() {
@@ -1347,38 +1358,51 @@ private:
         cam->sendMessage(MemoryReference(smsg));
     }
 
-    static const char tokenDelimiter[];
-
+    static const char whiteSpace[]; // space between tokens
+    static const char arraySpace[]; // space between array elements
     static bool getNextToken(const String &str, size_t *pos, String *token) {
         if (*pos >= str.length())
             return false;
-        size_t first = str.find_first_not_of(tokenDelimiter, *pos);
+        size_t first = str.find_first_not_of(whiteSpace, *pos);
         if (first == String::npos)
             return false;
-        size_t last = str.find_first_of(tokenDelimiter, first);
-        if (last == String::npos)
-            last = str.length();
+        size_t last = first;
+        if (str[first] == '"' || str[first] == '\'') {              // Quoted token
+            char quoteChar = str[first++];
+            last = str.find_first_of(quoteChar, first);
+            while (last != String::npos && str[last - 1] == '\\')   // Quoted quote
+                last = str.find_first_of(quoteChar, last + 1);
+            if (last == String::npos)
+                *pos = last = str.length();
+            else
+                *pos = last + 1;
+        }
+        else {                                                      // Unquoted token
+            last = str.find_first_of(whiteSpace, first);
+            if (last == String::npos)
+                last = str.length();
+            *pos = last;
+        }
         *token = str.substr(first, last - first);
-        *pos = last;
         return true;
     }
 
     static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
-        String token;
-        if (!getNextToken(str, pos, &token))
-            return false;
-        *d = strtod(token.c_str(), NULL);
-        return true;
+        const char *start = str.c_str() + *pos;
+        char *end;
+        *d = strtod(str.c_str(), &end);
+        *pos = end - str.c_str();
+        return start != end;
     }
 
     static bool getNextTokenAsLong(const String &str, size_t *pos, long *i) {
-        String token;
-        if (!getNextToken(str, pos, &token))
-            return false;
-        *i = strtol(token.c_str(), NULL, 10);   // Use 0 instead of 10 to get dec, hex, oct, etc.
-        return true;
+        const char *start = str.c_str() + *pos;
+        char *end;
+        *i = strtol(str.c_str(), &end, 10);
+        *pos = end - str.c_str();
+        return start != end;
     }
-	
+    
     // walk [ straight | turn ] speed
     void walkHandler(WebViewManager::NavigationAction action, const String& arg) {
         String token;
@@ -1498,25 +1522,26 @@ private:
 
     void getSelectedIDHandler(WebViewManager::NavigationAction action = WebViewManager::NavigateCommand, const String& arg = "") {
         // Neither the action nor the are are used, yet.
-		String id;
-		if (mSelectedObjects.size() > 0) {
-			SelectedObjectSet::const_iterator it = mSelectedObjects.begin();
-			ProxyObjectPtr obj(it->lock());
+        String id;
+        if (mSelectedObjects.size() > 0) {
+            SelectedObjectSet::const_iterator it = mSelectedObjects.begin();
+            ProxyObjectPtr obj(it->lock());
             // id = obj->getObjectReference().toString();
-			id = "\"" + dynamic_cast<ProxyMeshObject*>(obj.get())->getPhysical().name + "\"";
-		}
-		else {
-			id = "null";
-		}
+            id = "\"" + dynamic_cast<ProxyMeshObject*>(obj.get())->getPhysical().name + "\"";
+        }
+        else {
+            id = "null";
+        }
         std::cout << "pictureSelected(" + id + ");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
-														  "debug('" + id + "');" +
-														  "pictureSelected(" + id + ");"
-		);
+                                                          "debug('" + id + "');" +
+                                                          "pictureSelected(" + id + ");"
+        );
     }
 
 
-    // This provides an easy way to get values from a string of the form name=value name=value ...
+    // This provides an easy way to get values from a string of the form name=value name=value ... or name:value name:value ...
+    // Suitable for parsing element atributes or JSON members.
     class JavascriptArgumentParser {
     public:
         JavascriptArgumentParser(const String &str) {
@@ -1525,82 +1550,90 @@ private:
         size_t hasAttributeName(const char *name) {
             size_t ix = 0;
             while ((ix = mString->find(name, ix)) != String::npos) {    // FIXME: Prefer a case-insensitive search
-                if (ix > 0 && !isspace((*mString)[ix-1])) {    // No whitespace before the name
-                    ix += strlen(name);         // Skip over name
-                    continue;                   // Keep looking
+                if (ix > 0) {
+                    if ((*mString)[ix-1] == '"' || (*mString)[ix-1] == '\'') {  // Quoted attribute name
+                        char quoteChar = (*mString)[ix-1];
+                        if ((*mString)[ix + strlen(name)] != quoteChar) {   // Quoting a different name
+                            ix += strlen(name);                         // Skip over the name
+                            continue;                                   // Keep looking
+                        }
+                        ++ix;                                           // Skip over the quote
+                    }
+                    else if (!isspace((*mString)[ix-1])) {              // No whitespace before the name
+                        ix += strlen(name);                             // Skip over name
+                        continue;                                       // Keep looking
+                    }
                 }
-                ix += strlen(name);             // Skip over name
-                if ((*mString)[ix++] != '=')    // There should have been an '='here
-                    continue;                   // Keep looking
-                // We know that we have <whitespace> <name> '=', and the index is positioned after the '='
-                // Check for an initial quote
-                if ((*mString)[ix] == '"' || (*mString)[ix] == '\'')
-                    ++ix;
+                ix += strlen(name);                                     // Skip over name
+                ix = mString->find_first_not_of(whiteSpace, ix);        // Skip spaces
+                if ((*mString)[ix] != '=' && (*mString)[ix] != ':')     // There should have been an '=' or ':' here
+                    continue;                                           // Keep looking
+                ix = mString->find_first_not_of(whiteSpace, ix + 1);    // Skip over the '=' or ':'
+                // We know that we have <whitespace> <name> [ '=' | ':' ], and the index is positioned after the '=' or ':'
                 break;
             }
+            if ((*mString)[ix] == '[')  // Javascript array
+                ++ix;                   // Position at the first element
             return ix;
         }
-        bool getAttributeValue(const char *name, String *value) {
+        bool getAttributeValue(const char *name, String *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
-            // FIXME: The following does not allow escaping special characters
-            size_t iy = ix;
-            if ((*mString)[ix-1] == '"') {
-                iy = mString->find_first_of('"', ix);       // Doubly quoted sring
-            } else if ((*mString)[ix-1] == '\'') {
-                iy = mString->find_first_of('\'', ix);      // Singly quoted string
-            } else {
-                iy = mString->find_first_of(" \t\r\n", ix); // Non-quoted string: whitespace delimited
-            }
-            *value = String((*mString), ix, iy);
+            for (; numValues--; ++value, ix = mString->find_first_not_of(arraySpace, ix))
+                if (!getNextToken(*mString, &ix, value))
+                    return false;
             return true;
         }
-        bool getAttributeValue(const char *name, int numValues, int *value) {
+        bool getAttributeValue(const char *name, int *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (char *s1; numValues--; value++, s0 = s1 + 1) {
+            for (char *s1; numValues--; value++) {
                 *value = strtol(s0, &s1, 10);
-                if (*s1 == 0)
+                if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
+                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
             }
             return numValues == -1;
         }
-        bool getAttributeValue(const char *name, int numValues, double *value) {
+        bool getAttributeValue(const char *name, double *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (char *s1; numValues--; value++, s0 = s1 + 1) {
+            for (char *s1; numValues--; value++) {
                 *value = strtod(s0, &s1);
-                if (*s1 == 0)
+                if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
+                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
             }
             return numValues == -1;
         }
-        bool getAttributeValue(const char *name, int numValues, float *value) {
+        bool getAttributeValue(const char *name, float *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (char *s1; numValues--; value++, s0 = s1 + 1) {
+            for (char *s1; numValues--; value++) {
                 *value = strtod(s0, &s1);
-                if (*s1 == 0)
+                if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
+                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
             }
             return numValues == -1;
         }
-        bool getAttributeValue(const char *name, int numValues, bool *value) {
+        bool getAttributeValue(const char *name, bool *value, int numValues = 1) {
             size_t ix = hasAttributeName(name);
             if (ix == String::npos)
                 return false;
             const char *s0 = &(*mString)[ix];
-            for (const char *s1; numValues--; value++, s0 = s1 + 1) {
+            for (const char *s1; numValues--; value++) {
                 *value = strtobool(s0, &s1);
-                if (*s1 == 0)
+                if (s0 == s1 || *s1 == 0)           // Didn't find a number or it is the end of the string
                     break;
+                s0 = s1 + strspn(s1, arraySpace);   // Skip spaces and commas
             }
             return numValues == -1;
         }
@@ -1635,15 +1668,15 @@ private:
     static void setLightInfoFromString(const String &str, LightInfo *lightInfo) {
         JavascriptArgumentParser jap(str);
         String type;
-        if (jap.getAttributeValue("diffusecolor",  3, &lightInfo->mDiffuseColor[0]))    lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
-        if (jap.getAttributeValue("specularcolor", 3, &lightInfo->mSpecularColor[0]))   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
-        if (jap.getAttributeValue("ambientcolor",  3, &lightInfo->mAmbientColor[0]))    lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
-        if (jap.getAttributeValue("shadowcolor",   3, &lightInfo->mShadowColor[0]))     lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
-        if (jap.getAttributeValue("falloff",       3, &lightInfo->mConstantFalloff))    lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
-        if (jap.getAttributeValue("cone",          3, &lightInfo->mConeInnerRadians))   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
-        if (jap.getAttributeValue("power",         1, &lightInfo->mPower))              lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
-        if (jap.getAttributeValue("lightrange",    1, &lightInfo->mLightRange))         lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
-        if (jap.getAttributeValue("castsshadow",   1, &lightInfo->mCastsShadow))        lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
+        if (jap.getAttributeValue("diffusecolor",  &lightInfo->mDiffuseColor[0]),  3)   lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
+        if (jap.getAttributeValue("specularcolor", &lightInfo->mSpecularColor[0]), 3)   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
+        if (jap.getAttributeValue("ambientcolor",  &lightInfo->mAmbientColor[0]),  3)   lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
+        if (jap.getAttributeValue("shadowcolor",   &lightInfo->mShadowColor[0]),   3)   lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
+        if (jap.getAttributeValue("falloff",       &lightInfo->mConstantFalloff),  3)   lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
+        if (jap.getAttributeValue("cone",          &lightInfo->mConeInnerRadians), 3)   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
+        if (jap.getAttributeValue("power",         &lightInfo->mPower),            1)   lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
+        if (jap.getAttributeValue("lightrange",    &lightInfo->mLightRange),       1)   lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
+        if (jap.getAttributeValue("castsshadow",   &lightInfo->mCastsShadow),      1)   lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
         if (jap.getAttributeValue("type",             &type)) {                         lightInfo->mWhichFields |= LightInfo::TYPE;            // type
             if       (type == "point")                          lightInfo->mType = LightInfo::POINT;
             else if  (type == "directional")                    lightInfo->mType = LightInfo::DIRECTIONAL;
@@ -1807,19 +1840,21 @@ private:
     }
 
 
+    // FIXME: Should we only print the parameters that have neen set?
     static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
         String info(string_printf(
-            "light: { %s"                                                           //  1 prelude
-            " 'diffusecolor':" " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  2 diffuse
-            " 'specularcolor':"" { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  3 specular
-            " 'ambientcolor':" " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  4 ambient
-            " 'shadowcolor':"  " { 'r': %.7g, 'g': %.7g, 'b': %.7g },"              //  5 shadow
-            " 'falloff': { 'constant': %.7g, 'linear': %.7g, 'quadratic': %.7g },"  //  6 falloff
-            " 'cone': { 'inner': %.7g, 'outer': %.7g, 'falloff': %.7g },"           //  7 cone
-            " 'power': %.7g,"                                                       //  8 power
-            " 'lightrange': %.7g,"                                                  //  9 lightrange
-            " 'castsshadow': %s,"                                                   // 10 castsshadows
-            " 'type': '%s'"                                                         // 11 type
+            "{%s"                                                                  //  1 prelude
+            " 'diffusecolor':" "[%.7g, %.7g, %.7g],"                                //  2 diffuse
+            " 'specularcolor':""[%.7g, %.7g, %.7g],"                                //  3 specular
+            " 'ambientcolor':" "[%.7g, %.7g, %.7g],"                                //  4 ambient
+            " 'shadowcolor':"  "[%.7g, %.7g, %.7g],"                                //  5 shadow
+            " 'falloff':"      "[%.7g, %.7g, %.7g],"                                //  6 falloff
+            " 'cone':"         "[%.7g, %.7g, %.7g],"                                //  7 cone
+//          " 'cone':{'inner':%.7g, 'outer':%.7g, 'falloff':%.7g},"                 //  7 cone (this is too advanced for the current parser)
+            " 'power':%.7g,"                                                        //  8 power
+            " 'lightrange':%.7g,"                                                   //  9 lightrange
+            " 'castsshadow':%s,"                                                    // 10 castsshadows
+            " 'type':'%s'"                                                          // 11 type
             " %s}",                                                                 // 12 postlude
             prelude,                                                                //  1 prelude
             li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],        //  2 diffuse
@@ -1872,6 +1907,11 @@ private:
     }
 
 
+    // light list
+    // light get [<id>]
+    // light set <id> { ... }
+    // light mood <level>
+    // light editmood <level> { type=<type> ... }
     void lightHandler(WebViewManager::NavigationAction action, const String& arg) {
         String token;
         size_t ix = 0;
@@ -1902,6 +1942,7 @@ private:
             );
         }
 
+        //----------------------------------------------------------------------
         // light get              , or
         // light get 1            , or
         // light get 292ae805-393b-f239-8df8-8f129f9ddb03:12345678-1111-1111-1111-defa01759ace
@@ -1921,7 +1962,7 @@ private:
                     ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                     if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
                         const LightInfo &li = light->getLastLightInfo();
-                        String prelude(string_printf("index: %d, id: '%s', ", ix, obj->getObjectReference().toString().c_str()));
+                        String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
                         String info(printLightInfoToString(prelude.c_str(), li, ""));
                         WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
                             "debug(\"" + info + "\");"
@@ -1933,7 +1974,7 @@ private:
             }
             else { // No light specified
                 String allInfo;
-                allInfo = "lights: { ";
+                allInfo = "[ ";
                 int ix = 0;
                 for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                     iter != mParent->mSceneEntities.end(); ++iter
@@ -1942,26 +1983,48 @@ private:
                     ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
                     ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
                     const LightInfo &li = light->getLastLightInfo();
-                    String prelude(string_printf("index: %d, id: '%s', ", ix, obj->getObjectReference().toString().c_str()));
+                    String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
                     String info(printLightInfoToString(prelude.c_str(), li, ""));
                     if (ix > 0)
                         allInfo += ", ";
                     allInfo += info;
                     ++ix;
                 }
-                allInfo += " }";
+                allInfo += " ]";
                 std::cout << "debug(\"" + allInfo + " \");" << std::endl;
                 WebViewManager::getSingleton().evaluateJavaScript("__chrome", 
                     "debug(\"" + allInfo + "\");"
                 );
             }
         }
-		
-		else if (token == "mood") {
+        
+        //----------------------------------------------------------------------
+        // light set { ... }
+        else if (token == "set") {
+            String params(arg.substr(ix));
+            JavascriptArgumentParser jap(params);
+            if (!jap.getAttributeValue("id", &token)) {
+                SILOG(input, error, "lightHandler: no light id specified");
+                return;
+            }
+            
+            ProxyLightObject *light = getLightProxyForID(token);
+            if (light == NULL) {
+                SILOG(input, error, "lightHandler set: canot find light id \"" + token + "\"");
+                return;
+            }
+            LightInfo li = light->getLastLightInfo();
+            setLightInfoFromString(params, &li);
+            light->update(li);
+        }
+        
+        //----------------------------------------------------------------------
+        // light mood <level>
+        else if (token == "mood") {
             if (!moodLightsInited)
                 initLightMoods();
             long mood;
-			success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
+            success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
             if (mood < 0 || mood > (long)(sizeof(spotLightMoods) / sizeof(spotLightMoods[0])))
                 return;
             for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
@@ -1980,10 +2043,54 @@ private:
                 light->update(li);
             }
         }
-		
-		else {
+        
+        //----------------------------------------------------------------------
+        // light editmood <level> { ... }
+        else if (token == "editmood") {
+            if (!moodLightsInited)
+                initLightMoods();
+            long mood;
+            success = success && getNextTokenAsLong(arg, &ix, &mood);          // mood level
+            if (mood < 0 || mood > (long)(sizeof(spotLightMoods) / sizeof(spotLightMoods[0])))
+                return;
+            String params(arg.substr(ix));
+            JavascriptArgumentParser jap(params);
+            if (!jap.getAttributeValue("type", &token)) {
+                SILOG(input, error, "lightHandler editmood: no light type specified");
+                return;
+            }
+            LightInfo li;
+            li.mWhichFields = 0;
+            setLightInfoFromString(params, &li);
+            if      (token == "spotlight")      spotLightMoods[mood] = li;
+            else if (token == "directional")    directionalLightMoods[mood] = li;
+            else if (token == "point")          pointLightMoods[mood] = li;
+            else SILOG(input, error, "lightHandler editmood: unknown light type \"" + token + "\"");
+        }
+        
+        //----------------------------------------------------------------------
+        else {
             SILOG(input, error, "lightHandler: unknown command \"" + token + "\"");
-		}
+        }
+    }
+    
+    
+    ProxyLightObject* getLightProxyForID(SpaceObjectReference sor) {
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
+            iter != mParent->mSceneEntities.end(); ++iter
+        ) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            if (obj->getObjectReference() == sor)
+                return light;
+        }
+        return NULL;
+    }
+
+
+    ProxyLightObject* getLightProxyForID(String id) {
+        return getLightProxyForID(SpaceObjectReference(id));
     }
     
 
@@ -2302,7 +2409,8 @@ public:
     }
 };
 
-const char OgreSystem::MouseHandler::tokenDelimiter[] = " \t\n\r";
+const char OgreSystem::MouseHandler::whiteSpace[] = " \t\n\r";  // Space betwen tokens  
+const char OgreSystem::MouseHandler::arraySpace[] = " \t\n\r,"; // Space betwen array elements
 bool OgreSystem::MouseHandler::moodLightsInited = false;
 
 
