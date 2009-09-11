@@ -1708,7 +1708,7 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // This provides an easy way to get values from a string of the form
+    // This provides an easy and lightweight way to get values from a string of the form
     //    name=value name=value ...
     // or
     //    name:value name:value ...
@@ -1747,10 +1747,10 @@ private:
                     }
                 }
                 ix += strlen(name);                                     // Skip over name
-                ix = mString->find_first_not_of(mWhiteSpace, ix);        // Skip spaces
+                ix = mString->find_first_not_of(mWhiteSpace, ix);       // Skip spaces
                 if ((*mString)[ix] != '=' && (*mString)[ix] != ':')     // There should have been an '=' or ':' here
                     continue;                                           // Keep looking
-                ix = mString->find_first_not_of(mWhiteSpace, ix + 1);    // Skip over the '=' or ':'
+                ix = mString->find_first_not_of(mWhiteSpace, ix + 1);   // Skip over the '=' or ':'
                 // We know that we have <whitespace> <name> [ '=' | ':' ], and the index is positioned after the '=' or ':'
                 break;
             }
@@ -2105,14 +2105,14 @@ private:
     //--------------------------------------------------------------------------
 
     void lightGet(const String& arg, size_t argCaret) {
-        String token;
+        String id;
         bool success = true;
-        success = success && getNextToken(arg, &argCaret, &token);            // id or index
+        success = success && getNextToken(arg, &argCaret, &id);     // id or index
         if (success) {          // Specified a particular light
             // Check whether it is an ID or an index
-            bool isIndex = token.find_first_of(':') == String::npos;
-            int index = isIndex ? strtol(token.c_str(), NULL, 10) : std::numeric_limits<int>::max();
-            SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(token);
+            bool isIndex = id.find_first_of(':') == String::npos;
+            int index = isIndex ? strtol(id.c_str(), NULL, 10) : std::numeric_limits<int>::max();
+            SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(id);
             int ix = 0;
             for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
                 iter != mParent->mSceneEntities.end(); ++iter
@@ -2186,17 +2186,17 @@ private:
     //--------------------------------------------------------------------------
 
     void lightSet(const String& arg, size_t argCaret) {
-        String token;
+        String id;
         String params(arg.substr(argCaret));
         JavascriptArgumentParser jap(params);
-        if (!jap.getAttributeValue("id", &token)) {
+        if (!jap.getAttributeValue("id", &id)) {
             SILOG(input, error, "lightHandler: no light id specified");
             return;
         }
 
-        ProxyLightObject *light = getLightProxyForID(token);
+        ProxyLightObject *light = getLightProxyForID(id);
         if (light == NULL) {
-            SILOG(input, error, "lightHandler set: cannot find light id \"" + token + "\"");
+            SILOG(input, error, "lightSet: cannot find light id \"" + id + "\"");
             return;
         }
         LightInfo li = light->getLastLightInfo();
@@ -2262,7 +2262,7 @@ private:
         JavascriptArgumentParser jap(params);
         String lightType;
         if (!jap.getAttributeValue("type", &lightType)) {
-            SILOG(input, error, "lightHandler editmood: no light type specified");
+            SILOG(input, error, "lightEditMood: no light type specified");
             return;
         }
         LightInfo *moodPtr = NULL;
@@ -2270,7 +2270,7 @@ private:
         else if (lightType == "directional")    moodPtr = &mDirectionalLightMoods[mood];
         else if (lightType == "point")          moodPtr = &mPointLightMoods[mood];
         else {
-            SILOG(input, error, "lightHandler editmood: unknown light type \"" + lightType + "\"");
+            SILOG(input, error, "lightEditMood: unknown light type \"" + lightType + "\"");
             return;
         }
 
@@ -2328,12 +2328,35 @@ private:
 
 
     //--------------------------------------------------------------------------
+    // Remove the specified light.
+    // Invoked as
+    //     light remove <id>
+    //--------------------------------------------------------------------------
+
+    void lightRemove(const String& arg, size_t argCaret) {
+        String id;
+        String params(arg.substr(argCaret));
+        JavascriptArgumentParser jap(params);
+        if (!jap.getAttributeValue("id", &id)) {
+            SILOG(input, error, "lightRemove: no light id specified");
+            return;
+        }
+
+        ProxyLightObject *obj = getLightProxyForID(id);
+        Entity *ent = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
+        if (ent)
+            ent->getProxy().getProxyManager()->destroyObject(ent->getProxyPtr());
+    }
+
+
+    //--------------------------------------------------------------------------
     //  light list
     //  light get [<id>]
     //  light set <id> { ... }
     //  light mood <level>
     //  light editmood <level> { type=<type> ... }
     //  light selected
+    //  light remove <id>
     //--------------------------------------------------------------------------
 
     void lightHandler(WebViewManager::NavigationAction action, const String& arg) {
@@ -2353,6 +2376,7 @@ private:
             { "mood",           &Sirikata::Graphics::OgreSystem::MouseHandler::lightMood        },
             { "editmood",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightEditMood    },
             { "selected",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelected    },
+            { "remove",         &Sirikata::Graphics::OgreSystem::MouseHandler::lightRemove      },
             { NULL,             NULL                                                            }
         };
 
