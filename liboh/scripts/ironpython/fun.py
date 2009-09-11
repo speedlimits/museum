@@ -8,12 +8,37 @@ import protocol.MessageHeader_pb2 as pbHead
 from Sirikata.Runtime import HostedObject
 import System
 import util
+import math
 
 DEBUG_OUTPUT=True
 
+DEG2RAD = 0.0174532925
+
+def Euler2QuatPYR(pitch, yaw, roll):
+    k = DEG2RAD*.5
+    yawcos = math.cos(yaw*k)
+    yawsin = math.sin(yaw*k)
+    pitchcos = math.cos(pitch*k)
+    pitchsin = math.sin(pitch*k)
+    rollcos = math.cos(roll*k)
+    rollsin = math.sin(roll*k)
+
+    return (rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin,
+            rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos,
+            rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin,
+            rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin)
+
+
 class exampleclass:
     def __init__(self):
-        self.paintings={}
+        if DEBUG_OUTPUT: print "exampleclass.__init__"
+        self.objects={}
+
+    pinstate = {
+        "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
+        "pin_2": ((-23.66,-3.85,-17.3), Euler2QuatPYR(0,-46.63,-0.01)),
+        "pin_3": ((-23.36,-6.35,-18.02), Euler2QuatPYR(0,-50.91,0))
+        }
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
         print "Got an RPC named",name
@@ -49,19 +74,55 @@ class exampleclass:
             s = "".join(chr(i) for i in serialarg)
             if DEBUG_OUTPUT: print "PY", name, s
             tok = s.split()
-            if tok[1]=="placeObject":
-                painting = tok[2]
-                if not painting in self.paintings:
-                    print "PY ERROR painting-->" + painting + "<--", type(painting), "paintings:", self.paintings.keys()
-                x = float(tok[5])
-                y = float(tok[6])
-                z = float(tok[7])
-                qx = float(tok[8])
-                qy = float(tok[9])
-                qz = float(tok[10])
-                qw = float(tok[11])
-                if DEBUG_OUTPUT: print "PY:   moving", painting, self.paintings[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
-                self.setPosition(objid=self.paintings[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
+            if tok[0]=="inventory":
+                if tok[1]=="placeObject":
+                    painting = tok[2]
+                    if not painting in self.objects:
+                        print "PY ERROR painting-->" + painting + "<--", type(painting), "objects:", self.objects.keys()
+                    x = float(tok[5])
+                    y = float(tok[6])
+                    z = float(tok[7])
+                    qx = float(tok[8])
+                    qy = float(tok[9])
+                    qz = float(tok[10])
+                    qw = float(tok[11])
+                    if DEBUG_OUTPUT: print "PY:   moving", painting, self.objects[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+                    self.setPosition(objid=self.objects[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
+            elif tok[0]=="funmode":
+                if tok[1]=="fire":
+                    if DEBUG_OUTPUT: print "PY: fire the cannon!", s
+                    ammo = tok[2]
+                    x = float(tok[3])
+                    y = float(tok[4])
+                    z = float(tok[5])
+                    qx = float(tok[6])
+                    qy = float(tok[7])
+                    qz = float(tok[8])
+                    qw = float(tok[9])
+                    zx = float(tok[10])                          ## we fire down -Z axis (camera view direction)
+                    zy = float(tok[11])
+                    zz = float(tok[12])
+##                    ox=-zx; oy=-zy; oz=-zz
+                    ox=0; oy=1; oz=0
+                    offset = 1.0                                ## move ammo out from inside avatar
+                    x += ox*offset
+                    y += oy*offset
+                    z += oz*offset
+                    vel = 15.0                                  ## initial ammo velocity
+                    vx = -zx*vel
+                    vy = -zy*vel
+                    vz = -zz*vel
+                    if DEBUG_OUTPUT: print "PY: rot:", qx, qy, qz, qw, "axis:", zx, zy, zz, "pos+off:", x, y, z, "vel:", vx, vy, vz
+                    self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
+                                     velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
+                elif tok[1]=="reset":
+                    for i in self.objects:
+                        if i[:4] == "pin_":
+                            pos, rot = self.pinstate[i]
+                            self.setPosition(objid=self.objects[i], position = pos, orientation = rot,
+                                             velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+            else:
+                print "PY: unknown JavascriptMessage:", tok
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:
@@ -87,9 +148,14 @@ class exampleclass:
             header.destination_object=util.tupleFromUUID(self.objid);
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
-        elif myName[:8]=="artwork_":
-            if DEBUG_OUTPUT: print "PY: adding artwork", myName, ":", uuid
-            self.paintings[myName]=uuid
+        else:
+            self.objects[myName]=uuid
+##        elif myName[:8]=="artwork_":
+##            if DEBUG_OUTPUT: print "PY: adding artwork", myName, ":", uuid
+##            self.paintings[myName]=uuid
+##        elif myName[:5]=="ammo_":
+##            if DEBUG_OUTPUT: print "PY: adding ammo", myName, ":", uuid
+##            self.ammo[myName]=uuid
 
     def processRPC(self,header,name,arg):
         try:

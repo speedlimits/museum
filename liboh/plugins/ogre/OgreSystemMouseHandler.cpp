@@ -1372,6 +1372,49 @@ private:
         }
     }
 
+    /// Bornholm actions
+    
+    /// fun mode
+
+    //--------------------------------------------------------------------------
+    void fireAction() {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        ss << "funmode fire ammo_cannon1 ";
+        ProxyObjectPtr avatar = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        assert(avatar);
+        Time now(SpaceTimeOffsetManager::getSingleton().now(avatar->getObjectReference().space()));
+        Location location(avatar->globalLocation(now));
+        Vector3d pos = location.getPosition();
+        Quaternion rot = location.getOrientation();
+        Vector3f z_axis = rot.zAxis();
+        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w 
+                <<" "<< z_axis.x <<" "<< z_axis.y <<" "<< z_axis.z;
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
+
+    //--------------------------------------------------------------------------
+    void resetAction() {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        ss << "funmode reset";
+        ProxyObjectPtr avatar = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        assert(avatar);
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
+
+    /// curator mode
+
     //--------------------------------------------------------------------------
     void debugAction() {
         static int pic=0;
@@ -2520,6 +2563,8 @@ public:
         mInputResponses["cameraPathRun"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathRun, this));
         mInputResponses["cameraPathSpeedUp"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, -0.1f));
         mInputResponses["cameraPathSlowDown"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, 0.1f));
+        mInputResponses["fireAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::fireAction, this));
+        mInputResponses["resetAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::resetAction, this));
         mInputResponses["debugAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
@@ -2596,6 +2641,8 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F7), mInputResponses["cameraPathRun"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_SPACE), mInputResponses["fireAction"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction"]);
 
         // WebView Chrome
@@ -2645,12 +2692,12 @@ public:
 
 
 // MouseHandler static members and their initialization
-const char  OgreSystem::MouseHandler::mWhiteSpace[]          = " \t\n\r";        // Space between tokens
-const char  OgreSystem::MouseHandler::mArraySpace[]          = " \t\n\r,";       // Space between array elements
-float       OgreSystem::MouseHandler::mDefaultSpotLightInclination       = 30 * M_PI / 180;  // 30 degree default
-float       OgreSystem::MouseHandler::mDefaultLightHeight        = 5;                // 5 meters ~= 16.4 feet
-bool        OgreSystem::MouseHandler::mMoodLightsInited     = false;            // This indicates when the moods below have been initialized
-LightInfo   OgreSystem::MouseHandler::mSpotLightMoods[4];                       // These moods are initialized programatically
+const char  OgreSystem::MouseHandler::mWhiteSpace[]                 = " \t\n\r";        // Space between tokens
+const char  OgreSystem::MouseHandler::mArraySpace[]                 = " \t\n\r,";       // Space between array elements
+float       OgreSystem::MouseHandler::mDefaultSpotLightInclination  = 30 * M_PI / 180;  // 30 degree default
+float       OgreSystem::MouseHandler::mDefaultLightHeight           = 5;                // 5 meters ~= 16.4 feet
+bool        OgreSystem::MouseHandler::mMoodLightsInited             = false;            // This indicates when the moods below have been initialized
+LightInfo   OgreSystem::MouseHandler::mSpotLightMoods[4];                               // These moods are initialized programatically
 LightInfo   OgreSystem::MouseHandler::mPointLightMoods[4];
 LightInfo   OgreSystem::MouseHandler::mDirectionalLightMoods[4];
 
@@ -2683,5 +2730,5 @@ void OgreSystem::tickInputHandler(const Task::LocalTime& t) const {
         mMouseHandler->tick(t);
 }
 
-}
-}
+} // namespace Graphics
+} // namespace Sirikata
