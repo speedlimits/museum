@@ -55,9 +55,6 @@
 		$("#development-console").bind('mousedown', stopPropagation ) ;
 		$("#debugfns").bind('mousedown', stopPropagation ) ;
 
-		
-		debug('addOption ... ');
-
 		$("#debugfns").addOption(debugoptions,false);
 
 		$("#debugfns").change(function (event,ui) {
@@ -68,9 +65,7 @@
         		eval(dropdown.options[index].value); 
 		});
 		
-		function debug(msg) {
-			$("#development-console").append("<br>" + msg );
-		}
+		
 
 		
 	});
