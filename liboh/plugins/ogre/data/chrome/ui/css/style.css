@@ -101,6 +101,7 @@ ul#topbar-critique {
 	display: none;
 	position: absolute;
 	bottom: 28px;
+
 	left: 328px;
 	width: 680px;
 	height: 210px;
@@ -130,5 +131,5 @@ ul#topbar-critique {
 	width: 1336px;
 	z-index: 6002;
 	background: #000;
-	opacity:0.1;
+	opacity:0.0;
 }

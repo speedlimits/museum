@@ -96,9 +96,9 @@
 					start: function () {$("#drop-screen").show();},									  
 					stop: function (event, ui) {$("#drop-screen").hide(); },
 	 			});*/
-				$(".magnifyme li").draggable({ 
+				$("ul.magnifyme li").draggable({ 
 					 
-					start: function () {$("#drop-screen").show(); debug('drag start');},		  
+					start: function () {debug('drag start');$("#drop-screen").show(); },		  
 					stop: function (event, ui) {$("#drop-screen").hide(); debug('drag stop'); },
 					revert: true
 	 			});
