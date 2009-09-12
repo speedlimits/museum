@@ -122,6 +122,8 @@ class exampleclass:
                     self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
                                      velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
                 elif tok[1]=="reset":
+                    self.setPosition(objid=self.objects["Avatar"], position = (0,-2.5,0), orientation = (0,0,0,1),
+                                     velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
                     for i in self.objects:
                         if i[:4] == "pin_":
                             pos, rot = self.pinstate[i]
@@ -154,14 +156,7 @@ class exampleclass:
             header.destination_object=util.tupleFromUUID(self.objid);
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
-        else:
-            self.objects[myName]=uuid
-##        elif myName[:8]=="artwork_":
-##            if DEBUG_OUTPUT: print "PY: adding artwork", myName, ":", uuid
-##            self.paintings[myName]=uuid
-##        elif myName[:5]=="ammo_":
-##            if DEBUG_OUTPUT: print "PY: adding ammo", myName, ":", uuid
-##            self.ammo[myName]=uuid
+        self.objects[myName]=uuid
 
     def processRPC(self,header,name,arg):
         try:

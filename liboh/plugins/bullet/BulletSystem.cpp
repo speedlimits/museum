@@ -452,11 +452,12 @@ bool BulletSystem::tick() {
                                      << " meshpos: " << objects[i]->mMeshptr->getPosition()
                                      << " bulletpos before reset: " << objects[i]->getBulletState().p;)
                         Location loc=objects[i]->mMeshptr->getLastLocation();
+                        cout << "dbm debug: set vel " << loc.getVelocity() << " for " << objects[i]->mName << endl;
                         objects[i]->setBulletState(
                             positionOrientation (
                                 loc.getPosition(),
                                 loc.getOrientation()),
-                                loc.getVelocity(), Vector3f(0,0,0)
+                                loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
                             );
                         DEBUG_OUTPUT(cout << "bulletpos after reset: " << objects[i]->getBulletState().p << endl;)
                     }
