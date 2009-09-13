@@ -929,7 +929,12 @@ private:
         std::string name = obj->getPhysical().name;
         if (name.empty()) {
             name = obj->getMesh().filename();
-            name.resize(name.size()-5);
+            if (name.size() < 5) {
+                name = "NONAME_NOMESH";
+            }
+            else {
+                name.resize(name.size()-5);
+            }
             //name += ".0";
         }
 //        if (name.find(".") < name.size()) {             /// remove any enumeration
