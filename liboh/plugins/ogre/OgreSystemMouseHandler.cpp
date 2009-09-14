@@ -1516,7 +1516,7 @@ private:
     static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
         const char *start = str.c_str() + *pos;
         char *end;
-        *d = strtod(str.c_str(), &end);
+        *d = strtod(start, &end);
         *pos = end - str.c_str();
         return start != end;
     }
@@ -1529,7 +1529,7 @@ private:
     static bool getNextTokenAsLong(const String &str, size_t *pos, long *i) {
         const char *start = str.c_str() + *pos;
         char *end;
-        *i = strtol(str.c_str(), &end, 10);
+        *i = strtol(start, &end, 10);
         *pos = end - str.c_str();
         return start != end;
     }
