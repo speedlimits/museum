@@ -476,7 +476,7 @@ bool BulletSystem::tick() {
                             objects[i]->mPIDControlEnabled=false;
                         }
                     }
-                    if (objects[i]->mName=="Avatar") {
+                    if (objects[i]->mName=="Avatar_fun") {
                         Vector3f yax = loc.getOrientation().yAxis() * 10.0;
                         objects[i]->mBulletBodyPtr->applyCentralForce(btVector3(-yax.x, -yax.y, -yax.z));
                     }
