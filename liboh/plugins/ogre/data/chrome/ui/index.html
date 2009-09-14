@@ -122,7 +122,8 @@ function inspect(obj, maxLevels, level)
 					$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
 			
 				} else if (mode == 3) { // picture 
-					loadScreen("#detail-screen", c2);
+					//loadScreen("#detail-screen", c2);
+					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
 				}
 			}
 		}
@@ -156,11 +157,13 @@ function inspect(obj, maxLevels, level)
 		}
 		
 		function pictureSelectedEvent(event, data) {
-			debug("selected " + data.intem);
+			debug("selected " + data.item);
+			critiqueMode(3, data.item);
 				
 		}
 		function pictureDeSelectEvent(event) {
 			debug("items deselected");
+			critiqueMode(2);
 		}
 	
 		$(document).ready( function () {
