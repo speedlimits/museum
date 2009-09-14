@@ -1416,7 +1416,7 @@ private:
     /// curator mode
 
     //--------------------------------------------------------------------------
-    void debugAction() {
+    void debugAction_addpic() {
         static int pic=0;
         pic++;
         WebViewManager::NavigationAction act;
@@ -1425,6 +1425,17 @@ private:
         inventoryHandler(act, ss.str());
     }
 
+    void debugAction() {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        ss << "inventory saveState testfile1";
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
     /// WebView Actions
 
     //--------------------------------------------------------------------------
