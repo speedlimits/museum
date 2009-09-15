@@ -11,6 +11,7 @@ import util
 import math
 import cPickle as pkl
 import os
+import array
 
 DEBUG_OUTPUT=True
 DEG2RAD = 0.0174532925
@@ -45,22 +46,15 @@ def pbj2Quat(q):
     w = wsq**0.5 * sign
     return x, y, z, w
 
-DEG2RAD = 0.0174532925
+hexchars = '0123456789abcdef'
 
-def Euler2QuatPYR(pitch, yaw, roll):
-    k = DEG2RAD*.5
-    yawcos = math.cos(yaw*k)
-    yawsin = math.sin(yaw*k)
-    pitchcos = math.cos(pitch*k)
-    pitchsin = math.sin(pitch*k)
-    rollcos = math.cos(roll*k)
-    rollsin = math.sin(roll*k)
-
-    return (rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin,
-            rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos,
-            rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin,
-            rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin)
-
+def unHex(s):
+    a = array.array('B', [])
+    for i in range(0, len(s), 2):
+        lo = hexchars.index(s[i])
+        hi = hexchars.index(s[i+1])
+        a.append(lo + (hi<<4))
+    return a.tostring()
 
 class exampleclass:
     def __init__(self):
@@ -136,11 +130,15 @@ class exampleclass:
                     self.saveStateFile=filename
 
                 elif tok[1]=="loadState":
+                    """
                     filename = tok[2]
                     print "PY: loadState", filename
                     f = open("art/" + filename)
                     arts = pkl.load(f)
                     f.close()
+                    """
+                    data = unHex(tok[2])
+                    arts = pkl.loads(data)
                     if DEBUG_OUTPUT: print "loadState:", arts
                     for art in arts:
                         pos = art["pos"]
