@@ -54,6 +54,39 @@ ul#topbar-critique {
 	width: 117px;
 	text-align: center;
 }
+
+
+/* Bottom Bar */
+#bottom-bar {
+	display: none;
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	/*	display:none; 
+	background: #DDDDDD; */ 
+	top: 1px;
+	padding: 0 0px;
+	left: 281px;
+	z-index: 6002;
+}
+ul#bottom-bar  {
+	height: 37px;
+	padding: 0 118px;
+	margin:0 ;
+	background: url(../images/topbar_curator.png) no-repeat ;
+	list-style: none;
+}
+#bottom-bar li {
+	float:left;
+	margin:0 ;/*15px;*/
+	padding:0;
+	background: url(../images/topbar_curator.png);
+	height: 37px;
+	width: 117px;
+	text-align: center;
+}
+
+
 /* Modal Screen */
 #modal-screen {
 	display: none;
