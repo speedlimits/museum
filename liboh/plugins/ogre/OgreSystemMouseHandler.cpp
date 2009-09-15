@@ -354,6 +354,100 @@ private:
 
 
     //--------------------------------------------------------------------------
+    // Given the screen coordinate, hitQuery will return the entity, the position of intersection,
+    // and the normal of the surface at the point of intersection.
+    //--------------------------------------------------------------------------
+
+    bool getCurrentGlobalCameraLocation(Location *location) {
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!camera)
+            return false;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        *location = camera->globalLocation(now);
+        return true;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Given the screen coordinate, hitQuery will return the entity, the position of intersection,
+    // and the normal of the surface at the point of intersection.
+    //--------------------------------------------------------------------------
+
+    bool hitQuery(double screenX, double screenY, Entity const **entity, Vector3d *position, Vector3f *normal) {
+        // Look for an object intersected by the ray.
+        Location location;
+        if (!getCurrentGlobalCameraLocation(&location))
+            return false;
+        Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
+        double distance;
+        Vector3f myNormal(0, 0, 0);
+        bool success = false;
+        int numHits = 1, i;
+        const Entity *obj;
+        for (i = 0; i < numHits; i++) { // FIXME: Does this really need to iterate?
+            obj = mParent->rayTrace(location.getPosition(), viewDirection, numHits, distance, myNormal, i);
+            if (obj == NULL) {      // No object found
+                if (i < numHits)    // Why not?
+                    continue;       // Still more objects: keep looking
+                break;              // No more objects: return failure
+            }
+            success = true;
+            break;
+        }
+        if (!success || !(myNormal.normalizeThis() > 0))
+            return false;
+        
+        if (entity)
+            *entity = obj;
+        if (position)
+            *position = location.getPosition() + distance * Vector3d(viewDirection.x, viewDirection.y, viewDirection.z);
+        if (normal) {
+            if (viewDirection.dot(myNormal) > 0)    // backfacing normal
+                myNormal = -myNormal;               // make it front-facing
+            *normal = myNormal;
+        }
+        return true;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Determine whether the given entity is artwork.
+    // FIXME: total kluge!  Need a way to not select walls etc
+    //--------------------------------------------------------------------------
+
+    bool isArtWork(const Entity *obj) {
+        bool isArt = false;
+        ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(obj->getProxyPtr().get());
+        if (overMesh) {
+            const String &s = overMesh->getPhysical().name;
+            isArt = (s.size() >= 8 && s.substr(0,8)=="artwork_");
+        }
+        return isArt;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Walk from the current location to the specified poition,
+    // but aim towards the specified lookat direction.
+    //--------------------------------------------------------------------------
+
+    void walkTo(const Vector3d &position, Vector3f lookat) {
+        if (lookat.x == 0 && lookat.z == 0) {
+            SILOG(input, error, "walkTo: lookat vector is vertical");
+            return;
+        }
+        lookat.y = 0;
+        lookat.normalizeThis();
+        Vector3f right(Vector3f::unitY().cross(lookat));
+        Quaternion orientation(right, Vector3f::unitY(), lookat);
+        Vector3f velocity(0, 0, 0);
+        Vector3f angularVelocityAxis(0, 1, 0);
+        Location loc(position, orientation, velocity, angularVelocityAxis, 0);
+        // Here is where we would call python magic
+    }
+
+
+    //--------------------------------------------------------------------------
     void selectObjectAction(Vector2f p, int direction) {
         CameraEntity *camera = mParent->mPrimaryCamera;
         if (!camera) {
@@ -415,6 +509,30 @@ private:
         }
         else
 #endif // 0
+        if (mParent->mInputManager->isModifierDown(Input::MOD_ALT)) {   // click to go
+            // Look for an object intersected by the ray.
+            const Entity *obj = NULL;
+            Vector3d position;
+            Vector3f normal;
+            if (!hitQuery(p.x, p.y, &obj, &position, &normal))
+                return;
+            
+            Location location;
+            getCurrentGlobalCameraLocation(&location);  // This will succeed since hitQuery succeeded.
+            Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), p.x, p.y));
+            Vector3f lookat = viewDirection;            // By default, look in the direction that we clicked.
+            if ((fabs(normal.y) - 1) < 1e-4) {          // Clicked on the floor
+            }
+            else {                                      // Clicked on a wall or picture.
+                double backOffDistance = 2;
+                Vector3d fromWall(normal.x, 0, normal.z);
+                fromWall.normalizeThis();
+                position += backOffDistance * fromWall;
+                if (isArtWork(obj)) lookat = -normal;   // Clicked on  a picture: look at it.
+            }
+            walkTo(position, lookat);
+        }
+        else
         {
             // reset selection.
             clearSelection();
@@ -426,16 +544,11 @@ private:
             mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
 //            }
             if (mouseOver) {
-                /// FIXME: total kluge!  Need a way to not select walls etc
-                ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
-                if (overMesh) {
-                    const String &s = overMesh->getPhysical().name;
-                    if (s.size() >= 8 && s.substr(0,8)=="artwork_") {
-                        mSelectedObjects.insert(mouseOver->getProxyPtr());
-                        mouseOver->setSelected(true);
-                        SILOG(input,info,"Replaced selection with " << mouseOver->id());
-                        // Fire selected event.
-                    }
+                if (isArtWork(mouseOver)) {
+                    mSelectedObjects.insert(mouseOver->getProxyPtr());
+                    mouseOver->setSelected(true);
+                    SILOG(input,info,"Replaced selection with " << mouseOver->id());
+                    // Fire selected event.
                 }
             }
             mLastShiftSelected = SpaceObjectReference::null();
@@ -703,6 +816,7 @@ private:
             SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
             ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
             Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
+            
             Location loc (camera->getProxy().globalLocation(now));
             loc.setPosition(loc.getPosition() + Vector3d(direction(loc.getOrientation()))*WORLD_SCALE);
             loc.setOrientation(Quaternion(0.886995, 0.000000, -0.461779, 0.000000, Quaternion::WXYZ()));
@@ -1192,17 +1306,14 @@ private:
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMouseClick(mouseev);
 
+        if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
+            std::cout << "dbm debug mouseClickHandler cancelled due to ActiveButtons" << std::endl;
+            mWebViewActiveButtons.erase(mouseev->mButton);
+            return EventResponse::cancel();
+        }
         if (browser_resp == EventResponse::cancel()) {
             return EventResponse::cancel();
         }
-        /// FIXME: temporarily commenting out so ogre gets mouse clicks.  For some reason when the app first starts,
-        /// this logic cancels all mouse clicks so you cannot select a painting
-        /*
-        if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
-            std::cout << "dbm debug mouseClickHandler cancelled due to ActiveButtons" << std::endl;
-            return EventResponse::cancel();
-        }
-        */
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
         mInputBinding.handle(inputev);
 
@@ -1225,12 +1336,9 @@ private:
             if (ev->mType == Input::DRAG_END) {
                 mWebViewActiveButtons.erase(iter);
             }
-            /// FIXME: this is another place where initially the browser steals events.  We can't have that!
-            /*
             if (browser_resp == EventResponse::cancel()) {
                 return EventResponse::cancel();
             }
-            */
         }
 
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(evbase));
@@ -1399,7 +1507,7 @@ private:
     }
 
     /// Bornholm actions
-    
+
     /// fun mode
 
     //--------------------------------------------------------------------------
@@ -1416,7 +1524,7 @@ private:
         Vector3d pos = location.getPosition();
         Quaternion rot = location.getOrientation();
         Vector3f z_axis = rot.zAxis();
-        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w 
+        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w
                 <<" "<< z_axis.x <<" "<< z_axis.y <<" "<< z_axis.z;
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
@@ -1871,7 +1979,7 @@ private:
         static bool strtobool(char const *s0, char const **s1) {
             s0 += strspn(s0, mWhiteSpace);
             *s1 = s0;
-            
+
             if (strncaseeq(s0, "true", 4)) {
                 *s1 += 4;
                 return true;
