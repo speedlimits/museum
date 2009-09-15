@@ -114,15 +114,17 @@ function inspect(obj, maxLevels, level)
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_critique.html");	
-				 if (mode == 2) { // walk 
+				
+				$("body").bind('sirikata_item_select', pictureSelectedEvent);
+				$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
+			
+				if (mode == 2) { // walk 
 					//loadScreen("#detail-screen", "screens/detail_coverflow.html");	
 					hideScreen("#detail-screen");
 					
-					$("body").bind('sirikata_item_select', pictureSelectedEvent);
-					$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
-			
+					
 				} else if (mode == 3) { // picture 
-					loadScreen("#detail-screen", c2);
+					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
 				}
 			}
 		}
@@ -156,11 +158,13 @@ function inspect(obj, maxLevels, level)
 		}
 		
 		function pictureSelectedEvent(event, data) {
-			debug("selected " + data.intem);
+			debug("selected " + data.item);
+			critiqueMode(3, data.item);
 				
 		}
 		function pictureDeSelectEvent(event) {
 			debug("items deselected");
+			critiqueMode(2);
 		}
 	
 		$(document).ready( function () {
@@ -185,8 +189,6 @@ function inspect(obj, maxLevels, level)
 <div id="detail-screen"></div>
 
 <div id="top-bar"></div>
-
-<div id="bottom-bar"></div>
 
 <div id="bottom-bar"></div>
 
