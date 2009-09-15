@@ -114,6 +114,7 @@ function inspect(obj, maxLevels, level)
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_critique.html");	
+				
 				$("body").bind('sirikata_item_select', pictureSelectedEvent);
 				$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
 			
@@ -123,7 +124,6 @@ function inspect(obj, maxLevels, level)
 					
 					
 				} else if (mode == 3) { // picture 
-					//loadScreen("#detail-screen", c2);
 					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
 				}
 			}
@@ -189,8 +189,6 @@ function inspect(obj, maxLevels, level)
 <div id="detail-screen"></div>
 
 <div id="top-bar"></div>
-
-<div id="bottom-bar"></div>
 
 <div id="bottom-bar"></div>
 
