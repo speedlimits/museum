@@ -2309,7 +2309,7 @@ private:
     //--------------------------------------------------------------------------
     // Set the parameters of a light, with specifications in JSON format.
     // Invoked as
-    //     light set <id> { ... }
+    //     light set { 'id':'<id>' ... }
     //--------------------------------------------------------------------------
 
     void lightSet(const String& arg, size_t argCaret) {
@@ -2387,13 +2387,14 @@ private:
             SILOG(input, error, "lightGetMood: mood level out of range");
             return;
         }
+        String prelude(string_printf(" 'mood':%d,", mood));
         String lightType;
         String info;
         if (!getNextToken(arg, &argCaret, &lightType)) {
             info = "[ ";
-                info += printLightInfoToString(NULL, mDirectionalLightMoods[mood], NULL);   info += ",";
-                info += printLightInfoToString(NULL, mPointLightMoods[mood],       NULL);   info += ",";
-                info += printLightInfoToString(NULL, mSpotLightMoods[mood],        NULL);
+                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",";
+                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",";
+                info += printLightInfoToString(prelude.c_str(), mSpotLightMoods[mood],        NULL);
             info += " ]";
         }
         else {
@@ -2405,34 +2406,70 @@ private:
                 SILOG(input, error, "lightEditMood: unknown light type \"" + lightType + "\"");
                 return;
             }
-            info = printLightInfoToString(NULL, *moodPtr, NULL);
+            info = printLightInfoToString(prelude.c_str(), *moodPtr, NULL);
         }
-        std::cout << "debug(\"" + info + " \");" << std::endl;
+        std::cout << "receiveLightMood(\"" + info + " \");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
-            "debug(\"" + info + "\");"
+            "receiveLightMood(\"" + info + "\");"
         );
     }
 
 
     //--------------------------------------------------------------------------
+    // Make a substring between the first '{' and its matching '}', advancing the caret.
+    // Typical use parses a string of the form:
+    //    [ { ... }, { ... }, ... { ... } ]
+    //--------------------------------------------------------------------------
+
+    size_t getNextObject(const String& arg, size_t argCaret, String *params) {
+        const char *argcstr = arg.c_str();
+        const char *s = argcstr + argCaret, *start, *end;
+        int nest = 0;
+        for (; *s != 0; ++s) {
+            switch (*s) {
+                case '{':
+                    if (nest == 0)
+                        start = s;
+                   ++nest;
+                   break;
+                case '}':
+                    if (--nest == 0) {
+                        end = s + 1;
+                        *params = arg.substr(start - argcstr, end - start);
+                        return end - argcstr;
+                    }
+                    break;
+            }
+        }
+        return String::npos;
+    }
+
+    //--------------------------------------------------------------------------
     // Set the lighting mood. Choose from { 0, 1, 2, 3}
     // Invoked as
-    //     light setmood <level> { type=<type> ... }
+    //     light setmood { mood:<level>, type:<type> ... }
     //--------------------------------------------------------------------------
 
     void lightSetMood(const String& arg, size_t argCaret) {
         initLightMoods();
-        long mood;
-        if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
-            SILOG(input, error, "lightSetMood: no mood level was specified");
+        String params;
+        argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
+        if (arg[argCaret] == '[') { // Array
+            while ((argCaret = getNextObject(arg, argCaret, &params)) != String::npos)
+                lightSetMood(params, 0);
             return;
         }
-        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+        params = arg.substr(argCaret);
+        JavascriptArgumentParser jap(params);
+        int mood;
+        if (!jap.getAttributeValue("mood", &mood)) {
+            SILOG(input, error, "lightSetMood: no mood level specified");
+            return;
+        }
+        if (mood < 0 || mood > (int)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
             SILOG(input, error, "lightSetMood: mood level out of range");
             return;
         }
-        String params(arg.substr(argCaret));
-        JavascriptArgumentParser jap(params);
         String lightType;
         if (!jap.getAttributeValue("type", &lightType)) {
             SILOG(input, error, "lightSetMood: no light type specified");
