@@ -396,7 +396,7 @@ private:
         }
         if (!success || !(myNormal.normalizeThis() > 0))
             return false;
-        
+
         if (entity)
             *entity = obj;
         if (position)
@@ -516,7 +516,7 @@ private:
             Vector3f normal;
             if (!hitQuery(p.x, p.y, &obj, &position, &normal))
                 return;
-            
+
             Location location;
             getCurrentGlobalCameraLocation(&location);  // This will succeed since hitQuery succeeded.
             Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), p.x, p.y));
@@ -816,7 +816,7 @@ private:
             SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
             ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
             Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
-            
+
             Location loc (camera->getProxy().globalLocation(now));
             loc.setPosition(loc.getPosition() + Vector3d(direction(loc.getOrientation()))*WORLD_SCALE);
             loc.setOrientation(Quaternion(0.886995, 0.000000, -0.461779, 0.000000, Quaternion::WXYZ()));
@@ -2279,9 +2279,9 @@ private:
         if (!printOne)
             info += " ]";
 
-        std::cout << "debug(\"" + info + " \");" << std::endl;
+        std::cout << "receiveLight(\"" + info + " \");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
-            "debug(\"" + info + "\");"
+            "receiveLight(\"" + info + "\");"
         );
     }
 
@@ -2443,6 +2443,7 @@ private:
         }
         return String::npos;
     }
+
 
     //--------------------------------------------------------------------------
     // Set the lighting mood. Choose from { 0, 1, 2, 3}
