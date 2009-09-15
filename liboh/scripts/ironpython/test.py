@@ -181,7 +181,7 @@ class exampleclass:
                     self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
                                      velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
                 elif tok[1]=="reset":
-                    self.setPosition(objid=self.objects["Avatar"], position = (0,-2.5,0), orientation = (0,0,0,1),
+                    self.setPosition(objid=self.objects["Avatar_fun"], position = (0,-2.5,0), orientation = (0,0,0,1),
                                      velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
                     for i in self.objects:
                         if i[:4] == "pin_":
