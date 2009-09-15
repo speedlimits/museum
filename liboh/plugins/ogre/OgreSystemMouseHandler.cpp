@@ -1555,12 +1555,16 @@ private:
     /// curator mode
 
     //--------------------------------------------------------------------------
-    void debugAction_load() {
+    void debugAction(int num) {
         ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
         assert(cam);
         RoutableMessageBody msg;
         ostringstream ss;
-        ss << "inventory loadState teststate01";
+        if (num==1)
+            ss << "inventory loadState testfile1";
+        else
+            ss << "inventory saveState testfile1";
+            
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
         msg.SerializeToString(&smsg);
@@ -1576,17 +1580,6 @@ private:
         */
     }
 
-    void debugAction() {
-        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
-        assert(cam);
-        RoutableMessageBody msg;
-        ostringstream ss;
-        ss << "inventory saveState testfile1";
-        msg.add_message("JavascriptMessage", ss.str());
-        String smsg;
-        msg.SerializeToString(&smsg);
-        cam->sendMessage(MemoryReference(smsg));
-    }
     /// WebView Actions
 
     //--------------------------------------------------------------------------
@@ -2781,7 +2774,8 @@ public:
         mInputResponses["cameraPathSlowDown"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, 0.1f));
         mInputResponses["fireAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::fireAction, this));
         mInputResponses["resetAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::resetAction, this));
-        mInputResponses["debugAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this));
+        mInputResponses["debugAction1"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 1));
+        mInputResponses["debugAction2"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 2));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
         mInputResponses["webBack"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateBack));
@@ -2859,7 +2853,8 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_SPACE), mInputResponses["fireAction"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_MINUS), mInputResponses["debugAction1"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction2"]);
 
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
