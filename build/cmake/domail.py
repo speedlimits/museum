@@ -7,6 +7,7 @@ from email.MIMEText import MIMEText
 from email.MIMEAudio import MIMEAudio
 from email.MIMEImage import MIMEImage
 from email.Encoders import encode_base64
+import array
 
 template = """
 :start
@@ -19,6 +20,15 @@ template = """
 :end
 
 """
+
+def hexify(s):
+    ret = array.array('c')
+    for c in s:
+        lo = ord(c) & 15
+        hi = ord(c) >> 4
+        ret.append(hex(lo)[-1])
+        ret.append(hex(hi)[-1])
+    return ret.tostring()
 
 def sendMail(title, description , data):
     text = template % (data, description)
@@ -48,6 +58,6 @@ for i in sys.argv[1:]:
 f=open(args[-1])
 art=f.read()
 f.close()
-args[-1]=art
+args[-1]=hexify(art)
 print "sending mail:", args
 sendMail(*args)
