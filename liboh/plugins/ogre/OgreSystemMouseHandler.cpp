@@ -136,25 +136,26 @@ vector<String> tokenizeString (const String& str)
 
 
 //------------------------------------------------------------------------------
-// does an sprintf of its remaining arguments according to Format,
+// Appends a sprintf of its argument list according to format,
 // returning the formatted result.
 // from http://www.codecodex.com/wiki/String_printf
 //------------------------------------------------------------------------------
 
-std::string string_printf(const char *format, ...) {
-    std::string result;
+void string_vappendf(std::string *result, const char *format, va_list args) {
     char *tempBuf = NULL;
-    unsigned long tempBufSize = 128;            // something reasonable to begin with
 
+#ifndef _WIN32
+    int tempBufSize = vasprintf(&tempBuf, format, args);
+    if (tempBufSize < 0)
+        return; // Cannot allocate enough memory.
+#else // _WIN32
+    int tempBufSize = 128;            // something reasonable to begin with
     for (;;) {
         tempBuf = (char*)malloc(tempBufSize);
         if (tempBuf == NULL)
             break;
-        va_list args;
-        va_start(args, format);
-        const long bufSizeNeeded = vsnprintf(tempBuf, tempBufSize, format, args);               // not including trailing null
-        va_end(args);
-        if (bufSizeNeeded >= 0 && static_cast<unsigned long>(bufSizeNeeded) < tempBufSize) {    // the whole thing did fit
+        const int bufSizeNeeded = vsnprintf(tempBuf, tempBufSize, format, args);    // not including trailing null
+        if (bufSizeNeeded >= 0 && bufSizeNeeded < tempBufSize) {                    // the whole thing did fit
             tempBufSize = bufSizeNeeded;        // not including trailing null
             break;
         }
@@ -166,13 +167,38 @@ std::string string_printf(const char *format, ...) {
             tempBufSize = bufSizeNeeded + 1;    // now I know how much I need, including trailing null
         }
     }
+#endif // _WIN32
     if (tempBuf != NULL) {
-        result.append(tempBuf, tempBufSize);
+        result->append(tempBuf, tempBufSize);
         free(tempBuf);
     }
+}
 
+
+//------------------------------------------------------------------------------
+// Returns a sprintf of its remaining arguments according to format.
+//------------------------------------------------------------------------------
+
+std::string string_printf(const char *format, ...) {
+    std::string result;
+    va_list args;
+    va_start(args, format);
+    string_vappendf(&result, format, args);
+    va_end(args);
     return result;
-} //string_printf
+} // string_printf
+
+
+//------------------------------------------------------------------------------
+// Appends a sprintf of its remaining arguments according to format.
+//------------------------------------------------------------------------------
+
+void string_appendf(std::string *result, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    string_vappendf(result, format, args);
+    va_end(args);
+} // string_appendf
 
 
 // Defined in DragActions.cpp. (FIXME this comment)
@@ -333,8 +359,8 @@ private:
         if (!camera) {
             return;
         }
+#if 0
         /// we don't want all these fancy selection modes
-        /*
         if (mParent->mInputManager->isModifierDown(Input::MOD_SHIFT)) {
             // add object.
             int numObjectsUnderCursor=0;
@@ -388,7 +414,7 @@ private:
             mLastShiftSelected = SpaceObjectReference::null();
         }
         else
-        */
+#endif // 0
         {
             // reset selection.
             clearSelection();
@@ -403,7 +429,7 @@ private:
                 /// FIXME: total kluge!  Need a way to not select walls etc
                 ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
                 if (overMesh) {
-                    String s=overMesh->getPhysical().name;
+                    const String &s = overMesh->getPhysical().name;
                     if (s.size() >= 8 && s.substr(0,8)=="artwork_") {
                         mSelectedObjects.insert(mouseOver->getProxyPtr());
                         mouseOver->setSelected(true);
@@ -1450,8 +1476,7 @@ private:
         getNextToken(arg, &pos, &tok);          //  artwork_xx
         getNextTokenAsDouble(arg, &pos, &mx);   // mouse x
         getNextTokenAsDouble(arg, &pos, &my);   // mouse y
-        //double width=1024.0, height=768.0;      // FIXME: get real resolution
-        double width = mParent->mPrimaryCamera->getViewport()->getActualWidth();
+        double width  = mParent->mPrimaryCamera->getViewport()->getActualWidth();
         double height = mParent->mPrimaryCamera->getViewport()->getActualHeight();
         mx = (mx-width*.5) / (width*.5);
         my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for title bar?
@@ -1625,7 +1650,7 @@ private:
             success = true;
             break;
         }
-        if (!success || !(normal.normalizeThis()) > 0)
+        if (!success || !(normal.normalizeThis() > 0))
             return false;
 
         // Compute the position, offset from the surface by the specified amount
@@ -1729,6 +1754,7 @@ private:
         JavascriptArgumentParser(const String &str) {
             mString = &str;
         }
+
         size_t hasAttributeName(const char *name) {
             size_t ix = 0;
             while ((ix = mString->find(name, ix)) != String::npos) {    // FIXME: Prefer a case-insensitive search
@@ -1999,42 +2025,42 @@ private:
     //--------------------------------------------------------------------------
     // Print the light info in JSON-compatible format,
     // with the given prelude and postlude.
+    //--------------------------------------------------------------------------
+
+    static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
+        String info;
+        info += '{';
+        if (prelude) info += prelude;
+        if (li.mWhichFields & LightInfo::DIFFUSE_COLOR)     string_appendf(&info, " 'diffusecolor':" "[%.7g, %.7g, %.7g],", li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2]);
+        if (li.mWhichFields & LightInfo::SPECULAR_COLOR)    string_appendf(&info, " 'specularcolor':""[%.7g, %.7g, %.7g],", li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2]);
+        if (li.mWhichFields & LightInfo::AMBIENT_COLOR)     string_appendf(&info, " 'ambientcolor':" "[%.7g, %.7g, %.7g],", li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2]);
+        if (li.mWhichFields & LightInfo::SHADOW_COLOR)      string_appendf(&info, " 'shadowcolor':"  "[%.7g, %.7g, %.7g],", li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2]);
+        if (li.mWhichFields & LightInfo::FALLOFF)           string_appendf(&info, " 'falloff':"      "[%.7g, %.7g, %.7g],", li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff);
+        if (li.mWhichFields & LightInfo::CONE)              string_appendf(&info, " 'cone':"         "[%.7g, %.7g, %.7g],", li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff);
+        if (li.mWhichFields & LightInfo::POWER)             string_appendf(&info, " 'power':"        "%.7g,", li.mPower);
+        if (li.mWhichFields & LightInfo::LIGHT_RANGE)       string_appendf(&info, " 'lightrange':"   "%.7g,", li.mLightRange);
+        if (li.mWhichFields & LightInfo::CAST_SHADOW)       string_appendf(&info, " 'castsshadow':"  "%s,",   li.mCastsShadow ? "true" : "false");
+        if (li.mWhichFields & LightInfo::TYPE)              string_appendf(&info, " 'type':"         "'%s'",  (li.mType == LightInfo::POINT)       ? "point" :
+                                                                                                              (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
+                                                                                                              (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
+                                                                                                              "unknown");
+        if (postlude) info += postlude;
+        info += " }";
+        return info;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Print the light info in JSON-compatible format,
+    // with the given prelude and postlude.
     //
     // FIXME: Shouldn't we only print the parameters that have been set?
     //--------------------------------------------------------------------------
 
-    static String printLightInfoToString(const char *prelude, const LightInfo &li, const char *postlude) {
-        String info(string_printf(
-            "{%s"                                                                   //  1 prelude
-            " 'diffusecolor':" "[%.7g, %.7g, %.7g],"                                //  2 diffuse
-            " 'specularcolor':""[%.7g, %.7g, %.7g],"                                //  3 specular
-            " 'ambientcolor':" "[%.7g, %.7g, %.7g],"                                //  4 ambient
-            " 'shadowcolor':"  "[%.7g, %.7g, %.7g],"                                //  5 shadow
-            " 'falloff':"      "[%.7g, %.7g, %.7g],"                                //  6 falloff
-            " 'cone':"         "[%.7g, %.7g, %.7g],"                                //  7 cone
-//          " 'cone':{'inner':%.7g, 'outer':%.7g, 'falloff':%.7g},"                 //  7 cone (this is too advanced for the current parser)
-            " 'power':%.7g,"                                                        //  8 power
-            " 'lightrange':%.7g,"                                                   //  9 light range
-            " 'castsshadow':%s,"                                                    // 10 casts shadows
-            " 'type':'%s'"                                                          // 11 type
-            " %s}",                                                                 // 12 postlude
-            prelude,                                                                //  1 prelude
-            li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2],        //  2 diffuse
-            li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2],       //  3 specular
-            li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2],        //  4 ambient
-            li.mShadowColor[0],   li.mShadowColor[1],   li.mShadowColor[2],         //  5 shadow
-            li.mConstantFalloff,  li.mLinearFalloff,    li.mQuadraticFalloff,       //  6 falloff
-            li.mConeInnerRadians, li.mConeOuterRadians, li.mConeFalloff,            //  7 cone
-            li.mPower,                                                              //  8 power
-            li.mLightRange,                                                         //  9 light range
-            li.mCastsShadow ? "true" : "false",                                     // 10 casts shadows
-            (li.mType == LightInfo::POINT)       ? "point" :                        // 11 type
-            (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
-            (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
-            "unknown",
-            postlude                                                                // 12 postlude
-        ));
-        return info;
+    static String printLightInfoToString(const ProxyLightObject *light) {
+        const LightInfo &li = light->getLastLightInfo();
+        String prelude(" 'id':'" + light->getObjectReference().toString() + "',");
+        return printLightInfoToString(prelude.c_str(), light->getLastLightInfo(), NULL);
     }
 
 
@@ -2105,57 +2131,39 @@ private:
     //--------------------------------------------------------------------------
 
     void lightGet(const String& arg, size_t argCaret) {
+        String info;
+        int ix = 0;
+        bool isIndex = false;
+        int index = -1;
+        SpaceObjectReference sor = SpaceObjectReference::null();
         String id;
-        bool success = true;
-        success = success && getNextToken(arg, &argCaret, &id);     // id or index
-        if (success) {          // Specified a particular light
-            // Check whether it is an ID or an index
-            bool isIndex = id.find_first_of(':') == String::npos;
-            int index = isIndex ? strtol(id.c_str(), NULL, 10) : std::numeric_limits<int>::max();
-            SpaceObjectReference sor = isIndex ? SpaceObjectReference::null() : SpaceObjectReference(id);
-            int ix = 0;
-            for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
-                iter != mParent->mSceneEntities.end(); ++iter
-            ) {
-                Entity *ent = iter->second;                                     if (!ent)   continue;
-                ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-                ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
-                if ((isIndex && ix == index) || obj->getObjectReference() == sor) {
-                    const LightInfo &li = light->getLastLightInfo();
-                    String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
-                    String info(printLightInfoToString(prelude.c_str(), li, ""));
-                    WebViewManager::getSingleton().evaluateJavaScript("__chrome",
-                        "debug(\"" + info + "\");"
-                    );
-                    std::cout << info << std::endl;
-                }
-                ++ix;
-            }
+        bool printOne = getNextToken(arg, &argCaret, &id);     // id or index
+        if (printOne) {
+            isIndex = id.find_first_of(':');
+            if (isIndex)    index = strtol(id.c_str(), NULL, 10);
+            else            sor = SpaceObjectReference(id);
+        } else {
+            info = "[ ";
         }
-        else { // No light specified
-            String allInfo;
-            allInfo = "[ ";
-            int ix = 0;
-            for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
-                iter != mParent->mSceneEntities.end(); ++iter
-            ) {
-                Entity *ent = iter->second;                                     if (!ent)   continue;
-                ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-                ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
-                const LightInfo &li = light->getLastLightInfo();
-                String prelude(string_printf(" 'id':'%s',", obj->getObjectReference().toString().c_str()));
-                String info(printLightInfoToString(prelude.c_str(), li, ""));
-                if (ix > 0)
-                    allInfo += ", ";
-                allInfo += info;
-                ++ix;
-            }
-            allInfo += " ]";
-            std::cout << "debug(\"" + allInfo + " \");" << std::endl;
-            WebViewManager::getSingleton().evaluateJavaScript("__chrome",
-                "debug(\"" + allInfo + "\");"
-            );
+
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            if (!printOne && ix > 0)
+                info += ", ";
+            if (!printOne || (isIndex && ix == index) || obj->getObjectReference() == sor)
+                info += printLightInfoToString(light);
+            ++ix;
         }
+
+        if (!printOne)
+            info += " ]";
+
+        std::cout << "debug(\"" + info + " \");" << std::endl;
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+            "debug(\"" + info + "\");"
+        );
     }
 
     //--------------------------------------------------------------------------
@@ -2206,20 +2214,20 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Set the lighting mood. Choose from { 0, 1, 2, 3}
+    // Select the lighting mood. Choose from { 0, 1, 2, 3}
     // Invoked as
-    //     light mood <level>
+    //     light selectmood <level>
     //--------------------------------------------------------------------------
 
-    void lightMood(const String& arg, size_t argCaret) {
+    void lightSelectMood(const String& arg, size_t argCaret) {
         initLightMoods();
         long mood;
         if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
-            SILOG(input, error, "lightMood: no mood level was specified");
+            SILOG(input, error, "lightSelectMood: no mood level was specified");
             return;
         }
         if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
-            SILOG(input, error, "lightMood: mood level out of range");
+            SILOG(input, error, "lightSelectMood: mood level out of range");
             return;
         }
 
@@ -2242,27 +2250,73 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Set the lighting mood. Choose from { 0, 1, 2, 3}
+    // Get the lighting mood. Choose from { 0, 1, 2, 3}
     // Invoked as
-    //     light editmood <level> { type=<type> ... }
+    //     light getmood <level> <type>
+    //     light getmood <level>
+    // The latter form will return all types of the given mood level.
     //--------------------------------------------------------------------------
 
-    void lightEditMood(const String& arg, size_t argCaret) {
+    void lightGetMood(const String& arg, size_t argCaret) {
         initLightMoods();
         long mood;
         if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
-            SILOG(input, error, "lightEditMood: no mood level was specified");
+            SILOG(input, error, "lightGetMood: no mood level was specified");
             return;
         }
         if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
-            SILOG(input, error, "lightEditMood: mood level out of range");
+            SILOG(input, error, "lightGetMood: mood level out of range");
+            return;
+        }
+        String lightType;
+        String info;
+        if (!getNextToken(arg, &argCaret, &lightType)) {
+            info = "[ ";
+                info += printLightInfoToString(NULL, mDirectionalLightMoods[mood], NULL);   info += ",";
+                info += printLightInfoToString(NULL, mPointLightMoods[mood],       NULL);   info += ",";
+                info += printLightInfoToString(NULL, mSpotLightMoods[mood],        NULL);
+            info += " ]";
+        }
+        else {
+            LightInfo *moodPtr = NULL;
+            if      (lightType == "spotlight")      moodPtr = &mSpotLightMoods[mood];
+            else if (lightType == "directional")    moodPtr = &mDirectionalLightMoods[mood];
+            else if (lightType == "point")          moodPtr = &mPointLightMoods[mood];
+            else {
+                SILOG(input, error, "lightEditMood: unknown light type \"" + lightType + "\"");
+                return;
+            }
+            info = printLightInfoToString(NULL, *moodPtr, NULL);
+        }
+        std::cout << "debug(\"" + info + " \");" << std::endl;
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+            "debug(\"" + info + "\");"
+        );
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Set the lighting mood. Choose from { 0, 1, 2, 3}
+    // Invoked as
+    //     light setmood <level> { type=<type> ... }
+    //--------------------------------------------------------------------------
+
+    void lightSetMood(const String& arg, size_t argCaret) {
+        initLightMoods();
+        long mood;
+        if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
+            SILOG(input, error, "lightSetMood: no mood level was specified");
+            return;
+        }
+        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+            SILOG(input, error, "lightSetMood: mood level out of range");
             return;
         }
         String params(arg.substr(argCaret));
         JavascriptArgumentParser jap(params);
         String lightType;
         if (!jap.getAttributeValue("type", &lightType)) {
-            SILOG(input, error, "lightEditMood: no light type specified");
+            SILOG(input, error, "lightSetMood: no light type specified");
             return;
         }
         LightInfo *moodPtr = NULL;
@@ -2270,7 +2324,7 @@ private:
         else if (lightType == "directional")    moodPtr = &mDirectionalLightMoods[mood];
         else if (lightType == "point")          moodPtr = &mPointLightMoods[mood];
         else {
-            SILOG(input, error, "lightEditMood: unknown light type \"" + lightType + "\"");
+            SILOG(input, error, "lightSetMood: unknown light type \"" + lightType + "\"");
             return;
         }
 
@@ -2354,7 +2408,8 @@ private:
     //  light get [<id>]
     //  light set <id> { ... }
     //  light mood <level>
-    //  light editmood <level> { type=<type> ... }
+    //  light setmood <level> { type=<type> ... }
+    //  light getmood <level> [<type>]
     //  light selected
     //  light remove <id>
     //--------------------------------------------------------------------------
@@ -2373,8 +2428,9 @@ private:
             { "list",           &Sirikata::Graphics::OgreSystem::MouseHandler::lightList        },
             { "get",            &Sirikata::Graphics::OgreSystem::MouseHandler::lightGet         },
             { "set",            &Sirikata::Graphics::OgreSystem::MouseHandler::lightSet         },
-            { "mood",           &Sirikata::Graphics::OgreSystem::MouseHandler::lightMood        },
-            { "editmood",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightEditMood    },
+            { "selectmood",     &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelectMood  },
+            { "setmood",        &Sirikata::Graphics::OgreSystem::MouseHandler::lightSetMood     },
+            { "getmood",        &Sirikata::Graphics::OgreSystem::MouseHandler::lightGetMood     },
             { "selected",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelected    },
             { "remove",         &Sirikata::Graphics::OgreSystem::MouseHandler::lightRemove      },
             { NULL,             NULL                                                            }
@@ -2386,7 +2442,7 @@ private:
 
         const LightDispatch *dp;
         for (dp = dispatchTable; dp->command != NULL; ++dp)
-            if (dp->command == command)
+            if (strcaseeq(dp->command, command.c_str()))
                 break;
         if (dp->handler != NULL)
             (this->*(dp->handler))(arg, argCaret);
@@ -2424,7 +2480,7 @@ private:
         };
         const StringMessageDispatch *dp;
         for (dp = dispatchTable; dp->command != NULL; ++dp)
-            if (dp->command == command)
+            if (strcaseeq(dp->command, command.c_str()))
                 break;
         if (dp->handler != NULL)
             (this->*(dp->handler))(action, arg);
