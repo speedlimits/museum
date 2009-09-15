@@ -45,12 +45,68 @@
 			}
 		}
 		
+function inspect(obj, maxLevels, level)
+{
+  var str = '', type, msg;
+
+    // Start Input Validations
+    // Don't touch, we start iterating at level zero
+    if(level == null)  level = 0;
+
+    // At least you want to show the first level
+    if(maxLevels == null) maxLevels = 1;
+    if(maxLevels < 1)     
+        return '<font color="red">Error: Levels number must be > 0</font>';
+
+    // We start with a non null object
+    if(obj == null)
+    return '<font color="red">Error: Object <b>NULL</b></font>';
+    // End Input Validations
+
+    // Each Iteration must be indented
+    str += '<ul>';
+
+    // Start iterations for all objects in obj
+    for(property in obj)
+    {
+      try
+      {
+          // Show "property" and "type property"
+          type =  typeof(obj[property]);
+          str += '<li>(' + type + ') ' + property + 
+                 ( (obj[property]==null)?(': <b>null</b>'):('')) + '</li>';
+
+          // We keep iterating if this property is an Object, non null
+          // and we are inside the required number of levels
+          if((type == 'object') && (obj[property] != null) && (level+1 < maxLevels))
+          str += inspect(obj[property], maxLevels, level+1);
+      }
+      catch(err)
+      {
+        // Is there some properties in obj we can't access? Print it red.
+        if(typeof(err) == 'string') msg = err;
+        else if(err.message)        msg = err.message;
+        else if(err.description)    msg = err.description;
+        else                        msg = 'Unknown';
+
+        str += '<li><font color="red">(Error) ' + property + ': ' + msg +'</font></li>';
+      }
+    }
+
+      // Close indent
+      str += '</ul>';
+
+    return str;
+}
+
 		function critiqueMode(mode, c2) {
 			var mode = (mode == null) ? 0 : mode;
 			
-			$("body").unbind('sirikata_item_select', pictureSelectedEvent);
-			$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
-			
+			try {
+				$("body").unbind('sirikata_item_select', pictureSelectedEvent);
+				$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
+			} catch (err) {}
+
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/critique_welcome.html");
 			} else if (mode == 1) { // load
@@ -58,15 +114,17 @@
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_critique.html");	
-				 if (mode == 2) { // walk 
+				
+				$("body").bind('sirikata_item_select', pictureSelectedEvent);
+				$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
+			
+				if (mode == 2) { // walk 
 					//loadScreen("#detail-screen", "screens/detail_coverflow.html");	
 					hideScreen("#detail-screen");
 					
-					$("body").bind('sirikata_item_select', pictureSelectedEvent);
-					$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
-			
+					
 				} else if (mode == 3) { // picture 
-					loadScreen("#detail-screen", c2);
+					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
 				}
 			}
 		}
@@ -88,7 +146,7 @@
 		
 		
 		function debug(msg) {
-			$("#development-console").append("<br>" + msg );
+			$("#development-console").prepend("<br>" + msg );
 		}
 		
 		function pictureSelected(id) {
@@ -100,11 +158,13 @@
 		}
 		
 		function pictureSelectedEvent(event, data) {
-			debug("selected " + data.intem);
+			debug("selected " + data.item);
+			critiqueMode(3, data.item);
 				
 		}
 		function pictureDeSelectEvent(event) {
 			debug("items deselected");
+			critiqueMode(2);
 		}
 	
 		$(document).ready( function () {
@@ -129,8 +189,6 @@
 <div id="detail-screen"></div>
 
 <div id="top-bar"></div>
-
-<div id="bottom-bar"></div>
 
 <div id="bottom-bar"></div>
 

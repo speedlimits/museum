@@ -30,17 +30,17 @@
 	debugoptions = {
 		"":"",
 		"debug(1+1)":"Calculate what 1 + 1 is",
-		"curatorMode()":"Curator - 0",
-		"curatorMode(1)":"Curator - 1",
+		"curatorMode()":"Curator - 0 - welcome",
+		"curatorMode(1)":"Curator - 1 - art",
 		"curatorMode(2)":"Curator - 2",
 		"curatorMode(3)":"Curator - 3",
 		"curatorMode(4)":"Curator - 4",
-		"curatorMode(5)":"Curator - 5",
+		"curatorMode(5)":"Curator - 5 save ",
 		
-		"critiqueMode()":"Critique - 0",
-		"critiqueMode(1)":"Critique - 1",
-		"critiqueMode(2)":"Critique - 2",
-		"critiqueMode(3)":"Critique - 3",
+		"critiqueMode()":"Critique - 0 - welcome ",
+		"critiqueMode(1)":"Critique - 1 - load",
+		"critiqueMode(2)":"Critique - 2 - browse",
+		"critiqueMode(3)":"Critique - 3 - discuss",
 
 		"top.location = '../artist/lights.html';":"artist tool - lights",
 		"debug($.getURLParam('param'));":"getparameter"
@@ -55,9 +55,6 @@
 		$("#development-console").bind('mousedown', stopPropagation ) ;
 		$("#debugfns").bind('mousedown', stopPropagation ) ;
 
-		
-		debug('addOption ... ');
-
 		$("#debugfns").addOption(debugoptions,false);
 
 		$("#debugfns").change(function (event,ui) {
@@ -68,9 +65,7 @@
         		eval(dropdown.options[index].value); 
 		});
 		
-		function debug(msg) {
-			$("#development-console").append("<br>" + msg );
-		}
+		
 
 		
 	});

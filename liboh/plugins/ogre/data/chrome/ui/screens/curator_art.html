@@ -28,7 +28,7 @@
 				left: 30px;
 				width: 542px;
 				height: 19px;
-				background: url(images/productbrowser_scrollbar_20070622.jpg) no-repeat;
+				background: url(images/productbrowser_scrollbar_20070622.png) no-repeat;
 			}
 			
 			div.ui-slider-handle {
@@ -39,7 +39,7 @@
 				left: 0px;
 				height: 100%;
 				width: 181px;
-            	background: url(images/handle.jpg) no-repeat ;
+            	background: url(images/handle.png) no-repeat ;
 				
 			}
 		
@@ -91,23 +91,30 @@
 	$("ul.magnifyme").ready(function() {
 	  //$(document).ready(function() {
 				debug('make sortable');
-				$("ul.magnifyme").sortable({ 
+/*				$("ul.magnifyme").sortable({ 
 					distance: 10, 
 					start: function () {$("#drop-screen").show();},									  
 					stop: function (event, ui) {$("#drop-screen").hide(); },
+	 			});*/
+				$("ul.magnifyme li").draggable({ 
+					 
+					start: function () {debug('drag start');$("#drop-screen").show(); },		  
+					stop: function (event, ui) {$("#drop-screen").hide(); debug('drag stop'); },
+					revert: true
 	 			});
+
 				$("ul.magnifyme").coverflow();
 				
 				debug('done');
 //				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
 
-	$(".cover-icon").bind('mousedown' , function() {
+	$(".magnifyme").bind('mousedown' , function() {
 		debug('mousedown');
 	});
-	$(".cover-icon").bind('mouseup' , function() {
+	$(".magnifyme li").bind('mouseup' , function() {
 		debug('mouseup');
 	});
-	$(".cover-icon").bind('mouseout' , function() {
+	$(".magnifyme li").bind('mouseout' , function() {
 		debug('mouseout');
 	});
 
@@ -170,7 +177,7 @@
         
 	</ul> 
     <div class="slider"> 
-        <div class="ui-slider-handle"></div> 
+        <!--<div class="ui-slider-handle"></div> -->
     </div> 
 <div>
 
