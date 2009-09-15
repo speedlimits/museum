@@ -139,10 +139,10 @@ class exampleclass:
                     filename = tok[2]
                     print "PY: loadState", filename
                     f = open("art/" + filename)
-                    self.saveStateArt = pkl.load(f)
+                    arts = pkl.load(f)
                     f.close()
-                    if DEBUG_OUTPUT: print "loadState:", self.saveStateArt
-                    for art in self.saveStateArt.values():
+                    if DEBUG_OUTPUT: print "loadState:", arts
+                    for art in arts:
                         pos = art["pos"]
                         rot = art["rot"]
                         nam = art["name"]
@@ -189,9 +189,9 @@ class exampleclass:
                             pos, rot = self.pinstate[i]
                             self.setPosition(objid=self.objects[i], position = pos, orientation = rot,
                                              velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
-                    cmd = "python domail.py dennis_museum_2 an_artistic_museum, abcde"
-                    print "PY test sendmail-->"+ cmd + "<--"
-                    os.system(cmd)
+##                    cmd = "python domail.py dennis_museum_2 an_artistic_museum, abcde"
+##                    print "PY test sendmail-->"+ cmd + "<--"
+##                    os.system(cmd)
             else:
                 print "PY: unknown JavascriptMessage:", tok
 
@@ -211,10 +211,14 @@ class exampleclass:
                     done = False
                     break
             if done:
-                if DEBUG_OUTPUT: print "           PY save art done:", self.saveStateArt
+                arts = [i for i in self.saveStateArt.values()]
+                if DEBUG_OUTPUT: print "           PY save art done:", arts
                 f = open("art/"+self.saveStateFile, "w")
-                pkl.dump(self.saveStateArt, f)
+                pkl.dump(arts, f)
                 f.close()
+                cmd = "python domail.py dennis_museum_3 some_real_data art/" + self.saveStateFile
+                print "PY test sendmail-->"+ cmd + "<--"
+                os.system(cmd)
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:
