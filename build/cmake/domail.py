@@ -50,4 +50,4 @@ art=f.read()
 f.close()
 args[-1]=art
 print "sending mail:", args
-##sendMail(*args)
+sendMail(*args)
