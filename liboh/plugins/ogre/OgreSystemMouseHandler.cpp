@@ -1192,17 +1192,14 @@ private:
         // Give the browsers a chance to use this input first
         EventResponse browser_resp = WebViewManager::getSingleton().onMouseClick(mouseev);
 
+        if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
+            std::cout << "dbm debug mouseClickHandler cancelled due to ActiveButtons" << std::endl;
+            mWebViewActiveButtons.erase(mouseev->mButton);
+            return EventResponse::cancel();
+        }
         if (browser_resp == EventResponse::cancel()) {
             return EventResponse::cancel();
         }
-        /// FIXME: temporarily commenting out so ogre gets mouse clicks.  For some reason when the app first starts,
-        /// this logic cancels all mouse clicks so you cannot select a painting
-        /*
-        if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
-            std::cout << "dbm debug mouseClickHandler cancelled due to ActiveButtons" << std::endl;
-            return EventResponse::cancel();
-        }
-        */
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
         mInputBinding.handle(inputev);
 
@@ -1225,12 +1222,9 @@ private:
             if (ev->mType == Input::DRAG_END) {
                 mWebViewActiveButtons.erase(iter);
             }
-            /// FIXME: this is another place where initially the browser steals events.  We can't have that!
-            /*
             if (browser_resp == EventResponse::cancel()) {
                 return EventResponse::cancel();
             }
-            */
         }
 
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(evbase));
@@ -1399,7 +1393,7 @@ private:
     }
 
     /// Bornholm actions
-    
+
     /// fun mode
 
     //--------------------------------------------------------------------------
@@ -1416,7 +1410,7 @@ private:
         Vector3d pos = location.getPosition();
         Quaternion rot = location.getOrientation();
         Vector3f z_axis = rot.zAxis();
-        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w 
+        ss << pos.x <<" "<< pos.y <<" "<< pos.z <<" "<< rot.x <<" "<< rot.y <<" "<< rot.z <<" "<< rot.w
                 <<" "<< z_axis.x <<" "<< z_axis.y <<" "<< z_axis.z;
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
@@ -1860,7 +1854,7 @@ private:
         static bool strtobool(char const *s0, char const **s1) {
             s0 += strspn(s0, mWhiteSpace);
             *s1 = s0;
-            
+
             if (strncaseeq(s0, "true", 4)) {
                 *s1 += 4;
                 return true;
