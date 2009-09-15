@@ -1622,7 +1622,16 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Get the next token or string
+    // Get the next token or string. If the token starts with a quote, it is matched with
+    // an ending quote, and the string in between is returned. Escaped quotes are recognized
+    // in the middle of such a string.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found token after the call
+    //   - *token = found token is stored here
+    // Returns true if a token was found, false otherwise.
     //--------------------------------------------------------------------------
 
     static bool getNextToken(const String &str, size_t *pos, String *token) {
@@ -1654,7 +1663,14 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Get the next double
+    // Get the next double.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found number after the call
+    //   - *d     = found number is store here. Note that NaNs are not recognized.
+    // Returns true if a floating-point number was found, false otherwise.
     //--------------------------------------------------------------------------
 
     static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
@@ -1667,7 +1683,14 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Get the next long
+    // Get the next long integer.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found integer after the call
+    //   - *d     = found integer is store here.
+    // Returns true if an integer was found, false otherwise.
     //--------------------------------------------------------------------------
 
     static bool getNextTokenAsLong(const String &str, size_t *pos, long *i) {
@@ -1676,6 +1699,69 @@ private:
         *i = strtol(start, &end, 10);
         *pos = end - str.c_str();
         return start != end;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Get the next integer.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found integer after the call
+    //   - *d     = found integer is store here.
+    // Returns true if an integer was found, false otherwise.
+    //--------------------------------------------------------------------------
+
+    static bool getNextTokenAsInt(const String &str, size_t *pos, int *i) {
+    #if LONG_MAX == INT_MAX
+        return getNextTokenAsLong(str, pos, reinterpret_cast<long*>(i));
+    #else // LONG_MAX != INT_MAX
+        long l;
+        bool success = getNextTokenAsLong(str, pos, &l);
+        *i = l;
+        return success;
+    #endif // LONG_MAX != INT_MAX
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Make a substring between the first '{' and its matching '}', advancing the caret.
+    // Typical use parses a string of the form:
+    //    [ { ... }, { ... }, ... { ... } ]
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found integer after the call
+    //   - *d     = found object is store here.
+    // Returns true is an object was found, false otherwise.
+    //--------------------------------------------------------------------------
+
+    static bool getNextObject(const String& arg, size_t *pos, String *obj) {
+        const char *argcstr = arg.c_str();
+        const char *s = argcstr + *pos;
+        s += strspn(s, mArraySpace);
+        if (*s != '{')
+            return false;
+        const char *start = s++, *end;
+        int nest = 1;
+        for (; *s != 0; ++s) {
+            switch (*s) {
+                case '{':
+                   ++nest;
+                   break;
+                case '}':
+                    if (--nest == 0) {
+                        end = s + 1;
+                        *obj = arg.substr(start - argcstr, end - start);
+                        *pos = end - argcstr;
+                        return true;
+                    }
+                    break;
+            }
+        }
+        return false;
     }
 
 
@@ -2416,36 +2502,6 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Make a substring between the first '{' and its matching '}', advancing the caret.
-    // Typical use parses a string of the form:
-    //    [ { ... }, { ... }, ... { ... } ]
-    //--------------------------------------------------------------------------
-
-    size_t getNextObject(const String& arg, size_t argCaret, String *params) {
-        const char *argcstr = arg.c_str();
-        const char *s = argcstr + argCaret, *start, *end;
-        int nest = 0;
-        for (; *s != 0; ++s) {
-            switch (*s) {
-                case '{':
-                    if (nest == 0)
-                        start = s;
-                   ++nest;
-                   break;
-                case '}':
-                    if (--nest == 0) {
-                        end = s + 1;
-                        *params = arg.substr(start - argcstr, end - start);
-                        return end - argcstr;
-                    }
-                    break;
-            }
-        }
-        return String::npos;
-    }
-
-
-    //--------------------------------------------------------------------------
     // Set the lighting mood. Choose from { 0, 1, 2, 3}
     // Invoked as
     //     light setmood { mood:<level>, type:<type> ... }
@@ -2455,8 +2511,9 @@ private:
         initLightMoods();
         String params;
         argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
-        if (arg[argCaret] == '[') { // Array
-            while ((argCaret = getNextObject(arg, argCaret, &params)) != String::npos)
+        if (arg[argCaret] == '[') {                         // Array
+            ++argCaret;                                     // Skip over '['
+            while (getNextObject(arg, &argCaret, &params))  // Get next "{...}" string
                 lightSetMood(params, 0);
             return;
         }
