@@ -117,6 +117,21 @@ class exampleclass:
                             self.getPosition(objid=uid, position=1, orientation=1)
                     self.saveStateFile=filename
 
+                elif tok[1]=="loadState":
+                    filename = tok[2]
+                    print "PY: loadState", filename
+                    f = open("art/" + filename)
+                    self.saveStateArt = pkl.load(f)
+                    f.close()
+                    if DEBUG_OUTPUT: print "loadState:", self.saveStateArt
+                    for art in self.saveStateArt.values():
+                        pos = art["pos"]
+                        rot = art["rot"]
+                        nam = art["name"]
+                        uid = self.objects[nam]
+                        self.setPosition(objid=uid, position = pos, orientation = rot,
+                             velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+
             elif tok[0]=="funmode":
                 if tok[1]=="fire":
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s

@@ -1426,7 +1426,7 @@ private:
         assert(cam);
         RoutableMessageBody msg;
         ostringstream ss;
-        ss << "inventory saveState teststate01";
+        ss << "inventory loadState teststate01";
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
         msg.SerializeToString(&smsg);
