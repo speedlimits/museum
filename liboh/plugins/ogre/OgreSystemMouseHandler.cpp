@@ -438,12 +438,17 @@ private:
         }
         lookat.y = 0;
         lookat.normalizeThis();
-        Vector3f right(Vector3f::unitY().cross(lookat));
-        Quaternion orientation(right, Vector3f::unitY(), lookat);
-        Vector3f velocity(0, 0, 0);
-        Vector3f angularVelocityAxis(0, 1, 0);
-        Location loc(position, orientation, velocity, angularVelocityAxis, 0);
-        // Here is where we would call python magic
+
+        // Here is where we would call python magic to do an animation. Right now we just set it.
+        Protocol::ObjLoc rloc;
+        rloc.set_position(position);
+        rloc.set_orientation(Quaternion(Vector3f::unitY().cross(lookat), Vector3f::unitY(), lookat));
+        rloc.set_velocity(Vector3f::zero());
+        rloc.set_rotational_axis(Vector3f::unitY());
+        rloc.set_angular_speed(0);
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        camera->requestLocation(now, rloc);
     }
 
 
@@ -521,16 +526,17 @@ private:
             getCurrentGlobalCameraLocation(&location);  // This will succeed since hitQuery succeeded.
             Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), p.x, p.y));
             Vector3f lookat = viewDirection;            // By default, look in the direction that we clicked.
-            if ((fabs(normal.y) - 1) < 1e-4) {          // Clicked on the floor
-            }
-            else {                                      // Clicked on a wall or picture.
+            if (fabs(normal.y) < 1e-2) {                // Clicked on a wall or picture.
                 double backOffDistance = 2;
                 Vector3d fromWall(normal.x, 0, normal.z);
                 fromWall.normalizeThis();
                 position += backOffDistance * fromWall;
-                if (isArtWork(obj)) lookat = -normal;   // Clicked on  a picture: look at it.
+                if (isArtWork(obj)) lookat = -normal;   // Clicked on a picture: look at it.
+            }
+            else {                                      // Clicked on the floor
             }
             walkTo(position, lookat);
+            return;     // Since this is not a selection, do not do the selection epilogue.
         }
         else
         {
