@@ -844,7 +844,7 @@ void HostedObject::processRoutableMessage(const RoutableMessageHeader &header, M
         SILOG(cppoh,debug,os.str());
     }
     /// Handle Return values to queries we sent to someone:
-    if (header.has_reply_id()) {
+    if (header.has_reply_id() && header.reply_id()!=12345) {            /// magic # means Python script
         mTracker.processMessage(header, bodyData);
         return; // Not a message for us to process.
     }

@@ -9,6 +9,7 @@ from Sirikata.Runtime import HostedObject
 import System
 import util
 import math
+import cPickle as pkl
 
 DEBUG_OUTPUT=True
 DEG2RAD = 0.0174532925
@@ -28,9 +29,24 @@ def Euler2QuatPYR(pitch, yaw, roll):
             rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin)
 
 
+def pbj2Quat(q):
+    #fix weird pbj encoding
+    if q[0] >= 3:
+        sign = -1
+        sub = 3
+    else:
+        sub = 0
+        sign = 1
+    x = q[0]-sub
+    y = q[1]
+    z = q[2]
+    wsq = 1.0 - (x**2 + y**2 + z**2)
+    w = wsq**0.5 * sign
+    return x, y, z, w
+
 class exampleclass:
     def __init__(self):
-        if DEBUG_OUTPUT: print "exampleclass.__init__"
+        if DEBUG_OUTPUT: print "PY: exampleclass.__init__"
         self.objects={}
         self.ammoNum=0
         self.ammoMod=6
@@ -42,7 +58,7 @@ class exampleclass:
         }
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
-        print "Got an RPC named",name
+        print "PY: Got an RPC named",name
         header = pbHead.Header()
         header.ParseFromString(util.fromByteArray(serialheader))
         if name == "RetObj":
@@ -56,7 +72,6 @@ class exampleclass:
             self.spaceid = util.tupleToUUID(header.source_space)
 
             self.sendNewProx()
-            self.setPosition(angular_speed=0, axis=(0,1,0))
         elif name == "ProxCall":
             proxcall = pbSiri.ProxCall()
             proxcall.ParseFromString(util.fromByteArray(serialarg))
@@ -73,9 +88,10 @@ class exampleclass:
                 pass
         elif name == "JavascriptMessage":
             s = "".join(chr(i) for i in serialarg)
-            if DEBUG_OUTPUT: print "PY", name, s
+            if DEBUG_OUTPUT: print "PY JavascriptMessage:", name, s
             tok = s.split()
-            if tok[0]=="inventory":
+
+            if tok[0]=="inventory":                
                 if tok[1]=="placeObject":
                     painting = tok[2]
                     if not painting in self.objects:
@@ -87,8 +103,20 @@ class exampleclass:
                     qy = float(tok[9])
                     qz = float(tok[10])
                     qw = float(tok[11])
-                    if DEBUG_OUTPUT: print "PY:   moving", painting, self.objects[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
+                    if DEBUG_OUTPUT: print "PY moving", painting, self.objects[painting], "to", x, y, z, "quat:", qx, qy, qz, qw
                     self.setPosition(objid=self.objects[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
+
+                elif tok[1]=="saveState":
+                    filename = tok[2]
+                    print "PY: saveState", filename
+                    self.saveStateArt={}
+                    for art, uid in self.objects.items():
+                        if art[:8]=="artwork_":
+                            print "  PY: save", art, uid
+                            self.saveStateArt[uid]={"name":art}
+                            self.getPosition(objid=uid, position=1, orientation=1)
+                    self.saveStateFile=filename
+
             elif tok[0]=="funmode":
                 if tok[1]=="fire":
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s
@@ -128,6 +156,26 @@ class exampleclass:
                                              velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
             else:
                 print "PY: unknown JavascriptMessage:", tok
+        elif header.reply_id==12345:
+            if DEBUG_OUTPUT: print "PY: response to our location query.  Dunno why it has no name"
+            loc = pbSiri.ObjLoc()
+            loc.ParseFromString(util.fromByteArray(serialarg))
+            pos = (loc.position[0], loc.position[1], loc.position[2])
+            rot = pbj2Quat(loc.orientation)
+            uid = util.tupleToUUID(header.source_object)
+            art = self.saveStateArt[uid]["name"]
+            self.saveStateArt[uid]["pos"]=pos
+            self.saveStateArt[uid]["rot"]=rot
+            done = True
+            for i in self.saveStateArt.values():
+                if not "pos" in i:
+                    done = False
+                    break
+            if done:
+                if DEBUG_OUTPUT: print "           PY save art done:", self.saveStateArt
+                f = open("art/"+self.saveStateFile, "w")
+                pkl.dump(self.saveStateArt, f)
+                f.close()
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:
@@ -155,18 +203,12 @@ class exampleclass:
             HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
         else:
             self.objects[myName]=uuid
-##        elif myName[:8]=="artwork_":
-##            if DEBUG_OUTPUT: print "PY: adding artwork", myName, ":", uuid
-##            self.paintings[myName]=uuid
-##        elif myName[:5]=="ammo_":
-##            if DEBUG_OUTPUT: print "PY: adding ammo", myName, ":", uuid
-##            self.ammo[myName]=uuid
 
     def processRPC(self,header,name,arg):
         try:
             self.reallyProcessRPC(header,name,arg)
         except:
-            print "Error processing RPC",name
+            print "PY: Error processing RPC",name
             traceback.print_exc()
 
     def setPosition(self,position=None,orientation=None,velocity=None,angular_speed=None,axis=None,force=False,objid=None):
@@ -204,6 +246,22 @@ class exampleclass:
         header.destination_object = util.tupleFromUUID(objid)
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
+    def getPosition(self,position=0,orientation=0,velocity=0,angular_speed=0,axis=0,objid=None):
+        if not objid: objid = self.objid
+        locReq = pbSiri.LocRequest()
+        flags = position*1 + orientation*2 + velocity*4 + axis*8 + angular_speed*16
+        body = pbSiri.MessageBody()
+        body.message_names.append("LocRequest")
+        body.message_arguments.append(locReq.SerializeToString())
+        header = pbHead.Header()
+        header.destination_space = util.tupleFromUUID(self.spaceid)
+        header.destination_object = util.tupleFromUUID(objid)
+        print "PY debug A"
+##        header.id=util.tupleFromUUID(self.objid)
+        header.id=12345
+        print "PY debug B"
+        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+
     def sendNewProx(self):
         try:
             body = pbSiri.MessageBody()
@@ -223,7 +281,7 @@ class exampleclass:
             bodystr = body.SerializeToString()
             HostedObject.SendMessage(util.toByteArray(headerstr+bodystr))
         except:
-            print "ERORR"
+            print "PY: ERORR"
             traceback.print_exc()
 
     def processMessage(self,header,body):

@@ -1422,12 +1422,24 @@ private:
 
     //--------------------------------------------------------------------------
     void debugAction() {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        ss << "inventory saveState teststate01";
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+        /*
+        /// place art
         static int pic=0;
         pic++;
         WebViewManager::NavigationAction act;
         ostringstream ss;
         ss << "inventory placeObject artwork_0" << pic << " 400 300 ";
         inventoryHandler(act, ss.str());
+        */
     }
 
     /// WebView Actions
