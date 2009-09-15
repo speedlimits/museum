@@ -10,6 +10,7 @@ import System
 import util
 import math
 import cPickle as pkl
+import os
 
 DEBUG_OUTPUT=True
 DEG2RAD = 0.0174532925
@@ -188,6 +189,9 @@ class exampleclass:
                             pos, rot = self.pinstate[i]
                             self.setPosition(objid=self.objects[i], position = pos, orientation = rot,
                                              velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+                    cmd = "python domail.py dennis_museum_2 an_artistic_museum, abcde"
+                    print "PY test sendmail-->"+ cmd + "<--"
+                    os.system(cmd)
             else:
                 print "PY: unknown JavascriptMessage:", tok
 

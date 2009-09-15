@@ -3,6 +3,8 @@ import sys, os, time
 
 if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru"):
     cmd = "./run scenes/" + sys.argv[1] + ".csv scenes/" + sys.argv[1] + "_env.csv"
+    if sys.argv[1]=="curator":
+        cmd += " scenes/curator_art.csv"
     os.system(cmd)
     exit()
 
