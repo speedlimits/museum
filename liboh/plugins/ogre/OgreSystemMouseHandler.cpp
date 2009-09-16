@@ -2294,7 +2294,7 @@ private:
         mPointLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange(16.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::POINT);
         mPointLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(20.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::POINT);
 
-        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.7).setLightType(LightInfo::DIRECTIONAL);
+        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.007).setLightType(LightInfo::DIRECTIONAL);
         mDirectionalLightMoods[1].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.8).setLightType(LightInfo::DIRECTIONAL);
         mDirectionalLightMoods[2].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.9).setLightType(LightInfo::DIRECTIONAL);
         mDirectionalLightMoods[3].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(1.).setLightType(LightInfo::DIRECTIONAL);
@@ -2338,8 +2338,9 @@ private:
     //     light get 292ae805-393b-f239-8df8-8f129f9ddb03:12345678-1111-1111-1111-defa01759ace
     //--------------------------------------------------------------------------
 
+//    void lightGet(const String& arg, size_t argCaret) {
     void lightGet(const String& arg, size_t argCaret) {
-        String info;
+            String info;
         int ix = 0;
         bool isIndex = false;
         int index = -1;

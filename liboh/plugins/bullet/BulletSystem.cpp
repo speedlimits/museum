@@ -52,6 +52,8 @@ static int core_plugin_refcount = 0;
 //#define DEBUG_OUTPUT(x) x
 #define DEBUG_OUTPUT(x)
 
+#define DEBUG_ALWAYS(x) x
+
 SIRIKATA_PLUGIN_EXPORT_C void init() {
     using namespace Sirikata;
     DEBUG_OUTPUT(cout << "dbm: plugin init" << endl;)
@@ -449,7 +451,7 @@ bool BulletSystem::tick() {
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
-                        DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
+                        DEBUG_ALWAYS(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
                                      << " meshpos: " << objects[i]->mMeshptr->getPosition()
                                      << " bulletpos before reset: " << objects[i]->getBulletState().p;)
                         cout << "dbm debug: set vel " << loc.getVelocity() << " for " << objects[i]->mName << endl;
@@ -466,6 +468,7 @@ bool BulletSystem::tick() {
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
+                        DEBUG_ALWAYS(cout << "dbm debug PID vel: " << objects[i]->mDesiredLinearVelocity << endl);
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
                         objects[i]->mBulletBodyPtr->activate(true);
