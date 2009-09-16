@@ -1874,17 +1874,13 @@ private:
         Vector3f xAxis, yAxis, zAxis;
         if (!isSculpture) {                         //------ A Painting ------//
             zAxis = normal;                         // The painting is flush against the wall
-            yAxis = Vector3f::unitY();              // Tentatively on a vertical wall, but this is adjusted later
-            xAxis = yAxis.cross(zAxis);
+            xAxis = Vector3f::unitY().cross(zAxis);
             if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
-                xAxis = viewDirection.cross(yAxis); // Let's have it face the viewer, rather than the floor or ceiling
+                xAxis = viewDirection.cross(Vector3f::unitY()); // Face the viewer
                 if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
                     xAxis = Vector3f::unitX();      // Align to the world's coordinate axes, since the normal and view are pathological
-                zAxis = xAxis.cross(yAxis);         // Hang it vertically
             }
-            else {
-                yAxis = zAxis.cross(xAxis);         // This accommodates non-vertical walls nicely, as long as they aren't completely horizontal
-            }
+            yAxis = zAxis.cross(xAxis);
         }
         else {                                      //------ A Sculpture ------//
             yAxis = Vector3f::unitY();              // Sculpture always stands upright
@@ -1914,7 +1910,6 @@ private:
         else {
             id = "null";
         }
-        std::cout << "pictureSelected(" + id + ");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
                                                           "debug('" + id + "');" +
                                                           "pictureSelected(" + id + ");"
@@ -2163,7 +2158,6 @@ private:
 
         // Get an object's center and radius
         BoundingSphere<double> objSphere = ent->getOgreWorldBoundingSphere<double>();
-        std::cout << "boundingSphere, center=" << objSphere.center() << ", radius=" << objSphere.radius() << std::endl;
 
         // Get the floor coordinate
         double floorY = getFloorHeight();
@@ -2198,16 +2192,6 @@ private:
         float coneOuterAngle = coneAngle;   // Spotlights don't look as expected
         float coneFalloff = 0.5;
         lightInfo->setLightSpotlightCone(0, coneAngle, coneFalloff);
-
-        // FIXME: Remove after debugging
-        std::cout << "objCenter=" << objSphere.center()
-                  << ", objRadius=" << objSphere.radius()
-                  << ", floorY=" << floorY
-                  << ", normal=" << normal
-                  << ", lightPosition=" << lightPosition
-                  << ", lightZ=" << lightZ
-                  << ", coneAngle=" << coneAngle * 180. / M_PI
-                  << std::endl;
     }
 
 
@@ -2375,7 +2359,6 @@ private:
         if (!printOne)
             info += " ]";
 
-        std::cout << "receiveLight(\"" + info + " \");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
             "receiveLight(\"" + info + "\");"
         );
@@ -2488,8 +2471,8 @@ private:
         String info;
         if (!getNextToken(arg, &argCaret, &lightType)) {
             info = "[ ";
-                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",\\n ";
-                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",\\n ";
+                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",\\n  ";
+                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",\\n  ";
                 info += printLightInfoToString(prelude.c_str(), mSpotLightMoods[mood],        NULL);
             info += " ]";
         }
@@ -2504,7 +2487,6 @@ private:
             }
             info = printLightInfoToString(prelude.c_str(), *moodPtr, NULL);
         }
-        std::cout << "receiveLightMood(\"" + info + " \");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
             "receiveLightMood(\"" + info + "\");"
         );

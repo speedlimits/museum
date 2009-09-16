@@ -810,6 +810,11 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
     Vector3f xAxis, yAxis, zAxis;
     endPlane.getNormal(&zAxis);
     xAxis = Vector3f::unitY().cross(zAxis);
+    if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
+        xAxis.set(-endVec.z, 0, endVec.x);  // endVec.cross(Vector3f::unitY()); // Face the viewer
+        if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
+            xAxis = Vector3f::unitX();      // Align to the world's coordinate axes, since the normal and view are pathological
+    }
     yAxis = zAxis.cross(xAxis);
     Quaternion rotation(xAxis, yAxis, zAxis);
     rotation = mStartOrientation.inverse() * rotation;
