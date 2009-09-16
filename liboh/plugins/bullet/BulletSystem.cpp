@@ -451,24 +451,28 @@ bool BulletSystem::tick() {
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
-                        DEBUG_ALWAYS(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
-                                     << " meshpos: " << objects[i]->mMeshptr->getPosition()
-                                     << " bulletpos before reset: " << objects[i]->getBulletState().p;)
-                        cout << "dbm debug: set vel " << loc.getVelocity() << " for " << objects[i]->mName << endl;
+                        cout         << "dbm debug: object, " << objects[i]->mName << " moved" << endl
+                                     << "    debug meshpos: " << objects[i]->mMeshptr->getPosition() << endl
+                                     << "    debug bulletpos before reset: " << objects[i]->getBulletState().p << endl
+                                     << "    debug set vel " << loc.getVelocity() << endl;
                         objects[i]->setBulletState(
                             positionOrientation (
                                 loc.getPosition(),
                                 loc.getOrientation()),
                                 loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
                             );
-                        DEBUG_OUTPUT(cout << "bulletpos after reset: " << objects[i]->getBulletState().p << endl;)
+                        cout << "    debug new pos: " << objects[i]->getBulletState().p << endl;
                     }
 
                     /// if object under PID control, control it
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
-                        DEBUG_ALWAYS(cout << "dbm debug PID vel: " << objects[i]->mDesiredLinearVelocity << endl);
+                        DEBUG_ALWAYS(cout << "dbm debug PID vel: " << 
+                                objects[i]->mDesiredLinearVelocity.x() <<
+                                objects[i]->mDesiredLinearVelocity.y() <<
+                                objects[i]->mDesiredLinearVelocity.z()
+                                << endl);
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
                         objects[i]->mBulletBodyPtr->activate(true);
@@ -479,19 +483,19 @@ bool BulletSystem::tick() {
                             objects[i]->mPIDControlEnabled=false;
                         }
                     }
-                    if (objects[i]->mName=="Avatar_fun") {
-                        Vector3f yax = loc.getOrientation().yAxis() * 10.0;
-                        objects[i]->mBulletBodyPtr->applyCentralForce(btVector3(-yax.x, -yax.y, -yax.z));
-                    }
+//                    if (objects[i]->mName=="Avatar_fun") {
+//                        Vector3f yax = loc.getOrientation().yAxis() * 10.0;
+//                        objects[i]->mBulletBodyPtr->applyCentralForce(btVector3(-yax.x, -yax.y, -yax.z));
+//                    }
                 }
             }
 //            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
-            dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/200.0);
+            dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/100.0);
 
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     po = objects[i]->getBulletState();
-                    DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
+                    DEBUG_ALWAYS(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
                                  << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl);
                     Time remoteNow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(objects[i]->mMeshptr->getObjectReference().space()));
                     Location loc (objects[i]->mMeshptr->globalLocation(remoteNow));
