@@ -441,7 +441,7 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > Duration::seconds(10.0)) {
+        if ((now-mStartTime) > Duration::seconds(20.0)) {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
@@ -490,18 +490,25 @@ bool BulletSystem::tick() {
                 }
             }
 //            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
-            dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/100.0);
+            dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/300.0);
 
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     po = objects[i]->getBulletState();
-                    DEBUG_ALWAYS(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
+                    DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << ", delta, "
                                  << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl);
                     Time remoteNow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(objects[i]->mMeshptr->getObjectReference().space()));
                     Location loc (objects[i]->mMeshptr->globalLocation(remoteNow));
-                    loc.setPosition(po.p);
-                    loc.setOrientation(po.o);
-                    objects[i]->mMeshptr->setLocation(remoteNow, loc);
+                    if (    po.p.x > 100000. || po.p.x < -100000. ||
+                            po.p.y > 100000. || po.p.y < -100000. ||
+                            po.p.z > 100000. || po.p.z < -100000. ) {
+                        cout << "dbm debug BAD POSITION! " << objects[i]->mName << " pos: " << po.p << endl;
+                    }
+                    else {
+                        loc.setPosition(po.p);
+                        loc.setOrientation(po.o);
+                        objects[i]->mMeshptr->setLocation(remoteNow, loc);
+                    }
                 }
             }
 
