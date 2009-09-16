@@ -354,6 +354,105 @@ private:
 
 
     //--------------------------------------------------------------------------
+    // Given the screen coordinate, hitQuery will return the entity, the position of intersection,
+    // and the normal of the surface at the point of intersection.
+    //--------------------------------------------------------------------------
+
+    bool getCurrentGlobalCameraLocation(Location *location) {
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!camera)
+            return false;
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        *location = camera->globalLocation(now);
+        return true;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Given the screen coordinate, hitQuery will return the entity, the position of intersection,
+    // and the normal of the surface at the point of intersection.
+    //--------------------------------------------------------------------------
+
+    bool hitQuery(double screenX, double screenY, Entity const **entity, Vector3d *position, Vector3f *normal) {
+        // Look for an object intersected by the ray.
+        Location location;
+        if (!getCurrentGlobalCameraLocation(&location))
+            return false;
+        Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), screenX, screenY));
+        double distance;
+        Vector3f myNormal(0, 0, 0);
+        bool success = false;
+        int numHits = 1, i;
+        const Entity *obj;
+        for (i = 0; i < numHits; i++) { // FIXME: Does this really need to iterate?
+            obj = mParent->rayTrace(location.getPosition(), viewDirection, numHits, distance, myNormal, i);
+            if (obj == NULL) {      // No object found
+                if (i < numHits)    // Why not?
+                    continue;       // Still more objects: keep looking
+                break;              // No more objects: return failure
+            }
+            success = true;
+            break;
+        }
+        if (!success || !(myNormal.normalizeThis() > 0))
+            return false;
+
+        if (entity)
+            *entity = obj;
+        if (position)
+            *position = location.getPosition() + distance * Vector3d(viewDirection.x, viewDirection.y, viewDirection.z);
+        if (normal) {
+            if (viewDirection.dot(myNormal) > 0)    // backfacing normal
+                myNormal = -myNormal;               // make it front-facing
+            *normal = myNormal;
+        }
+        return true;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Determine whether the given entity is artwork.
+    // FIXME: total kluge!  Need a way to not select walls etc
+    //--------------------------------------------------------------------------
+
+    bool isArtWork(const Entity *obj) {
+        bool isArt = false;
+        ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(obj->getProxyPtr().get());
+        if (overMesh) {
+            const String &s = overMesh->getPhysical().name;
+            isArt = (s.size() >= 8 && s.substr(0,8)=="artwork_");
+        }
+        return isArt;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Walk from the current location to the specified poition,
+    // but aim towards the specified lookat direction.
+    //--------------------------------------------------------------------------
+
+    void walkTo(const Vector3d &position, Vector3f lookat) {
+        if (lookat.x == 0 && lookat.z == 0) {
+            SILOG(input, error, "walkTo: lookat vector is vertical");
+            return;
+        }
+        lookat.y = 0;
+        lookat.normalizeThis();
+
+        // Here is where we would call python magic to do an animation. Right now we just set it.
+        Protocol::ObjLoc rloc;
+        rloc.set_position(position);
+        rloc.set_orientation(Quaternion(Vector3f::unitY().cross(lookat), Vector3f::unitY(), lookat));
+        rloc.set_velocity(Vector3f::zero());
+        rloc.set_rotational_axis(Vector3f::unitY());
+        rloc.set_angular_speed(0);
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        camera->requestLocation(now, rloc);
+    }
+
+
+    //--------------------------------------------------------------------------
     void selectObjectAction(Vector2f p, int direction) {
         CameraEntity *camera = mParent->mPrimaryCamera;
         if (!camera) {
@@ -415,6 +514,31 @@ private:
         }
         else
 #endif // 0
+        if (mParent->mInputManager->isModifierDown(Input::MOD_ALT)) {   // click to go
+            // Look for an object intersected by the ray.
+            const Entity *obj = NULL;
+            Vector3d position;
+            Vector3f normal;
+            if (!hitQuery(p.x, p.y, &obj, &position, &normal))
+                return;
+
+            Location location;
+            getCurrentGlobalCameraLocation(&location);  // This will succeed since hitQuery succeeded.
+            Vector3f viewDirection(pixelToDirection(mParent->mPrimaryCamera, location.getOrientation(), p.x, p.y));
+            Vector3f lookat = viewDirection;            // By default, look in the direction that we clicked.
+            if (fabs(normal.y) < 1e-2) {                // Clicked on a wall or picture.
+                double backOffDistance = 2;
+                Vector3d fromWall(normal.x, 0, normal.z);
+                fromWall.normalizeThis();
+                position += backOffDistance * fromWall;
+                if (isArtWork(obj)) lookat = -normal;   // Clicked on a picture: look at it.
+            }
+            else {                                      // Clicked on the floor
+            }
+            walkTo(position, lookat);
+            return;     // Since this is not a selection, do not do the selection epilogue.
+        }
+        else
         {
             // reset selection.
             clearSelection();
@@ -426,16 +550,11 @@ private:
             mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
 //            }
             if (mouseOver) {
-                /// FIXME: total kluge!  Need a way to not select walls etc
-                ProxyMeshObject* overMesh = dynamic_cast<ProxyMeshObject*>(mouseOver->getProxyPtr().get());
-                if (overMesh) {
-                    const String &s = overMesh->getPhysical().name;
-                    if (s.size() >= 8 && s.substr(0,8)=="artwork_") {
-                        mSelectedObjects.insert(mouseOver->getProxyPtr());
-                        mouseOver->setSelected(true);
-                        SILOG(input,info,"Replaced selection with " << mouseOver->id());
-                        // Fire selected event.
-                    }
+                if (isArtWork(mouseOver)) {
+                    mSelectedObjects.insert(mouseOver->getProxyPtr());
+                    mouseOver->setSelected(true);
+                    SILOG(input,info,"Replaced selection with " << mouseOver->id());
+                    // Fire selected event.
                 }
             }
             mLastShiftSelected = SpaceObjectReference::null();
@@ -703,6 +822,7 @@ private:
             SpaceObjectReference newId = SpaceObjectReference(camera->id().space(), ObjectReference(UUID::random()));
             ProxyManager *proxyMgr = camera->getProxy().getProxyManager();
             Time now(SpaceTimeOffsetManager::getSingleton().now(newId.space()));
+
             Location loc (camera->getProxy().globalLocation(now));
             loc.setPosition(loc.getPosition() + Vector3d(direction(loc.getOrientation()))*WORLD_SCALE);
             loc.setOrientation(Quaternion(0.886995, 0.000000, -0.461779, 0.000000, Quaternion::WXYZ()));
@@ -1508,7 +1628,16 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Get the next token or string
+    // Get the next token or string. If the token starts with a quote, it is matched with
+    // an ending quote, and the string in between is returned. Escaped quotes are recognized
+    // in the middle of such a string.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found token after the call
+    //   - *token = found token is stored here
+    // Returns true if a token was found, false otherwise.
     //--------------------------------------------------------------------------
 
     static bool getNextToken(const String &str, size_t *pos, String *token) {
@@ -1540,7 +1669,14 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Get the next double
+    // Get the next double.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found number after the call
+    //   - *d     = found number is store here. Note that NaNs are not recognized.
+    // Returns true if a floating-point number was found, false otherwise.
     //--------------------------------------------------------------------------
 
     static bool getNextTokenAsDouble(const String &str, size_t *pos, double *d) {
@@ -1553,7 +1689,14 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Get the next long
+    // Get the next long integer.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found integer after the call
+    //   - *d     = found integer is store here.
+    // Returns true if an integer was found, false otherwise.
     //--------------------------------------------------------------------------
 
     static bool getNextTokenAsLong(const String &str, size_t *pos, long *i) {
@@ -1562,6 +1705,69 @@ private:
         *i = strtol(start, &end, 10);
         *pos = end - str.c_str();
         return start != end;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Get the next integer.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found integer after the call
+    //   - *d     = found integer is store here.
+    // Returns true if an integer was found, false otherwise.
+    //--------------------------------------------------------------------------
+
+    static bool getNextTokenAsInt(const String &str, size_t *pos, int *i) {
+    #if LONG_MAX == INT_MAX
+        return getNextTokenAsLong(str, pos, reinterpret_cast<long*>(i));
+    #else // LONG_MAX != INT_MAX
+        long l;
+        bool success = getNextTokenAsLong(str, pos, &l);
+        *i = l;
+        return success;
+    #endif // LONG_MAX != INT_MAX
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Make a substring between the first '{' and its matching '}', advancing the caret.
+    // Typical use parses a string of the form:
+    //    [ { ... }, { ... }, ... { ... } ]
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found integer after the call
+    //   - *d     = found object is store here.
+    // Returns true is an object was found, false otherwise.
+    //--------------------------------------------------------------------------
+
+    static bool getNextObject(const String& arg, size_t *pos, String *obj) {
+        const char *argcstr = arg.c_str();
+        const char *s = argcstr + *pos;
+        s += strspn(s, mArraySpace);
+        if (*s != '{')
+            return false;
+        const char *start = s++, *end;
+        int nest = 1;
+        for (; *s != 0; ++s) {
+            switch (*s) {
+                case '{':
+                   ++nest;
+                   break;
+                case '}':
+                    if (--nest == 0) {
+                        end = s + 1;
+                        *obj = arg.substr(start - argcstr, end - start);
+                        *pos = end - argcstr;
+                        return true;
+                    }
+                    break;
+            }
+        }
+        return false;
     }
 
 
@@ -1785,8 +1991,10 @@ private:
                 // We know that we have <whitespace> <name> [ '=' | ':' ], and the index is positioned after the '=' or ':'
                 break;
             }
-            if ((*mString)[ix] == '[')  // Javascript array
-                ++ix;                   // Position at the first element
+            if (ix != String::npos) {
+                if ((*mString)[ix] == '[')  // Javascript array
+                    ++ix;                   // Position at the first element
+            }
             return ix;
         }
 
@@ -1896,15 +2104,15 @@ private:
     static void setLightInfoFromString(const String &str, LightInfo *lightInfo) {
         JavascriptArgumentParser jap(str);
         String type;
-        if (jap.getAttributeValue("diffusecolor",  &lightInfo->mDiffuseColor[0]),  3)   lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
-        if (jap.getAttributeValue("specularcolor", &lightInfo->mSpecularColor[0]), 3)   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
-        if (jap.getAttributeValue("ambientcolor",  &lightInfo->mAmbientColor[0]),  3)   lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
-        if (jap.getAttributeValue("shadowcolor",   &lightInfo->mShadowColor[0]),   3)   lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
-        if (jap.getAttributeValue("falloff",       &lightInfo->mConstantFalloff),  3)   lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
-        if (jap.getAttributeValue("cone",          &lightInfo->mConeInnerRadians), 3)   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
-        if (jap.getAttributeValue("power",         &lightInfo->mPower),            1)   lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
-        if (jap.getAttributeValue("lightrange",    &lightInfo->mLightRange),       1)   lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
-        if (jap.getAttributeValue("castsshadow",   &lightInfo->mCastsShadow),      1)   lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
+        if (jap.getAttributeValue("diffusecolor",  &lightInfo->mDiffuseColor[0],  3))   lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
+        if (jap.getAttributeValue("specularcolor", &lightInfo->mSpecularColor[0], 3))   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
+        if (jap.getAttributeValue("ambientcolor",  &lightInfo->mAmbientColor[0],  3))   lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
+        if (jap.getAttributeValue("shadowcolor",   &lightInfo->mShadowColor[0],   3))   lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
+        if (jap.getAttributeValue("falloff",       &lightInfo->mConstantFalloff,  3))   lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
+        if (jap.getAttributeValue("cone",          &lightInfo->mConeInnerRadians, 3))   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
+        if (jap.getAttributeValue("power",         &lightInfo->mPower,            1))   lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
+        if (jap.getAttributeValue("lightrange",    &lightInfo->mLightRange,       1))   lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
+        if (jap.getAttributeValue("castsshadow",   &lightInfo->mCastsShadow,      1))   lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
         if (jap.getAttributeValue("type",             &type)) {                         lightInfo->mWhichFields |= LightInfo::TYPE;            // type
             if       (type == "point")                          lightInfo->mType = LightInfo::POINT;
             else if  (type == "directional")                    lightInfo->mType = LightInfo::DIRECTIONAL;
@@ -2036,6 +2244,10 @@ private:
         String info;
         info += '{';
         if (prelude) info += prelude;
+        if (li.mWhichFields & LightInfo::TYPE)              string_appendf(&info, " 'type':"         "'%s',",  (li.mType == LightInfo::POINT)       ? "point" :
+                                                                                                               (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
+                                                                                                               (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
+                                                                                                               "unknown");
         if (li.mWhichFields & LightInfo::DIFFUSE_COLOR)     string_appendf(&info, " 'diffusecolor':" "[%.7g, %.7g, %.7g],", li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2]);
         if (li.mWhichFields & LightInfo::SPECULAR_COLOR)    string_appendf(&info, " 'specularcolor':""[%.7g, %.7g, %.7g],", li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2]);
         if (li.mWhichFields & LightInfo::AMBIENT_COLOR)     string_appendf(&info, " 'ambientcolor':" "[%.7g, %.7g, %.7g],", li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2]);
@@ -2045,11 +2257,9 @@ private:
         if (li.mWhichFields & LightInfo::POWER)             string_appendf(&info, " 'power':"        "%.7g,", li.mPower);
         if (li.mWhichFields & LightInfo::LIGHT_RANGE)       string_appendf(&info, " 'lightrange':"   "%.7g,", li.mLightRange);
         if (li.mWhichFields & LightInfo::CAST_SHADOW)       string_appendf(&info, " 'castsshadow':"  "%s,",   li.mCastsShadow ? "true" : "false");
-        if (li.mWhichFields & LightInfo::TYPE)              string_appendf(&info, " 'type':"         "'%s'",  (li.mType == LightInfo::POINT)       ? "point" :
-                                                                                                              (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
-                                                                                                              (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
-                                                                                                              "unknown");
         if (postlude) info += postlude;
+        if (info[info.size() - 1] == ',')
+            info.erase(info.size() - 1);   // Remove trailing comma
         info += " }";
         return info;
     }
@@ -2165,9 +2375,9 @@ private:
         if (!printOne)
             info += " ]";
 
-        std::cout << "debug(\"" + info + " \");" << std::endl;
+        std::cout << "receiveLight(\"" + info + " \");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
-            "debug(\"" + info + "\");"
+            "receiveLight(\"" + info + "\");"
         );
     }
 
@@ -2195,7 +2405,7 @@ private:
     //--------------------------------------------------------------------------
     // Set the parameters of a light, with specifications in JSON format.
     // Invoked as
-    //     light set <id> { ... }
+    //     light set { 'id':'<id>' ... }
     //--------------------------------------------------------------------------
 
     void lightSet(const String& arg, size_t argCaret) {
@@ -2273,13 +2483,14 @@ private:
             SILOG(input, error, "lightGetMood: mood level out of range");
             return;
         }
+        String prelude(string_printf(" 'mood':%d,", mood));
         String lightType;
         String info;
         if (!getNextToken(arg, &argCaret, &lightType)) {
             info = "[ ";
-                info += printLightInfoToString(NULL, mDirectionalLightMoods[mood], NULL);   info += ",";
-                info += printLightInfoToString(NULL, mPointLightMoods[mood],       NULL);   info += ",";
-                info += printLightInfoToString(NULL, mSpotLightMoods[mood],        NULL);
+                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",\\n ";
+                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",\\n ";
+                info += printLightInfoToString(prelude.c_str(), mSpotLightMoods[mood],        NULL);
             info += " ]";
         }
         else {
@@ -2291,11 +2502,11 @@ private:
                 SILOG(input, error, "lightEditMood: unknown light type \"" + lightType + "\"");
                 return;
             }
-            info = printLightInfoToString(NULL, *moodPtr, NULL);
+            info = printLightInfoToString(prelude.c_str(), *moodPtr, NULL);
         }
-        std::cout << "debug(\"" + info + " \");" << std::endl;
+        std::cout << "receiveLightMood(\"" + info + " \");" << std::endl;
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
-            "debug(\"" + info + "\");"
+            "receiveLightMood(\"" + info + "\");"
         );
     }
 
@@ -2303,22 +2514,30 @@ private:
     //--------------------------------------------------------------------------
     // Set the lighting mood. Choose from { 0, 1, 2, 3}
     // Invoked as
-    //     light setmood <level> { type=<type> ... }
+    //     light setmood { mood:<level>, type:<type> ... }
     //--------------------------------------------------------------------------
 
     void lightSetMood(const String& arg, size_t argCaret) {
         initLightMoods();
-        long mood;
-        if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
-            SILOG(input, error, "lightSetMood: no mood level was specified");
+        String params;
+        argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
+        if (arg[argCaret] == '[') {                         // Array
+            ++argCaret;                                     // Skip over '['
+            while (getNextObject(arg, &argCaret, &params))  // Get next "{...}" string
+                lightSetMood(params, 0);
             return;
         }
-        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+        params = arg.substr(argCaret);
+        JavascriptArgumentParser jap(params);
+        int mood;
+        if (!jap.getAttributeValue("mood", &mood)) {
+            SILOG(input, error, "lightSetMood: no mood level specified");
+            return;
+        }
+        if (mood < 0 || mood > (int)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
             SILOG(input, error, "lightSetMood: mood level out of range");
             return;
         }
-        String params(arg.substr(argCaret));
-        JavascriptArgumentParser jap(params);
         String lightType;
         if (!jap.getAttributeValue("type", &lightType)) {
             SILOG(input, error, "lightSetMood: no light type specified");
