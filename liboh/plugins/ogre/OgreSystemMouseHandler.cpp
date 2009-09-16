@@ -1508,6 +1508,10 @@ private:
             }
             oldmsg=msg;
 
+            if (last_animate) {
+                std::cout << "dbm debug animate: " << last_animate << " "
+                        << last_anim_vel_x << last_anim_vel_y << last_anim_vel_z << std::endl;
+            }
             if (!success) {
                 mRunningCameraPath = false;
                 return;

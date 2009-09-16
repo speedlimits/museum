@@ -49,6 +49,10 @@ struct CameraPoint {
     String msg;
     int screen_x;
     int screen_y;
+    String animate;
+    float anim_vel_x;
+    float anim_vel_y;
+    float anim_vel_z;    
 
     CameraPoint(const Vector3d& pos, const Quaternion& orient, const Task::DeltaTime& _dt, const String& s)
             : position(pos),
@@ -92,6 +96,8 @@ public:
 
     bool evaluate(const Task::DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& s, int*x, int*y);
 private:
+    String last_animate;
+    float last_anim_vel_x, last_anim_vel_y, last_anim_vel_z;
     std::vector<CameraPoint> mPathPoints;
     std::vector<double> mDensities;
     bool mDirty;
