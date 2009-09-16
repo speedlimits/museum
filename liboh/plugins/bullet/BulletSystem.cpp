@@ -451,10 +451,10 @@ bool BulletSystem::tick() {
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
-                        cout         << "dbm debug: object, " << objects[i]->mName << " moved" << endl
-                                     << "    debug meshpos: " << objects[i]->mMeshptr->getPosition() << endl
-                                     << "    debug bulletpos before reset: " << objects[i]->getBulletState().p << endl
-                                     << "    debug set vel " << loc.getVelocity() << endl;
+                        DEBUG_OUTPUT(cout << "dbm debug: object, " << objects[i]->mName << " moved" << endl
+                                          << "    debug meshpos: " << objects[i]->mMeshptr->getPosition() << endl
+                                          << "    debug bulletpos before reset: " << objects[i]->getBulletState().p << endl
+                                          << "    debug set vel " << loc.getVelocity() << endl);
                         objects[i]->setBulletState(
                             positionOrientation (
                                 loc.getPosition(),

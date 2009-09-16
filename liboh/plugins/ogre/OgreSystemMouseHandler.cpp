@@ -1496,9 +1496,9 @@ private:
             Vector3d pos;
             Quaternion orient;
             static String oldmsg;
-            String msg;
+            String msg, animation;
             int tx, ty;
-            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg, &tx, &ty);
+            bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg, &tx, &ty, animation);
             if (msg != oldmsg && msg != "") {
                 std::ostringstream ss;
                 //ss << "document.selected='" << msg << "'; debug(document.selected);";
@@ -1508,9 +1508,8 @@ private:
             }
             oldmsg=msg;
 
-            if (last_animate) {
-                std::cout << "dbm debug animate: " << last_animate << " "
-                        << last_anim_vel_x << last_anim_vel_y << last_anim_vel_z << std::endl;
+            if (animation != "") {
+                std::cout << "dbm debug animate: " << animation << std::endl;
             }
             if (!success) {
                 mRunningCameraPath = false;

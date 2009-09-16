@@ -199,7 +199,8 @@ void CameraPath::computeTimes() {
     }
 }
 
-bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& msg, int* screen_x, int* screen_y) {
+bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, 
+                          String& msg, int* screen_x, int* screen_y, String& animation) {
     if (mDirty) {
         normalizePath();
         mDirty = false;
@@ -227,10 +228,7 @@ bool CameraPath::evaluate(const DeltaTime& t, Vector3d* pos_out, Quaternion* ori
             msg = mPathPoints[i].msg;
             *screen_x = mPathPoints[i].screen_x;
             *screen_y = mPathPoints[i].screen_y;
-            last_animate = mPathPoints[i].animate;
-            last_anim_vel_x = mPathPoints[i].anim_vel_x;
-            last_anim_vel_y = mPathPoints[i].anim_vel_y;
-            last_anim_vel_z = mPathPoints[i].anim_vel_z;
+            animation = mPathPoints[i].animate;
         }
         float stddev = 1.0f / (float)mDensities[i];
         float weight = (float)exp( - difft * difft / (stddev*stddev));
