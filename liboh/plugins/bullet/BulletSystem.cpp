@@ -468,7 +468,7 @@ bool BulletSystem::tick() {
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
-                        DEBUG_ALWAYS(cout << "dbm debug PID vel: " << 
+                        DEBUG_OUTPUT(cout << "dbm debug PID vel: " << 
                                 objects[i]->mDesiredLinearVelocity.x() <<
                                 objects[i]->mDesiredLinearVelocity.y() <<
                                 objects[i]->mDesiredLinearVelocity.z()
