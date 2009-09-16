@@ -117,7 +117,7 @@ private:
         for (unsigned int i=0; i<line.size(); i++) {
             char c = line[i];
             if (c!=',') {
-                if ((c!=' ') && (c!='"')) {
+                if (c!='"') {
                     temp.push_back(c);
                 }
             }
@@ -135,7 +135,7 @@ private:
         s.clear();
         while (true) {
             char c = fgetc(f);
-            if (c<0) {
+            if (c==-1) {
                 s.clear();
                 break;
             }
