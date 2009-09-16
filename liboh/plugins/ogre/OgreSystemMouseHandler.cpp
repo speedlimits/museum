@@ -1991,8 +1991,10 @@ private:
                 // We know that we have <whitespace> <name> [ '=' | ':' ], and the index is positioned after the '=' or ':'
                 break;
             }
-            if ((*mString)[ix] == '[')  // Javascript array
-                ++ix;                   // Position at the first element
+            if (ix != String::npos) {
+                if ((*mString)[ix] == '[')  // Javascript array
+                    ++ix;                   // Position at the first element
+            }
             return ix;
         }
 
@@ -2102,15 +2104,15 @@ private:
     static void setLightInfoFromString(const String &str, LightInfo *lightInfo) {
         JavascriptArgumentParser jap(str);
         String type;
-        if (jap.getAttributeValue("diffusecolor",  &lightInfo->mDiffuseColor[0]),  3)   lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
-        if (jap.getAttributeValue("specularcolor", &lightInfo->mSpecularColor[0]), 3)   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
-        if (jap.getAttributeValue("ambientcolor",  &lightInfo->mAmbientColor[0]),  3)   lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
-        if (jap.getAttributeValue("shadowcolor",   &lightInfo->mShadowColor[0]),   3)   lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
-        if (jap.getAttributeValue("falloff",       &lightInfo->mConstantFalloff),  3)   lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
-        if (jap.getAttributeValue("cone",          &lightInfo->mConeInnerRadians), 3)   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
-        if (jap.getAttributeValue("power",         &lightInfo->mPower),            1)   lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
-        if (jap.getAttributeValue("lightrange",    &lightInfo->mLightRange),       1)   lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
-        if (jap.getAttributeValue("castsshadow",   &lightInfo->mCastsShadow),      1)   lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
+        if (jap.getAttributeValue("diffusecolor",  &lightInfo->mDiffuseColor[0],  3))   lightInfo->mWhichFields |= LightInfo::DIFFUSE_COLOR;   // R, G, B
+        if (jap.getAttributeValue("specularcolor", &lightInfo->mSpecularColor[0], 3))   lightInfo->mWhichFields |= LightInfo::SPECULAR_COLOR;  // R, G, B
+        if (jap.getAttributeValue("ambientcolor",  &lightInfo->mAmbientColor[0],  3))   lightInfo->mWhichFields |= LightInfo::AMBIENT_COLOR;   // R, G, B
+        if (jap.getAttributeValue("shadowcolor",   &lightInfo->mShadowColor[0],   3))   lightInfo->mWhichFields |= LightInfo::SHADOW_COLOR;    // R, G. B
+        if (jap.getAttributeValue("falloff",       &lightInfo->mConstantFalloff,  3))   lightInfo->mWhichFields |= LightInfo::FALLOFF;         // constant, linear, quadratic
+        if (jap.getAttributeValue("cone",          &lightInfo->mConeInnerRadians, 3))   lightInfo->mWhichFields |= LightInfo::CONE;            // cone inner radians, outer radians, falloff
+        if (jap.getAttributeValue("power",         &lightInfo->mPower,            1))   lightInfo->mWhichFields |= LightInfo::POWER;           // exponent
+        if (jap.getAttributeValue("lightrange",    &lightInfo->mLightRange,       1))   lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
+        if (jap.getAttributeValue("castsshadow",   &lightInfo->mCastsShadow,      1))   lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
         if (jap.getAttributeValue("type",             &type)) {                         lightInfo->mWhichFields |= LightInfo::TYPE;            // type
             if       (type == "point")                          lightInfo->mType = LightInfo::POINT;
             else if  (type == "directional")                    lightInfo->mType = LightInfo::DIRECTIONAL;
@@ -2242,6 +2244,10 @@ private:
         String info;
         info += '{';
         if (prelude) info += prelude;
+        if (li.mWhichFields & LightInfo::TYPE)              string_appendf(&info, " 'type':"         "'%s',",  (li.mType == LightInfo::POINT)       ? "point" :
+                                                                                                               (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
+                                                                                                               (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
+                                                                                                               "unknown");
         if (li.mWhichFields & LightInfo::DIFFUSE_COLOR)     string_appendf(&info, " 'diffusecolor':" "[%.7g, %.7g, %.7g],", li.mDiffuseColor[0],  li.mDiffuseColor[1],  li.mDiffuseColor[2]);
         if (li.mWhichFields & LightInfo::SPECULAR_COLOR)    string_appendf(&info, " 'specularcolor':""[%.7g, %.7g, %.7g],", li.mSpecularColor[0], li.mSpecularColor[1], li.mSpecularColor[2]);
         if (li.mWhichFields & LightInfo::AMBIENT_COLOR)     string_appendf(&info, " 'ambientcolor':" "[%.7g, %.7g, %.7g],", li.mAmbientColor[0],  li.mAmbientColor[1],  li.mAmbientColor[2]);
@@ -2251,11 +2257,9 @@ private:
         if (li.mWhichFields & LightInfo::POWER)             string_appendf(&info, " 'power':"        "%.7g,", li.mPower);
         if (li.mWhichFields & LightInfo::LIGHT_RANGE)       string_appendf(&info, " 'lightrange':"   "%.7g,", li.mLightRange);
         if (li.mWhichFields & LightInfo::CAST_SHADOW)       string_appendf(&info, " 'castsshadow':"  "%s,",   li.mCastsShadow ? "true" : "false");
-        if (li.mWhichFields & LightInfo::TYPE)              string_appendf(&info, " 'type':"         "'%s'",  (li.mType == LightInfo::POINT)       ? "point" :
-                                                                                                              (li.mType == LightInfo::DIRECTIONAL) ? "directional" :
-                                                                                                              (li.mType == LightInfo::SPOTLIGHT)   ? "spotlight" :
-                                                                                                              "unknown");
         if (postlude) info += postlude;
+        if (info[info.size() - 1] == ',')
+            info.erase(info.size() - 1);   // Remove trailing comma
         info += " }";
         return info;
     }
@@ -2484,8 +2488,8 @@ private:
         String info;
         if (!getNextToken(arg, &argCaret, &lightType)) {
             info = "[ ";
-                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",";
-                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",";
+                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",\\n ";
+                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",\\n ";
                 info += printLightInfoToString(prelude.c_str(), mSpotLightMoods[mood],        NULL);
             info += " ]";
         }
