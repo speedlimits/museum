@@ -1,4 +1,4 @@
-"pos_x","pos_y","pos_z","rot_x","rot_y","rot_z","rot_w","delay","text","text_x","text_y","animate"
+"pos_x","pos_y","pos_z","rot_x","rot_y","rot_z","rot_w","delay","text","text_x","text_y","animation"
 65.06,9.62,9.74,-0.03,0.66,0.03,0.75,1,"Bornholm_augmented_tour",100,100,
 36.2,7.2,-10.52,-0.03,0.72,0.03,0.7,1,,,,
 5.79,5.45,-27.51,-0.01,0.93,0.04,0.37,1,"(under spacial construction!)",150,140,

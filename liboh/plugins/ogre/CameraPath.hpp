@@ -93,8 +93,6 @@ public:
 
     bool evaluate(const Task::DeltaTime& t, Vector3d* pos_out, Quaternion* orient_out, String& s, int*x, int*y, String& anim);
 private:
-    String last_animate;
-    float last_anim_vel_x, last_anim_vel_y, last_anim_vel_z;
     std::vector<CameraPoint> mPathPoints;
     std::vector<double> mDensities;
     bool mDirty;
@@ -187,6 +185,7 @@ private:
             cp.orientation.w = str2dbl(row["rot_w"]);
             cp.dt = Task::DeltaTime::seconds(str2dbl(row["delay"]));
             cp.msg = row["text"];
+            cp.animate = row["animation"];
             cp.screen_x = str2int(row["text_x"]);
             cp.screen_y = str2int(row["text_y"]);
             return true;

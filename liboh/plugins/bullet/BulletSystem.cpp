@@ -461,7 +461,7 @@ bool BulletSystem::tick() {
                                 loc.getOrientation()),
                                 loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
                             );
-                        cout << "    debug new pos: " << objects[i]->getBulletState().p << endl;
+                        DEBUG_OUTPUT(cout << "    debug new pos: " << objects[i]->getBulletState().p << endl);
                     }
 
                     /// if object under PID control, control it
