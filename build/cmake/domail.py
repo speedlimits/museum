@@ -59,4 +59,4 @@ hexart=hexify(art)
 pyart = pkl.loads(art)
 desc = pyart[-1]
 print "sending mail:", sys.argv[1], desc, hexart
-sendMail(sys.argv[1], hexart)
+sendMail(sys.argv[1], desc, hexart)
