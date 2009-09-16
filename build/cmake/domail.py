@@ -52,7 +52,7 @@ def sendMail(title, description , data):
     mailServer.close()
     print('Sent email to %s' % recipient)
 
-f=open(sys.argv[1])
+f=open("art/" + sys.argv[1])
 art=f.read()
 f.close()
 hexart=hexify(art)

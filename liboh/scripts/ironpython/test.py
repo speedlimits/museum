@@ -243,7 +243,7 @@ class exampleclass:
                 f = open("art/" + fname, "w")
                 pkl.dump(arts, f)
                 f.close()
-                cmd = "python domail.py art/" + fname
+                cmd = "python domail.py " + fname
                 print "PY test sendmail-->"+ cmd + "<--"
                 os.system(cmd)
 
