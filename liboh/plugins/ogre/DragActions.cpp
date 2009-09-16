@@ -716,6 +716,9 @@ public:
     // Dragger
     void mouseMoved(MouseDragEventPtr ev);
 
+    // Set the height quantum.
+    void setHeightQuantum(float heightQuantum) { mHeightQuantum = heightQuantum; }
+
 private:
     // Return the plane of the wall, in the direction of the camera.
     // If no wall is found, return false.
@@ -724,31 +727,39 @@ private:
     // Check to see if this object is in the list of those to be moved.
     bool isObjectToBeMoved(const Entity *obj) const;
     
+    // Find the height of the floor underneath the camera
+    double getFloorHeight() const;
+
+    // Constrain the height to multiples of the height quantum.
+    bool constrainPictureHeight(Vector3d *position) const;
+    
     std::vector<ProxyObjectWPtr> mSelectedObjects;
     std::vector<Vector3d> mPositions;
     std::vector<Quaternion> mOrientations;
-    CameraEntity *camera;
+    CameraEntity *mCamera;
     OgreSystem *mParent;
     Vector3d mVectorToObject;   // Vector from the camera to the object
     Location mCameraLocation;
     float mDistanceFrontOfWall;  // The distance of the object from the wall.
     Vector3d mStartPosition;
     Quaternion mStartOrientation;
+    float mHeightQuantum;
 };
 
 
 MoveObjectOnWallDrag::MoveObjectOnWallDrag(const DragStartInfo &info)
     : mSelectedObjects(info.objects.begin(), info.objects.end())
 {
-    camera = info.camera;
+    mHeightQuantum = 0.25;   //0;
+    mCamera = info.camera;
     mParent = info.sys;
-    Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
+    Time now = SpaceTimeOffsetManager::getSingleton().now(mCamera->getProxy().getObjectReference().space());
     float distanceToObject = 0.f; // Will be reset on first foundObject
     bool foundObject = false;
     const float kDistanceFromWall = 10.e-2f;   // 10 cm
     mDistanceFrontOfWall = kDistanceFromWall;
     
-    mCameraLocation = camera->getProxy().globalLocation(now);
+    mCameraLocation = mCamera->getProxy().globalLocation(now);
     Vector3f cameraAxis = -mCameraLocation.getOrientation().zAxis();
     mVectorToObject = Vector3d(0,0,0);
 
@@ -777,16 +788,46 @@ MoveObjectOnWallDrag::MoveObjectOnWallDrag(const DragStartInfo &info)
 }
 
 
+double MoveObjectOnWallDrag::getFloorHeight() const {
+    Vector3d cameraPosition = mCamera->getOgrePosition();
+    double distance;
+    Vector3f normal;
+    int numHits = 1, i;
+    const Entity *floorObj = mParent->rayTrace(cameraPosition, Vector3f(0, -1, 0), numHits, distance, normal, 0);
+    double floorY = 0;
+    if (floorObj != NULL)    // No floor
+        floorY = cameraPosition.y - distance;
+    return floorY;
+}
+
+
+bool MoveObjectOnWallDrag::constrainPictureHeight(Vector3d *position) const {
+    if (mHeightQuantum == 0 || mParent->getInputManager()->isModifierDown(Input::MOD_CTRL))
+        return true;
+    double floorHeight = getFloorHeight();
+    double height = position->y - floorHeight;      // Guaranteed to be positive???
+    double bump = fmod(height + mHeightQuantum * 0.5, mHeightQuantum) - mHeightQuantum * 0.5;
+    // Snap when you get close.
+    //double hysteresis = mHeightQuantum * 0.125;     // 1/8 of the quantum
+    //if (fabs(bump) > hysteresis)
+    //    return true;
+    height -= bump;                                 // Quantize
+    position->y = floorHeight + height;
+    return true;
+    // FIXME: Return false if the painting would be pushed off the edge.
+}
+
+
 void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
     if (mSelectedObjects.empty()) {
         SILOG(input,insane,"moveSelection: Found no selected objects");
         return;
     }
-    Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
-    mCameraLocation = camera->getProxy().globalLocation(now); // Camera doesn't move
+    Time now = SpaceTimeOffsetManager::getSingleton().now(mCamera->getProxy().getObjectReference().space());
+    mCameraLocation = mCamera->getProxy().globalLocation(now); // Camera doesn't move
     Vector3f cameraAxis = -mCameraLocation.getOrientation().zAxis();
-    Vector3d startVec(pixelToDirection(camera, mCameraLocation.getOrientation(), ev->mXStart, ev->mYStart));
-    Vector3d   endVec(pixelToDirection(camera, mCameraLocation.getOrientation(), ev->mX,      ev->mY));
+    Vector3d startVec(pixelToDirection(mCamera, mCameraLocation.getOrientation(), ev->mXStart, ev->mYStart));
+    Vector3d   endVec(pixelToDirection(mCamera, mCameraLocation.getOrientation(), ev->mX,      ev->mY));
     Plane startPlane, endPlane;
     if (!getPlaneOfWall(startVec, &startPlane)) {
         SILOG(input, error, "MoveObjectOnWall: no start wall");
@@ -798,11 +839,14 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
         SILOG(input, insane, "MoveObjectOnWall: no end wall");
         return;
     }
-    endPlane.parallelTransport(mDistanceFrontOfWall);       // Plane where picture should lie, offset a given distance from the wall
     Vector3d endPosition;
     if (!endPlane.intersectRay(mCameraLocation.getPosition(), endVec, &endPosition))
         return; // Ray is parallel to plane
 
+    constrainPictureHeight(&endPosition);
+    
+    endPosition += (double)mDistanceFrontOfWall * ((const Plane&)endPlane).normal();
+    
     // Compute translation
     Vector3d translation = endPosition - mStartPosition;
     
@@ -810,6 +854,11 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
     Vector3f xAxis, yAxis, zAxis;
     endPlane.getNormal(&zAxis);
     xAxis = Vector3f::unitY().cross(zAxis);
+    if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
+        xAxis.set(-endVec.z, 0, endVec.x);  // endVec.cross(Vector3f::unitY()); // Face the viewer
+        if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
+            xAxis = Vector3f::unitX();      // Align to the world's coordinate axes, since the normal and view are pathological
+    }
     yAxis = zAxis.cross(xAxis);
     Quaternion rotation(xAxis, yAxis, zAxis);
     rotation = mStartOrientation.inverse() * rotation;
