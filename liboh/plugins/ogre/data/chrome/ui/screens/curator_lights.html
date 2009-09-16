@@ -1,5 +1,5 @@
 <script type="text/javascript">
-		function receiveLightMood(moodStr) { lightForm.lightInfo.value = moodStr; }
+        function receiveLightMood(moodStr) { lightForm.lightInfo.value = moodStr; }
 
 </script>
 
@@ -15,13 +15,13 @@
 <a href='javascript:Client.event("navcommand", "light getmood 2");'>2</a>&nbsp;
 <a href='javascript:Client.event("navcommand", "light getmood 3");'>3</a>&nbsp;
 |&nbsp;
-<a href="javascript:Client.event('navcommand', 'spotlight selected');">light selected</a>&nbsp;
+<a href="javascript:Client.event('navcommand', 'spotlight selected');">Light Selected</a>&nbsp;
 |&nbsp;
 <a href="javascript:location.reload();">Reload</a>
 </p>
 
 <p>
-  <textarea name="lightInfo" cols="100" rows="4"></textarea>
+  <textarea name="lightInfo" rows="5" wrap="soft" style="width: 600px; font: 67% Verdana, Arial, Helvetica, sans-serif"></textarea>
   <input name="setMoodButton" type="button" onclick="javascript:Client.event('navcommand', 'light setmood ' + lightForm.lightInfo.value);" value="Set" />
 </p>
 </form>
