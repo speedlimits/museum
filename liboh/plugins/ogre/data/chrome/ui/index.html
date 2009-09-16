@@ -133,7 +133,8 @@
 				if(!galleryWasLoaded) {
 					
 					debug('TODO load data: ' + event.data);
-					Client.event("navcommand", "inventory loadState " + event.data);
+					//Client.event("navcommand", "inventory loadState " + event.data);
+					Client.event("navcommand", "inventory debug \"name has spaces\" \"description too\"" + event.data);
 					
 					galleryWasLoaded = true;
 					

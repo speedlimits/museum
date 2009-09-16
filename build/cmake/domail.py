@@ -8,6 +8,7 @@ from email.MIMEAudio import MIMEAudio
 from email.MIMEImage import MIMEImage
 from email.Encoders import encode_base64
 import array
+import cPickle as pkl
 
 template = """
 :start
@@ -51,13 +52,11 @@ def sendMail(title, description , data):
     mailServer.close()
     print('Sent email to %s' % recipient)
 
-args = []
-for i in sys.argv[1:]:
-    args.append(i.replace("_"," "))
-
-f=open(args[-1])
+f=open(sys.argv[1])
 art=f.read()
 f.close()
-args[-1]=hexify(art)
-print "sending mail:", args
-sendMail(*args)
+hexart=hexify(art)
+pyart = pkl.loads(art)
+desc = pyart[-1]
+print "sending mail:", sys.argv[1], desc, hexart
+sendMail(sys.argv[1], hexart)

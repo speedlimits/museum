@@ -12,6 +12,7 @@ import math
 import cPickle as pkl
 import os
 import array
+import time
 
 DEBUG_OUTPUT=True
 DEG2RAD = 0.0174532925
@@ -45,6 +46,27 @@ def pbj2Quat(q):
     wsq = 1.0 - (x**2 + y**2 + z**2)
     w = wsq**0.5 * sign
     return x, y, z, w
+
+def tokenize(s):
+    toks = []
+    quoting=False
+    t = ""
+    for i in s:
+        if quoting:
+            if i=='"':
+                quoting=False
+            else:
+                t += i
+        else:
+            if i=='"':
+                quoting=True
+            elif i==' ':
+                toks.append(t)
+                t = ""
+            else:
+                t += i
+    toks.append(t)
+    return toks
 
 hexchars = '0123456789abcdef'
 
@@ -101,7 +123,7 @@ class exampleclass:
         elif name == "JavascriptMessage":
             s = "".join(chr(i) for i in serialarg)
             if DEBUG_OUTPUT: print "PY JavascriptMessage:", name, s
-            tok = s.split()
+            tok = tokenize(s)
 
             if tok[0]=="inventory":                
                 if tok[1]=="placeObject":
@@ -120,7 +142,8 @@ class exampleclass:
 
                 elif tok[1]=="saveState":
                     filename = tok[2]
-                    print "PY: saveState", filename
+                    description = tok[3]
+                    print "PY: saveState", filename, "description:", description
                     self.saveStateArt={}
                     for art, uid in self.objects.items():
                         if art[:8]=="artwork_":
@@ -128,6 +151,9 @@ class exampleclass:
                             self.saveStateArt[uid]={"name":art}
                             self.getPosition(objid=uid, position=1, orientation=1)
                     self.saveStateFile=filename
+                    if DEBUG_OUTPUT:
+                        description += " TIMESTAMP:" + str(time.ctime())
+                    self.saveStateDesc=description
 
                 elif tok[1]=="loadState":
                     """
@@ -141,12 +167,13 @@ class exampleclass:
                     arts = pkl.loads(data)
                     if DEBUG_OUTPUT: print "loadState:", arts
                     for art in arts:
-                        pos = art["pos"]
-                        rot = art["rot"]
-                        nam = art["name"]
-                        uid = self.objects[nam]
-                        self.setPosition(objid=uid, position = pos, orientation = rot,
-                             velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+                        if "pos" in art:
+                            pos = art["pos"]
+                            rot = art["rot"]
+                            nam = art["name"]
+                            uid = self.objects[nam]
+                            self.setPosition(objid=uid, position = pos, orientation = rot,
+                                 velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
 
             elif tok[0]=="funmode":
                 if tok[1]=="fire":
@@ -210,11 +237,13 @@ class exampleclass:
                     break
             if done:
                 arts = [i for i in self.saveStateArt.values()]
+                arts.append(self.saveStateDesc)
                 if DEBUG_OUTPUT: print "           PY save art done:", arts
-                f = open("art/"+self.saveStateFile, "w")
+                fname = self.saveStateFile.replace(" ", "_").replace('"',"")
+                f = open("art/" + fname, "w")
                 pkl.dump(arts, f)
                 f.close()
-                cmd = "python domail.py dennis_museum_3 some_real_data art/" + self.saveStateFile
+                cmd = "python domail.py art/" + fname
                 print "PY test sendmail-->"+ cmd + "<--"
                 os.system(cmd)
 
