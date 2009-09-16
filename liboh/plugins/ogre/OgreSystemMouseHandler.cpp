@@ -1075,7 +1075,12 @@ private:
         std::string name = obj->getPhysical().name;
         if (name.empty()) {
             name = obj->getMesh().filename();
-            name.resize(name.size()-5);
+            if (name.size() < 5) {
+                name = "NONAME_NOMESH";
+            }
+            else {
+                name.resize(name.size()-5);
+            }
             //name += ".0";
         }
 //        if (name.find(".") < name.size()) {             /// remove any enumeration
@@ -1556,26 +1561,30 @@ private:
     /// curator mode
 
     //--------------------------------------------------------------------------
-    void debugAction_addpic() {
+    void debugAction(int num) {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        if (num==1)
+            ss << "inventory loadState 82c60703a082460713a065e616d656a00723a06516274777f627b6f50323a00733a0376507f637a00743a08264d293e23333631363831353537363139363a064d223e2136303332363336303837333732343a06413e2237313238373130353432353530353a0470753a0376527f647a00763a0826403e20303032303831303532303830303239363231373a064d203e2033343930353239353831393034343131333a06473e22363834303238393634343331343931356d2030363a06403e29393933393036303237393931313436323a0470773a0371682460783a07623a06516274777f627b6f50333a00793a0377643a08264d273e24363939373a064d213e203636373a064d203e2035363039303030303030303030303030313a047071303a0377663a0826403e203a064d203e273331333533393938313834323034313a06403e203a06403e26383139393830343230333532393733353a047071313a037168246071323a07623a06516274777f627b6f50343a0071333a0377643a08264d273e2534383433373030383934323239323a064d223e2131393030303132323332383632393a06433e213931333537343333373737373a047071343a0377663a0826403e273037313036383238363839353735323a064d283e26373434393732333136333130353039356d2031313a06483e26373434373731303838333837323936356d2031313a064d203e27303731303637333336383335313636323a047071353a037168246071363a07623a06516274777f627b6f50313a0071373a0377643a08264d223e27353231343a064d203e26383339363939393939393939393939373a06423e23373130313a047071383a0377663a0826403e203a064d203e273331333533393938313834323034313a06403e203a06403e26383139393830343230333532393733353a047071393a03716e2";
+        else
+            ss << "inventory saveState \"name with spaces\" \"description, also with spaces\"";
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+        /*
+        /// place art
         static int pic=0;
         pic++;
         WebViewManager::NavigationAction act;
         ostringstream ss;
         ss << "inventory placeObject artwork_0" << pic << " 400 300 ";
         inventoryHandler(act, ss.str());
+        */
     }
 
-    void debugAction() {
-        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
-        assert(cam);
-        RoutableMessageBody msg;
-        ostringstream ss;
-        ss << "inventory saveState testfile1";
-        msg.add_message("JavascriptMessage", ss.str());
-        String smsg;
-        msg.SerializeToString(&smsg);
-        cam->sendMessage(MemoryReference(smsg));
-    }
     /// WebView Actions
 
     //--------------------------------------------------------------------------
@@ -2851,7 +2860,8 @@ public:
         mInputResponses["cameraPathSlowDown"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::cameraPathChangeSpeed, this, 0.1f));
         mInputResponses["fireAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::fireAction, this));
         mInputResponses["resetAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::resetAction, this));
-        mInputResponses["debugAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this));
+        mInputResponses["debugAction1"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 1));
+        mInputResponses["debugAction2"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 2));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
         mInputResponses["webBack"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateBack));
@@ -2929,7 +2939,8 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_SPACE), mInputResponses["fireAction"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_MINUS), mInputResponses["debugAction1"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction2"]);
 
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);

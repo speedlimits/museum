@@ -133,6 +133,7 @@
 				if(!galleryWasLoaded) {
 					
 					debug('TODO load data: ' + event.data);
+					Client.event("navcommand", "inventory loadState " + event.data);
 					
 					galleryWasLoaded = true;
 					
