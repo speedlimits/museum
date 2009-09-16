@@ -2132,9 +2132,7 @@ private:
 
     double getFloorHeight() const {
         CameraEntity *camera = mParent->mPrimaryCamera;
-        Vector3d cameraPosition  =  camera->getOgrePosition();
-        Quaternion cameraOrientation = camera->getOgreOrientation();
-        Vector3f cameraAxis = -cameraOrientation.zAxis();
+        Vector3d cameraPosition = camera->getOgrePosition();
         double distance;
         Vector3f normal;
         int numHits = 1, i;
