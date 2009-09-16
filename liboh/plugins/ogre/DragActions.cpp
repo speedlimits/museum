@@ -802,15 +802,17 @@ double MoveObjectOnWallDrag::getFloorHeight() const {
 
 
 bool MoveObjectOnWallDrag::constrainPictureHeight(Vector3d *position) const {
-    if (mHeightQuantum == 0 || mParent->getInputManager()->isModifierDown(Input::MOD_CTRL))
+    if (mHeightQuantum <= 0 || mParent->getInputManager()->isModifierDown(Input::MOD_CTRL))
         return true;
     double floorHeight = getFloorHeight();
     double height = position->y - floorHeight;      // Guaranteed to be positive???
     double bump = fmod(height + mHeightQuantum * 0.5, mHeightQuantum) - mHeightQuantum * 0.5;
-    // Snap when you get close.
-    //double hysteresis = mHeightQuantum * 0.125;     // 1/8 of the quantum
-    //if (fabs(bump) > hysteresis)
-    //    return true;
+#if SNAP_WHEN_CLOSE
+    // Snap when you get close to one of the height quanta.
+    double hysteresis = mHeightQuantum * 0.125;     // 1/8 of the quantum
+    if (fabs(bump) > hysteresis)                    // Not close enough
+        return true;                                // Don't constrain
+#endif // SNAP_WHEN_CLOSE
     height -= bump;                                 // Quantize
     position->y = floorHeight + height;
     return true;
