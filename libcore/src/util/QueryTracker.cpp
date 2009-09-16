@@ -103,7 +103,15 @@ void QueryTracker::processMessage(const RoutableMessageHeader &msgHeader, Memory
             SILOG(cppoh, warning, os.str());
         }
     } else {
-        SILOG(cppoh, warning, "Got a reply for unknown query ID "<<id);
+        ObjectReference dest(ObjectReference::null());
+        if (msgHeader.has_destination_object()) {
+            dest = msgHeader.destination_object();
+        }
+        SILOG(cppoh, warning, "Got a reply for unknown query ID (assume Python?)"<<id);
+        std::ostringstream os;
+        os << "Response message with ID "<<id<<" to object "<<dest<<
+                " came from " <<msgHeader.source_object();
+        SILOG(cppoh, warning, os.str());
     }
 }
 
