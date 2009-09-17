@@ -31,6 +31,7 @@
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_curator.html");	
+				loadScreen("div#bottom-bar", "screens/bottombar.html"); 	
 				if (mode == 1) { // art 
 					loadScreen("#detail-screen", "screens/curator_art.html");	
 				} else if (mode == 2) { // frames 
@@ -118,9 +119,9 @@
 	
 		$(document).ready( function () {
 			if ($.getURLParam('mode') == "curator") {
-				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome_curator.html"); ', 1000);
+				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critique") {
-				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome_critique.html"); ', 1000);
+				setTimeout('critiqueMode() ', 1000);
 			} else {
 				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
 			}
