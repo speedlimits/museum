@@ -904,7 +904,7 @@ private:
         ) {
             Entity *ent = iter->second;
             ProxyObject *obj = ent->getProxyPtr().get();
-            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj);
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj);
             if (light) {
                 if (!foundFirstLight) {
                     visibility = !ent->getVisible();
@@ -1701,6 +1701,26 @@ private:
 
 
     //--------------------------------------------------------------------------
+    // Get the next float.
+    //
+    // Parameters:
+    //   - str    = the string to be searched
+    //   - *pos   = the position in the string to start the search,
+    //              updated to the position after the found number after the call
+    //   - *d     = found number is store here. Note that NaNs are not recognized.
+    // Returns true if a floating-point number was found, false otherwise.
+    //--------------------------------------------------------------------------
+
+    static bool getNextTokenAsFloat(const String &str, size_t *pos, float *f) {
+        const char *start = str.c_str() + *pos;
+        char *end;
+        *f = strtof(start, &end);
+        *pos = end - str.c_str();
+        return start != end;
+    }
+
+
+    //--------------------------------------------------------------------------
     // Get the next long integer.
     //
     // Parameters:
@@ -2280,25 +2300,28 @@ private:
     void initLightMoods() {
         if (mMoodLightsInited)
             return;
-        for (int i = 0; i < 4; ++i) {
+        const int numMoods = sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]);
+        for (int i = 0; i < numMoods; ++i) {
             mSpotLightMoods[i].mWhichFields          = 0;
             mPointLightMoods[i].mWhichFields         = 0;
             mDirectionalLightMoods[i].mWhichFields   = 0;
         }
-        mSpotLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 6.).setLightFalloff(1., .00,.20).setLightType(LightInfo::SPOTLIGHT);
-        mSpotLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.9).setLightRange( 7.).setLightFalloff(1.,-.02,.10).setLightType(LightInfo::SPOTLIGHT);
-        mSpotLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange( 9.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::SPOTLIGHT);
-        mSpotLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT);
+                
+        mSpotLightMoods[0].setLightDiffuseColor(Color(.7,.6,.5)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
+        mSpotLightMoods[1].setLightDiffuseColor(Color(.8,.7,.6)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
+        mSpotLightMoods[2].setLightDiffuseColor(Color(.9,.9,.8)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
+        mSpotLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
 
-        mPointLightMoods[0].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.7).setLightRange( 8.).setLightFalloff(1., .00,.20).setLightType(LightInfo::POINT);
-        mPointLightMoods[1].setLightDiffuseColor(Color(1.,1.,.9)).setLightPower(.8).setLightRange(12.).setLightFalloff(1.,-.02,.10).setLightType(LightInfo::POINT);
-        mPointLightMoods[2].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(.9).setLightRange(16.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::POINT);
-        mPointLightMoods[3].setLightDiffuseColor(Color(1.,1.,1.)).setLightPower(1.).setLightRange(20.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::POINT);
+        mPointLightMoods[0].setLightDiffuseColor(Color(.2,.1,.0)).setLightRange(20.).setLightFalloff(1., .00,.20).setLightType(LightInfo::POINT).setLightPower(1);
+        mPointLightMoods[1].setLightDiffuseColor(Color(.3,.2,.1)).setLightRange(20.).setLightFalloff(1.,-.02,.10).setLightType(LightInfo::POINT).setLightPower(1);
+        mPointLightMoods[2].setLightDiffuseColor(Color(.4,.3,.2)).setLightRange(20.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::POINT).setLightPower(1);
+        mPointLightMoods[3].setLightDiffuseColor(Color(.5,.5,.5)).setLightRange(20.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::POINT).setLightPower(1);
 
-        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.007).setLightType(LightInfo::DIRECTIONAL);
-        mDirectionalLightMoods[1].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.8).setLightType(LightInfo::DIRECTIONAL);
-        mDirectionalLightMoods[2].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(.9).setLightType(LightInfo::DIRECTIONAL);
-        mDirectionalLightMoods[3].setLightDiffuseColor(Color(.2,.2,.2)).setLightPower(1.).setLightType(LightInfo::DIRECTIONAL);
+        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.05,.01,.00)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[1].setLightDiffuseColor(Color(.10,.08,.06)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[2].setLightDiffuseColor(Color(.15,.14,.13)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[3].setLightDiffuseColor(Color(.20,.20,.20)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+
         mMoodLightsInited = true;
     }
 
@@ -2319,7 +2342,7 @@ private:
         ) {
             Entity *ent = iter->second;                                     if (!ent)   continue;
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
             if (list.size() > 1)
                 list += ", ";
             list += obj->getObjectReference().toString();
@@ -2359,9 +2382,9 @@ private:
         for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
             Entity *ent = iter->second;                                     if (!ent)   continue;
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
             if (!printOne && ix > 0)
-                info += ", ";
+                info += ",\\n  ";
             if (!printOne || (isIndex && ix == index) || obj->getObjectReference() == sor)
                 info += printLightInfoToString(light);
             ++ix;
@@ -2385,7 +2408,7 @@ private:
         ) {
             Entity *ent = iter->second;                                     if (!ent)   continue;
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
             if (obj->getObjectReference() == sor)
                 return light;
         }
@@ -2445,7 +2468,7 @@ private:
         ) {
             Entity *ent = iter->second;                                     if (!ent)   continue;
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
-            ProxyLightObject* light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
             LightInfo li = light->getLastLightInfo();
             switch (li.mType) {
                 case LightInfo::POINT:          li =        mPointLightMoods[mood]; break;
@@ -2621,6 +2644,102 @@ private:
 
 
     //--------------------------------------------------------------------------
+    // Get the power of one or all of the lights.
+    // Invoked as
+    //     light getpower <id>
+    //     light getpower
+    // The latter form will get the power level of all lights.
+    //--------------------------------------------------------------------------
+
+    void lightGetPower(const String& arg, size_t argCaret) {
+        String id;
+        bool getOne = getNextToken(arg, &argCaret, &id);
+        SpaceObjectReference sor = SpaceObjectReference::null();
+        String info;
+        if (getOne)
+            sor = SpaceObjectReference(id);
+        else
+            info = "[ ";
+
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            if (getOne && !(light->getObjectReference() == sor))                        continue;
+            if (!getOne && info.size() > 2)
+                info += ", ";
+            LightInfo li = light->getLastLightInfo();
+            string_appendf(&info, "{ 'id':'%s', 'power':%.7g }", light->getObjectReference().toString().c_str(), light->getLastLightInfo().mPower);
+        }
+        
+        if (!getOne)
+            info += " ]";
+
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+            "receivePower(\"" + info + "\");"
+        );
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Set the power of one or all of the lights.
+    // Invoked as
+    //     light setpower <power>
+    //     light setpower <power> <id>
+    //     light setpower { 'id':'<id>', 'power':<power> }
+    //     light setpower [ { 'id':'<id>', 'power':<power> }, { ... } ]
+    // The first form sets the power level of all lights to the same value.
+    // The second and third forms set the power level of a particular light.
+    // The fourth form sets the power level of every light to a different level.
+    //--------------------------------------------------------------------------
+
+    void lightSetPower(const String& arg, size_t argCaret) {
+        argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
+        if (arg[argCaret] == '[') {                         // Array
+            String params;
+            ++argCaret;                                     // Skip over '['
+            while (getNextObject(arg, &argCaret, &params))  // Get next "{...}" string
+                lightSetPower(params, 0);
+            return;
+        }
+
+        SpaceObjectReference sor = SpaceObjectReference::null();
+        float power;
+        String id;
+        bool setOne;
+        if (arg[argCaret] == '{') {                         // Object
+            String params = arg.substr(argCaret);
+            JavascriptArgumentParser jap(params);
+            setOne = jap.getAttributeValue("id", &id);
+            if (!jap.getAttributeValue("power", &power)) {
+                SILOG(input, error, "lightSetPower: no power level was specified");
+                return;
+            }
+        }
+        else {                                              // Simple parameters
+            if (!getNextTokenAsFloat(arg, &argCaret, &power)) {
+                SILOG(input, error, "lightSetPower: no power level was specified");
+                return;
+            }
+            setOne = getNextToken(arg, &argCaret, &id);
+        }
+        
+        if (setOne)
+            sor = SpaceObjectReference(id);
+
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            if (setOne && !(light->getObjectReference() == sor))                        continue;
+            LightInfo li = light->getLastLightInfo();
+            li.setLightPower(power);
+            light->update(li);
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
     //  light list
     //  light get [<id>]
     //  light set <id> { ... }
@@ -2629,6 +2748,9 @@ private:
     //  light getmood <level> [<type>]
     //  light selected
     //  light remove <id>
+    //  light getpower [<id>]
+    //  light setpower <power> [<id>]
+    //  light setpower { id:<id>, power:<power> }
     //--------------------------------------------------------------------------
 
     void lightHandler(WebViewManager::NavigationAction action, const String& arg) {
@@ -2650,6 +2772,8 @@ private:
             { "getmood",        &Sirikata::Graphics::OgreSystem::MouseHandler::lightGetMood     },
             { "selected",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightSelected    },
             { "remove",         &Sirikata::Graphics::OgreSystem::MouseHandler::lightRemove      },
+            { "getpower",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightGetPower    },
+            { "setpower",       &Sirikata::Graphics::OgreSystem::MouseHandler::lightSetPower    },
             { NULL,             NULL                                                            }
         };
 
@@ -2803,22 +2927,25 @@ public:
                 WebViewEvent::Id,
                 std::tr1::bind(&MouseHandler::webviewHandler, this, _1)));
 
-        mInputResponses["moveForward"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(0, 0, -1), _1), 1, 0);
-        mInputResponses["moveBackward"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(0, 0, 1), _1), 1, 0);
-        mInputResponses["moveLeft"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(-1, 0, 0), _1), 1, 0);
-        mInputResponses["moveRight"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(1, 0, 0), _1), 1, 0);
-        mInputResponses["moveDown"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(0, -1, 0), _1), 1, 0);
-        mInputResponses["moveUp"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(0, 1, 0), _1), 1, 0);
+        const float trnSpeed = 0.05f;   // Speed for translational motion, in meters/sec. (FIXME: 5 cm/sec isn't what is perceived)
+        const float rotSpeed = 0.5f;    // Speed for  rotational   motion, in rdians/sec.
+        // ----------------------------------------------------------------------------------------------------------  ------ direction --------  ---on--- off
+        mInputResponses["moveForward"]  = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  0, -1), _1), trnSpeed, 0);
+        mInputResponses["moveBackward"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  0, +1), _1), trnSpeed, 0);
+        mInputResponses["moveLeft"]     = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(-1,  0,  0), _1), trnSpeed, 0);
+        mInputResponses["moveRight"]    = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f(+1,  0,  0), _1), trnSpeed, 0);
+        mInputResponses["moveDown"]     = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0, -1,  0), _1), trnSpeed, 0);
+        mInputResponses["moveUp"]       = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  1,  0), _1), trnSpeed, 0);
 
-        mInputResponses["rotateXPos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(1, 0, 0), _1), 1, 0);
-        mInputResponses["rotateXNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(-1, 0, 0), _1), 1, 0);
-        mInputResponses["rotateYPos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(0, 1, 0), _1), 1, 0);
-        mInputResponses["rotateYNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(0, -1, 0), _1), 1, 0);
-        mInputResponses["rotateZPos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(0, 0, 1), _1), 1, 0);
-        mInputResponses["rotateZNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(0, 0, -1), _1), 1, 0);
+        mInputResponses["rotateXPos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(+1,  0,  0), _1), rotSpeed, 0);
+        mInputResponses["rotateXNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f(-1,  0,  0), _1), rotSpeed, 0);
+        mInputResponses["rotateYPos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f( 0, +1,  0), _1), rotSpeed, 0);
+        mInputResponses["rotateYNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f( 0, -1,  0), _1), rotSpeed, 0);
+        mInputResponses["rotateZPos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f( 0,  0, +1), _1), rotSpeed, 0);
+        mInputResponses["rotateZNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::rotateAction, this, Vector3f( 0,  0, -1), _1), rotSpeed, 0);
 
-        mInputResponses["stableRotatePos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, 1.f, _1), 1, 0);
-        mInputResponses["stableRotateNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, -1.f, _1), 1, 0);
+        mInputResponses["stableRotatePos"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, +1.f, _1),      rotSpeed, 0);
+        mInputResponses["stableRotateNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, -1.f, _1),      rotSpeed, 0);
 
         mInputResponses["createLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::createLightAction, this));
         mInputResponses["controlLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::controlLightAction, this));
