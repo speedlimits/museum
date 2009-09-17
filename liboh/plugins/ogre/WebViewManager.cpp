@@ -76,6 +76,10 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
       lastTooltip(0), tooltipShowTime(0), isDraggingFocusedWebView(0),
           mInputManager(inputMgr)
 {
+    FILE* f=fopen("mode.txt", "r");
+    char mode[20];
+    fread(mode, 1, 19, f);
+    std::cout << "webview option museumMode:" << mode << std::endl;
     tooltipWebView = 0;
 #ifdef HAVE_AWESOMIUM
     webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
@@ -90,12 +94,16 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     //tooltipWebView->setIgnoresMouse();
 
         chromeWebView = createWebView("__chrome", 1336, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
+        /*
         if (access("mode_flythru", F_OK)==0) {
             chromeWebView->loadFile("application/sirikata_flythru.html");
         }
         else {
-            chromeWebView->loadFile("ui/index.html?param=test");
-        }
+        */
+        std::ostringstream ss;
+        ss << "ui/index.html?mode=" << mode;
+        chromeWebView->loadFile(ss.str());
+//        }
         chromeWebView->setTransparent(true);
 
 /*  WebView* chromeUI = createWebView("ui", 1336, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_MIDDLE);

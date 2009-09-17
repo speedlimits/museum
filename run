@@ -5,6 +5,9 @@ if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru
     cmd = "./run scenes/" + sys.argv[1] + ".csv scenes/" + sys.argv[1] + "_env.csv"
     if sys.argv[1] in ("curator", "funmode"):
         cmd += " scenes/" + sys.argv[1] + "_art.csv"
+    f = open("build/cmake/mode.txt", "w")
+    f.write(sys.argv[1] + "\n")
+    f.close()
     os.system(cmd)
     exit()
 
