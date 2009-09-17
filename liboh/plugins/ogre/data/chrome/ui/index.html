@@ -99,7 +99,7 @@
 		}
 		
 		function pictureSelected(id) {
-			if (id == null) {
+			if (id != null) {
 				$("body").trigger('sirikata_item_select', {item: id});	
 			} else {
 				$("body").trigger('sirikata_item_deselect');
@@ -132,8 +132,10 @@
 		function loadGallery(event) {
 				if(!galleryWasLoaded) {
 					
-					debug('TODO load data: ' + event.data);
-					Client.event("navcommand", "inventory loadState " + event.data);
+					debug('load data: ' + event.data);
+					try {
+						Client.event("navcommand", "inventory loadState " + event.data);
+					} catch (err) {debug('load data failed');}
 					
 					galleryWasLoaded = true;
 					

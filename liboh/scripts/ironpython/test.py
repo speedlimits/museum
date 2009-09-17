@@ -14,6 +14,8 @@ import os
 import array
 import time
 
+import blog
+
 DEBUG_OUTPUT=True
 DEG2RAD = 0.0174532925
 
@@ -77,6 +79,15 @@ def unHex(s):
         hi = hexchars.index(s[i+1])
         a.append(lo + (hi<<4))
     return a.tostring()
+
+def hexify(s):
+    ret = array.array('c',())
+    for c in s:
+        lo = ord(c) & 15
+        hi = ord(c) >> 4
+        ret.append(hex(lo)[-1])
+        ret.append(hex(hi)[-1])
+    return ret.tostring()
 
 class exampleclass:
     def __init__(self):
@@ -238,14 +249,18 @@ class exampleclass:
             if done:
                 arts = [i for i in self.saveStateArt.values()]
                 arts.append(self.saveStateDesc)
-                if DEBUG_OUTPUT: print "           PY save art done:", arts
-                fname = self.saveStateFile.replace(" ", "_").replace('"',"")
-                f = open("art/" + fname, "w")
-                pkl.dump(arts, f)
-                f.close()
-                cmd = "python domail.py " + fname
-                print "PY test sendmail-->"+ cmd + "<--"
-                os.system(cmd)
+                #if DEBUG_OUTPUT: print "           PY save art done:", arts
+                #fname = self.saveStateFile.replace(" ", "_").replace('"',"")
+                #f = open("art/" + fname, "w")
+                #pkl.dump(arts, f)
+                #f.close()
+                #cmd = "python domail.py " + fname
+                #print "PY test sendmail-->"+ cmd + "<--"
+                #os.system(cmd)
+                data = pkl.dumps(arts)
+                print "PY: will hexify this data %s" % (data)
+                hexart=hexify(data)
+                blog.saveMuseum(self.saveStateFile, self.saveStateDesc, hexart)
 
     def sawAnotherObject(self,persistence,header,retstatus):
         if header.HasField('return_status') or retstatus:
