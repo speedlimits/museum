@@ -258,7 +258,6 @@ class exampleclass:
                 #print "PY test sendmail-->"+ cmd + "<--"
                 #os.system(cmd)
                 data = pkl.dumps(arts)
-                print "PY: will hexify this data %s" % (data)
                 hexart=hexify(data)
                 blog.saveMuseum(self.saveStateFile, self.saveStateDesc, hexart)
 

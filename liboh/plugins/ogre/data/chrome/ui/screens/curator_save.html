@@ -1,4 +1,21 @@
 
+<p>
+Title: <input id="title" type="text" size="30" maxlength="30">
+</p>
+<p>
+Description: <textarea id='description' cols="30" rows="3"></textarea>
+</p>
+<p>
+<a href='javascript:saveGallery();'> SAVE STATE </a>
+</p>
+<script type="text/javascript">
+        function saveGallery() {
+                var title = $('#title').val();
+                var description = $('#description').val();
+                var command = "inventory saveState \"" + title + "\" \"" + description + "\"";
+                try { 
+                        Client.event("navcommand", command );
+                } catch (err) {debug('load save failed' + command);}
+        }
 
-<a href="javascript:try { Client.event('navcommand', 'inventory saveState defaulttitle defaultdescription' );} catch (err) {debug('load save failed');}"> SAVE STATE </a>
-					
+</script>
