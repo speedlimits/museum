@@ -750,7 +750,7 @@ private:
 MoveObjectOnWallDrag::MoveObjectOnWallDrag(const DragStartInfo &info)
     : mSelectedObjects(info.objects.begin(), info.objects.end())
 {
-    mHeightQuantum = 0.25;   //0;
+    mHeightQuantum = 0.1;   //0;
     mCamera = info.camera;
     mParent = info.sys;
     Time now = SpaceTimeOffsetManager::getSingleton().now(mCamera->getProxy().getObjectReference().space());
