@@ -431,7 +431,8 @@ float btMagSq(const btVector3& v) {
 bool BulletSystem::tick() {
     static Task::LocalTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
-    static int mode = 0;
+    //static int mode = 0;
+    static positionOrientation lastGoodAvatarPo;
     Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
     positionOrientation po;
@@ -491,7 +492,7 @@ bool BulletSystem::tick() {
             }
 //            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
             dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/300.0);
-
+            
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     po = objects[i]->getBulletState();
@@ -502,16 +503,21 @@ bool BulletSystem::tick() {
                     if (    po.p.x > 100000. || po.p.x < -100000. ||
                             po.p.y > 100000. || po.p.y < -100000. ||
                             po.p.z > 100000. || po.p.z < -100000. ) {
-                        cout << "dbm debug BAD POSITION! " << objects[i]->mName << " pos: " << po.p << endl;
+                        cout << "dbm debug BAD POSITION!" << objects[i]->mName << " pos: " << po.p << endl;
+                        if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6)=="Avatar") {
+                            po=lastGoodAvatarPo;
+                            cout << "dbm debug POSITION FIX:" << objects[i]->mName << " pos: " << po.p << endl;
+                        }
                     }
-                    else {
-                        loc.setPosition(po.p);
-                        loc.setOrientation(po.o);
-                        objects[i]->mMeshptr->setLocation(remoteNow, loc);
+                    loc.setPosition(po.p);
+                    loc.setOrientation(po.o);
+                    objects[i]->mMeshptr->setLocation(remoteNow, loc);
+                    if (objects[i]->mName.size()>=7 && objects[i]->mName.substr(0,7)=="Avatar") {
+                        lastGoodAvatarPo = po;
                     }
                 }
             }
-
+            
             /// test queryRay
             /*
             ProxyMeshObjectPtr bugObj;
