@@ -1,0 +1,1318 @@
+./run:12: DeprecationWarning: os.popen2 is deprecated.  Use the subprocess module.
+  sin, sout = os.popen2("ps -af")
+./run:70: DeprecationWarning: os.popen2 is deprecated.  Use the subprocess module.
+  sin, sout = os.popen2(cmd)
+Assembly loaded: mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+Not implemented reached in Mono::Domain Mono::MonoSystem::createDomain()
+Assembly loaded: Microsoft.Scripting, Version=0.9.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+Assembly loaded: IronPython, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+Assembly loaded: IronPython.Modules, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+Assembly loaded: Sirikata.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+Mono Initialized 1 0 
+cdn = (
+    cache = (
+        0 = Memory(
+            policy = LRU(
+                size = 200M
+            )
+        )
+        1 = Network(
+            services = (
+                mhash:/// = file:///./Staging
+            )
+        )
+        2 = Disk(
+            directory = Cache
+            policy = LRU(
+                size = 3000M
+            )
+        )
+        3 = Network(
+            services = (
+                mhash:/// = (
+                    0 = http://www.sirikata.com/content/assets
+                    1 = http://graphics.stanford.edu/~danielrh/uploadsystem/files/global
+                    2 = file:///./Staging
+                )
+            )
+        )
+    )
+    download = (
+        mhash:/// = (
+            0 = http://www.sirikata.com/content/assets
+            1 = http://graphics.stanford.edu/~danielrh/uploadsystem/files/global
+            2 = file:///./Staging
+        )
+    )
+    namelookup = (
+        meru:/// = (
+            0 = http://localhost/names
+            1 = http://graphics.stanford.edu/~danielrh/dns/names/global
+            2 = file:///./Staging/names.txt
+            3 = http://www.sirikata.com/content/names
+        )
+        meru://cplatz@/ = (
+            0 = http://localhost/names
+            1 = http://graphics.stanford.edu/~danielrh/dns/names/global/cplatz
+            2 = file:///./Staging/names-cplatz.txt
+        )
+        meru://daniel@/ = (
+            0 = http://localhost/names
+            1 = http://graphics.stanford.edu/~danielrh/dns/names/global/daniel
+            2 = file:///./Staging/names-daniel.txt
+        )
+        meru://meru@/ = http://graphics.stanford.edu/~danielrh/dns/names/global/meru
+    )
+    nameupload = (
+        meru:/// = file:///./Staging/names.txt
+    )
+    upload = (
+        mhash:// = file:///./Staging
+    )
+)
+Loading object b7615a5f-ea0f-4b71-9072-e3fa6a2fce01
+Loading object a1aeca1a-869b-4712-af21-7a5747699217
+Loading object e6949d58-f529-4bfb-8a0f-6028a33f5365
+Loading object 5bd898a0-5f5a-4925-bc1d-d8bb334abff7
+Loading object 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3
+Loading object c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0
+Loading object 582df572-3b86-4c7e-b411-a0882c4c576f
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+Creating object b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 at position <-10.35,-1.82,3.85>
+Not implemented reached in Mono::Domain Mono::MonoSystem::createDomain()
+['.', '../../liboh/scripts/ironpython', '../../../liboh/scripts/ironpython', 'scripts/ironpython', 'ironpython', '../../liboh/scripts/ironpython/site-packages', '../../../liboh/scripts/ironpython/site-packages', 'scripts/ironpython/site-packages', 'ironpython/site_packages', '../lib/scripts/ironpython', '../lib/scripts/ironpython/site-packages']
+PY: exampleclass.__init__
+Assembly loaded: Microsoft.Scripting.Core, Version=0.9.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+Assembly loaded: System.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
+Assembly loaded: System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+Assembly loaded: System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+Assembly loaded: Microsoft.Scripting.ExtensionAttribute, Version=0.9.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
+!!! Loaded assembly, mono_assembly_fill_assembly_name failed
+Assembly loaded: (Unknown)
+!!! Loaded assembly, mono_assembly_fill_assembly_name failed
+Assembly loaded: (Unknown)
+!!! Loaded assembly, mono_assembly_fill_assembly_name failed
+Assembly loaded: (Unknown)
+Assembly loaded: I18N, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756
+Assembly loaded: I18N.Rare, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756
+Assembly loaded: I18N.West, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756
+Assembly loaded: I18N.Other, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756
+Assembly loaded: I18N.CJK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756
+Assembly loaded: I18N.MidEast, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to a1aeca1a-869b-4712-af21-7a5747699217 port 0
+Creating object a1aeca1a-869b-4712-af21-7a5747699217 at position <-10.35,-1.82,3.85>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to e6949d58-f529-4bfb-8a0f-6028a33f5365 port 0
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 0
+Creating object 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 at position <-1.86,3515.99,3.32>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 port 0
+Creating object 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 port 0
+Creating object c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 at position <0,0,0>
+Loading object a69cb6f7-c916-4075-a3c7-cd8af90e6bc9
+Loading object ecd38343-d764-4284-8f85-fd9616fc84dd
+Loading object da38029c-fac5-4f8d-9096-85f6debe0dc6
+Loading object 14900025-cdfb-46c9-b40e-7f6f8725247a
+Loading object 8a25b03c-6536-4e99-9578-2f639f8372bd
+Loading object 2be16cf2-9dd4-424b-8238-1f2cef972cc4
+Loading object 9ee9d586-f048-4e33-b58c-1428fd699744
+Loading object 3684583f-15e1-4574-8f9c-05f7d2a5f316
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 582df572-3b86-4c7e-b411-a0882c4c576f port 0
+Creating object 582df572-3b86-4c7e-b411-a0882c4c576f at position <0,0,0>
+Loading object fbfbc087-c30e-4b16-b738-abf9e3fbe059
+Loading object f7beaa35-7c6a-476d-a7c8-4f1e9698ade6
+Loading object 63317c33-54ec-43c8-8145-20ce7d6ee6fa
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 port 0
+Creating object a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 at position <0,0,0>
+Loading object d849aff3-ae52-4555-b823-a3a7e3fd8e91
+Loading object 1efaf2e9-7b0c-481e-932b-d7605a45022f
+Loading object 15225321-320d-4dfd-8e4a-e5d452acf335
+Loading object fa2a7b36-b84c-4857-b27a-68c8b4eb0a35
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to ecd38343-d764-4284-8f85-fd9616fc84dd port 0
+Creating object ecd38343-d764-4284-8f85-fd9616fc84dd at position <0,0,0>
+Loading object 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4
+Loading object 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997
+Initializing ogregraphics
+Creating resource group General
+Creating resource group Internal
+Creating resource group Autodetect
+SceneManagerFactory for type 'DefaultSceneManager' registered.
+Registering ResourceManager for type Material
+Registering ResourceManager for type Mesh
+Registering ResourceManager for type Skeleton
+MovableObjectFactory for type 'ParticleSystem' registered.
+OverlayElementFactory for type Panel registered.
+OverlayElementFactory for type BorderPanel registered.
+OverlayElementFactory for type TextArea registered.
+Registering ResourceManager for type Font
+ArchiveFactory for archive type FileSystem registered.
+ArchiveFactory for archive type Zip registered.
+FreeImage version: 3.10.0
+This program uses FreeImage, a free, open source image library supporting all common bitmap formats. See http://freeimage.sourceforge.net for details
+Supported formats: bmp,ico,jpg,jif,jpeg,jpe,jng,koa,iff,lbm,mng,pbm,pbm,pcd,pcx,pgm,pgm,png,ppm,ppm,ras,tga,targa,tif,tiff,wap,wbmp,wbm,psd,cut,xbm,xpm,gif,hdr,g3,sgi,exr,j2k,j2c,jp2
+DDS codec registering
+Registering ResourceManager for type HighLevelGpuProgram
+Registering ResourceManager for type Compositor
+MovableObjectFactory for type 'Entity' registered.
+MovableObjectFactory for type 'Light' registered.
+MovableObjectFactory for type 'BillboardSet' registered.
+MovableObjectFactory for type 'ManualObject' registered.
+MovableObjectFactory for type 'BillboardChain' registered.
+MovableObjectFactory for type 'RibbonTrail' registered.
+plugins.cfg not found, automatic plugin loading disabled.
+*-*-* OGRE Initialising
+*-*-* Version 1.6.1 (Shoggoth)
+Loading library ../../dependencies/lib/OGRE/RenderSystem_GL.so
+Installing plugin: GL RenderSystem
+OpenGL Rendering Subsystem created.
+Plugin successfully installed
+Loading library ../../dependencies/lib/OGRE/Plugin_CgProgramManager.so
+Installing plugin: Cg Program Manager
+Plugin successfully installed
+Loading library ../../dependencies/lib/OGRE/Plugin_ParticleFX.so
+Installing plugin: ParticleFX
+Particle Emitter Type 'Point' registered
+Particle Emitter Type 'Box' registered
+Particle Emitter Type 'Ellipsoid' registered
+Particle Emitter Type 'Cylinder' registered
+Particle Emitter Type 'Ring' registered
+Particle Emitter Type 'HollowEllipsoid' registered
+Particle Affector Type 'LinearForce' registered
+Particle Affector Type 'ColourFader' registered
+Particle Affector Type 'ColourFader2' registered
+Particle Affector Type 'ColourImage' registered
+Particle Affector Type 'ColourInterpolator' registered
+Particle Affector Type 'Scaler' registered
+Particle Affector Type 'Rotator' registered
+Particle Affector Type 'DirectionRandomiser' registered
+Particle Affector Type 'DeflectorPlane' registered
+Plugin successfully installed
+Loading library ../../dependencies/lib/OGRE/Plugin_OctreeSceneManager.so
+Installing plugin: Octree & Terrain Scene Manager
+Plugin successfully installed
+CPU Identifier & Features
+-------------------------
+ *   CPU ID: GenuineIntel: Intel(R) Core(TM)2 CPU          6600  @ 2.40GHz
+ *      SSE: yes
+ *     SSE2: yes
+ *     SSE3: yes
+ *      MMX: yes
+ *   MMXEXT: yes
+ *    3DNOW: no
+ * 3DNOWEXT: no
+ *     CMOV: yes
+ *      TSC: yes
+ *      FPU: yes
+ *      PRO: yes
+ *       HT: no
+-------------------------
+******************************
+*** Starting GLX Subsystem ***
+******************************
+Registering ResourceManager for type MaterialScript
+Installing plugin: CDNArchive
+ArchiveFactory for archive type CDN registered.
+Plugin successfully installed
+Added resource location '' of type 'CDN' to resource group 'General'
+Added resource location '.' of type 'FileSystem' to resource group 'General'
+Parsing scripts for resource group Autodetect
+Finished parsing scripts for resource group Autodetect
+Parsing scripts for resource group General
+Finished parsing scripts for resource group General
+Parsing scripts for resource group Internal
+Finished parsing scripts for resource group Internal
+GLRenderSystem::_createRenderWindow "Sirikata", 1336x768 windowed  miscParams: currentGLContext=True 
+GLXWindow::create used FBConfigID = 125
+GL_VERSION = 3.0.0 NVIDIA 180.44
+GL_VENDOR = NVIDIA Corporation
+GL_RENDERER = GeForce 9800 GX2/PCI/SSE2
+GL_EXTENSIONS = GL_ARB_color_buffer_float GL_ARB_depth_buffer_float GL_ARB_depth_texture GL_ARB_draw_buffers GL_ARB_draw_instanced GL_ARB_fragment_program GL_ARB_fragment_program_shadow GL_ARB_fragment_shader GL_ARB_half_float_pixel GL_ARB_half_float_vertex GL_ARB_framebuffer_object GL_ARB_geometry_shader4 GL_ARB_imaging GL_ARB_map_buffer_range GL_ARB_multisample GL_ARB_multitexture GL_ARB_occlusion_query GL_ARB_pixel_buffer_object GL_ARB_point_parameters GL_ARB_point_sprite GL_ARB_shadow GL_ARB_shader_objects GL_ARB_shading_language_100 GL_ARB_texture_border_clamp GL_ARB_texture_buffer_object GL_ARB_texture_compression GL_ARB_texture_cube_map GL_ARB_texture_env_add GL_ARB_texture_env_combine GL_ARB_texture_env_dot3 GL_ARB_texture_float GL_ARB_texture_mirrored_repeat GL_ARB_texture_non_power_of_two GL_ARB_texture_rectangle GL_ARB_texture_rg GL_ARB_transpose_matrix GL_ARB_vertex_array_object GL_ARB_vertex_buffer_object GL_ARB_vertex_program GL_ARB_vertex_shader GL_ARB_window_pos GL_ATI_draw_buffers GL_ATI_texture_float GL_ATI_texture_mirror_once GL_S3_s3tc GL_EXT_texture_env_add GL_EXT_abgr GL_EXT_bgra GL_EXT_blend_color GL_EXT_blend_equation_separate GL_EXT_blend_func_separate GL_EXT_blend_minmax GL_EXT_blend_subtract GL_EXT_compiled_vertex_array GL_EXT_Cg_shader GL_EXT_bindable_uniform GL_EXT_depth_bounds_test GL_EXT_direct_state_access GL_EXT_draw_buffers2 GL_EXT_draw_instanced GL_EXT_draw_range_elements GL_EXT_fog_coord GL_EXT_framebuffer_blit GL_EXT_framebuffer_multisample GL_EXT_framebuffer_object GL_EXTX_framebuffer_mixed_formats GL_EXT_framebuffer_sRGB GL_EXT_geometry_shader4 GL_EXT_gpu_program_parameters GL_EXT_gpu_shader4 GL_EXT_multi_draw_arrays GL_EXT_packed_depth_stencil GL_EXT_packed_float GL_EXT_packed_pixels GL_EXT_pixel_buffer_object GL_EXT_point_parameters GL_EXT_rescale_normal GL_EXT_secondary_color GL_EXT_separate_specular_color GL_EXT_shadow_funcs GL_EXT_stencil_two_side GL_EXT_stencil_wrap GL_EXT_texture3D GL_EXT_texture_array GL_EXT_texture_buffer_object GL_EXT_texture_compression_latc GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc GL_EXT_texture_cube_map GL_EXT_texture_edge_clamp GL_EXT_texture_env_combine GL_EXT_texture_env_dot3 GL_EXT_texture_filter_anisotropic GL_EXT_texture_integer GL_EXT_texture_lod GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp GL_EXT_texture_object GL_EXT_texture_sRGB GL_EXT_texture_swizzle GL_EXT_texture_shared_exponent GL_EXT_timer_query GL_EXT_vertex_array GL_EXT_vertex_array_bgra GL_IBM_rasterpos_clip GL_IBM_texture_mirrored_repeat GL_KTX_buffer_region GL_NV_blend_square GL_NV_copy_depth_to_color GL_NV_depth_buffer_float GL_NV_conditional_render GL_NV_depth_clamp GL_NV_explicit_multisample GL_NV_fence GL_NV_float_buffer GL_NV_fog_distance GL_NV_fragment_program GL_NV_fragment_program_option GL_NV_fragment_program2 GL_NV_framebuffer_multisample_coverage GL_NV_geometry_shader4 GL_NV_gpu_program4 GL_NV_half_float GL_NV_light_max_exponent GL_NV_multisample_coverage GL_NV_multisample_filter_hint GL_NV_occlusion_query GL_NV_packed_depth_stencil GL_NV_parameter_buffer_object GL_NV_pixel_data_range GL_NV_point_sprite GL_NV_primitive_restart GL_NV_register_combiners GL_NV_register_combiners2 GL_NV_texgen_reflection GL_NV_texture_compression_vtc GL_NV_texture_env_combine4 GL_NV_texture_expand_normal GL_NV_texture_rectangle GL_NV_texture_shader GL_NV_texture_shader2 GL_NV_texture_shader3 GL_NV_transform_feedback GL_NV_vertex_array_range GL_NV_vertex_array_range2 GL_NV_vertex_program GL_NV_vertex_program1_1 GL_NV_vertex_program2 GL_NV_vertex_program2_option GL_NV_vertex_program3 GL_NVX_conditional_render GL_SGIS_generate_mipmap GL_SGIS_texture_lod GL_SGIX_depth_texture GL_SGIX_shadow GL_SUN_slice_accum 
+Supported GLX extensions: GLX_EXT_visual_info GLX_EXT_visual_rating GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SGI_video_sync GLX_SGI_swap_control GLX_EXT_texture_from_pixmap GLX_ARB_create_context GLX_ARB_multisample GLX_NV_float_buffer GLX_ARB_fbconfig_float GLX_EXT_framebuffer_sRGB GLX_ARB_get_proc_address 
+***************************
+*** GL Renderer Started ***
+***************************
+Registering ResourceManager for type GpuProgram
+GLSL support detected
+GL: Using GL_EXT_framebuffer_object for rendering to textures (best)
+FBO PF_UNKNOWN depth/stencil support: D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_L8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_A8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_A4L4 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_BYTE_LA depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_R5G6B5 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_B5G6R5 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_A1R5G5B5 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_R8G8B8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_B8G8R8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_A8R8G8B8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_B8G8R8A8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_A2R10G10B10 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_A2B10G10R10 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT16_RGB depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT16_RGBA depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT32_RGB depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT32_RGBA depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_X8R8G8B8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_X8B8G8R8 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_SHORT_RGBA depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_R3G3B2 depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT16_R depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT32_R depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT16_GR depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_FLOAT32_GR depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+FBO PF_SHORT_RGB depth/stencil support: D0S0 D16S0 D24S0 D32S0 Packed-D24S8 
+[GL] : Valid FBO targets PF_UNKNOWN PF_L8 PF_A8 PF_A4L4 PF_BYTE_LA PF_R5G6B5 PF_B5G6R5 PF_A1R5G5B5 PF_R8G8B8 PF_B8G8R8 PF_A8R8G8B8 PF_B8G8R8A8 PF_A2R10G10B10 PF_A2B10G10R10 PF_FLOAT16_RGB PF_FLOAT16_RGBA PF_FLOAT32_RGB PF_FLOAT32_RGBA PF_X8R8G8B8 PF_X8B8G8R8 PF_SHORT_RGBA PF_R3G3B2 PF_FLOAT16_R PF_FLOAT32_R PF_FLOAT16_GR PF_FLOAT32_GR PF_SHORT_RGB 
+RenderSystem capabilities
+-------------------------
+RenderSystem Name: OpenGL Rendering Subsystem
+GPU Vendor: nvidia
+Device Name: GeForce 9800 GX2/PCI/SSE2
+Driver Version: 3.0.0.0
+ * Fixed function pipeline: yes
+ * Hardware generation of mipmaps: yes
+ * Texture blending: yes
+ * Anisotropic texture filtering: yes
+ * Dot product texture operation: yes
+ * Cube mapping: yes
+ * Hardware stencil buffer: no
+ * Hardware vertex / index buffers: yes
+ * Vertex programs: yes
+ * Fragment programs: yes
+ * Geometry programs: yes
+ * Supported Shader Profiles: arbfp1 arbvp1 fp20 fp30 fp40 glsl gp4gp gpu_gp nvgp4 vp30 vp40
+ * Texture Compression: yes
+   - DXT: yes
+   - VTC: yes
+ * Scissor Rectangle: yes
+ * Hardware Occlusion Query: yes
+ * User clip planes: yes
+ * VET_UBYTE4 vertex element type: yes
+ * Infinite far plane projection: yes
+ * Hardware render-to-texture: yes
+ * Floating point textures: yes
+ * Non-power-of-two textures: yes
+ * Volume textures: yes
+ * Multiple Render Targets: 8
+   - With different bit depths: yes
+ * Point Sprites: yes
+ * Extended point parameters: yes
+ * Max Point Size: 63.375
+ * Vertex texture fetch: yes
+   - Max vertex textures: 32
+   - Vertex textures shared: yes
+ * Render to Vertex Buffer : yes
+ * GL 1.5 without VBO workaround: no
+ * Frame Buffer objects: yes
+ * Frame Buffer objects (ARB extension): no
+ * Frame Buffer objects (ATI extension): no
+ * PBuffer suppport: no
+ * GL 1.5 without HW-occlusion workaround: no
+Registering ResourceManager for type Texture
+ResourceBackgroundQueue - threading enabled, starting own thread
+ResourceBackgroundQueue - thread starting.
+Particle Renderer Type 'billboard' registered
+SceneManagerFactory for type 'OctreeSceneManager' registered.
+SceneManagerFactory for type 'TerrainSceneManager' registered.
+dbm debug: cameraPathLoad
+[0916/171704:INFO:WebCore.cpp(75)] Creating the core thread.
+[0916/171704:INFO:WebCore.cpp(85)] Creating the WebCore.
+[0916/171704:INFO:WebCoreProxy.cpp(84)] ICU successfully initialized.
+[0916/171704:INFO:WebCoreProxy.cpp(223)] The WebCore is now online.
+[0916/171704:INFO:WebView.cpp(87)] A new WebView has been created.
+[0916/171704:INFO:WebViewProxy.cpp(112)] A new WebViewProxy has been created.
+[0916/171704:INFO:WebViewProxy.cpp(818)] Committed Load for Frame. URL: file:///home/dennis/workspaces/museum/liboh/plugins/ogre/data/chrome/tooltip.html, Status Code: 0, Mime-Type: text/html, Frame Name: 
+[0916/171704:INFO:WebView.cpp(87)] A new WebView has been created.
+Successfully initialized ogregraphics
+Initializing bulletphysics
+Successfully initialized bulletphysics
+[0916/171704:INFO:WebViewProxy.cpp(112)] A new WebViewProxy has been created.
+[0916/171704:INFO:WebViewProxy.cpp(818)] Committed Load for Frame. URL: file:///home/dennis/workspaces/museum/liboh/plugins/ogre/data/chrome/ui/index.html?param=test, Status Code: 0, Mime-Type: text/html, Frame Name: 
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to da38029c-fac5-4f8d-9096-85f6debe0dc6 port 0
+Creating object da38029c-fac5-4f8d-9096-85f6debe0dc6 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 14900025-cdfb-46c9-b40e-7f6f8725247a port 0
+Creating object 14900025-cdfb-46c9-b40e-7f6f8725247a at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 8a25b03c-6536-4e99-9578-2f639f8372bd port 0
+Creating object 8a25b03c-6536-4e99-9578-2f639f8372bd at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 2be16cf2-9dd4-424b-8238-1f2cef972cc4 port 0
+Creating object 2be16cf2-9dd4-424b-8238-1f2cef972cc4 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 9ee9d586-f048-4e33-b58c-1428fd699744 port 0
+Creating object 9ee9d586-f048-4e33-b58c-1428fd699744 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 3684583f-15e1-4574-8f9c-05f7d2a5f316 port 0
+Creating object 3684583f-15e1-4574-8f9c-05f7d2a5f316 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to fbfbc087-c30e-4b16-b738-abf9e3fbe059 port 0
+Creating object fbfbc087-c30e-4b16-b738-abf9e3fbe059 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 port 0
+Creating object f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 63317c33-54ec-43c8-8145-20ce7d6ee6fa port 0
+Creating object 63317c33-54ec-43c8-8145-20ce7d6ee6fa at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to d849aff3-ae52-4555-b823-a3a7e3fd8e91 port 0
+Creating object d849aff3-ae52-4555-b823-a3a7e3fd8e91 at position <0,0,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 1efaf2e9-7b0c-481e-932b-d7605a45022f port 0
+Creating object 1efaf2e9-7b0c-481e-932b-d7605a45022f at position <0,-166.28,0>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 15225321-320d-4dfd-8e4a-e5d452acf335 port 0
+Creating object 15225321-320d-4dfd-8e4a-e5d452acf335 at position <0,-10,0.3>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 0
+Creating object fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 at position <0,-10,0.3>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 0
+Creating object 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 at position <0,-10,0.3>
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 0
+Creating object 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 at position <0,-10,0.3>
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID e6949d58-f529-4bfb-8a0f-6028a33f5365] port 0
+	RetObj: I am now a Mesh known as e6949d58-f529-4bfb-8a0f-6028a33f5365
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID a1aeca1a-869b-4712-af21-7a5747699217] port 0
+* Received MESH property update for a1aeca1a-869b-4712-af21-7a5747699217 has mesh URI meru://daniel@/sphere.mesh
+	RetObj: I am now a Mesh known as a1aeca1a-869b-4712-af21-7a5747699217
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID b7615a5f-ea0f-4b71-9072-e3fa6a2fce01] port 0
+	RetObj: I am now a Camera known as b7615a5f-ea0f-4b71-9072-e3fa6a2fce01
+Processing RPC RetObj
+PY: Got an RPC named RetObj
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 5bd898a0-5f5a-4925-bc1d-d8bb334abff7] port 0
+	RetObj. I am now a Light known as 5bd898a0-5f5a-4925-bc1d-d8bb334abff7
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 582df572-3b86-4c7e-b411-a0882c4c576f] port 0
+* Received MESH property update for 582df572-3b86-4c7e-b411-a0882c4c576f has mesh URI meru:///bornh_bldg_08_skylights.mesh
+	RetObj: I am now a Mesh known as 582df572-3b86-4c7e-b411-a0882c4c576f
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID da38029c-fac5-4f8d-9096-85f6debe0dc6] port 0
+* Received MESH property update for da38029c-fac5-4f8d-9096-85f6debe0dc6 has mesh URI meru:///bornh_bldg_08_wall_int_01.mesh
+	RetObj: I am now a Mesh known as da38029c-fac5-4f8d-9096-85f6debe0dc6
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 2be16cf2-9dd4-424b-8238-1f2cef972cc4] port 0
+* Received MESH property update for 2be16cf2-9dd4-424b-8238-1f2cef972cc4 has mesh URI meru:///bornh_bldg_07_skylights.mesh
+	RetObj: I am now a Mesh known as 2be16cf2-9dd4-424b-8238-1f2cef972cc4
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID fbfbc087-c30e-4b16-b738-abf9e3fbe059] port 0
+* Received MESH property update for fbfbc087-c30e-4b16-b738-abf9e3fbe059 has mesh URI meru:///bornh_bldg_07_walls_int_01.mesh
+	RetObj: I am now a Mesh known as fbfbc087-c30e-4b16-b738-abf9e3fbe059
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID d849aff3-ae52-4555-b823-a3a7e3fd8e91] port 0
+* Received MESH property update for d849aff3-ae52-4555-b823-a3a7e3fd8e91 has mesh URI meru:///frame_skylgt_box_a_01.mesh
+	RetObj: I am now a Mesh known as d849aff3-ae52-4555-b823-a3a7e3fd8e91
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID fa2a7b36-b84c-4857-b27a-68c8b4eb0a35] port 0
+* Received MESH property update for fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 has mesh URI meru:///Box01.mesh
+	RetObj: I am now a Mesh known as fa2a7b36-b84c-4857-b27a-68c8b4eb0a35
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0] port 0
+* Received MESH property update for c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 has mesh URI meru:///bornh_bldg_08_wall_ext_01.mesh
+	RetObj: I am now a Mesh known as c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID ecd38343-d764-4284-8f85-fd9616fc84dd] port 0
+* Received MESH property update for ecd38343-d764-4284-8f85-fd9616fc84dd has mesh URI meru:///bornh_bldg_08_wall_ext_02.mesh
+	RetObj: I am now a Mesh known as ecd38343-d764-4284-8f85-fd9616fc84dd
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 8a25b03c-6536-4e99-9578-2f639f8372bd] port 0
+* Received MESH property update for 8a25b03c-6536-4e99-9578-2f639f8372bd has mesh URI meru:///bornh_bldg_07_roof.mesh
+	RetObj: I am now a Mesh known as 8a25b03c-6536-4e99-9578-2f639f8372bd
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 3684583f-15e1-4574-8f9c-05f7d2a5f316] port 0
+* Received MESH property update for 3684583f-15e1-4574-8f9c-05f7d2a5f316 has mesh URI meru:///bornh_bldg_07_walls_ext_02.mesh
+	RetObj: I am now a Mesh known as 3684583f-15e1-4574-8f9c-05f7d2a5f316
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 63317c33-54ec-43c8-8145-20ce7d6ee6fa] port 0
+* Received MESH property update for 63317c33-54ec-43c8-8145-20ce7d6ee6fa has mesh URI meru:///bornh_bldg_08_floor.mesh
+	RetObj: I am now a Mesh known as 63317c33-54ec-43c8-8145-20ce7d6ee6fa
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 15225321-320d-4dfd-8e4a-e5d452acf335] port 0
+* Received MESH property update for 15225321-320d-4dfd-8e4a-e5d452acf335 has mesh URI meru:///Box01.mesh
+	RetObj: I am now a Mesh known as 15225321-320d-4dfd-8e4a-e5d452acf335
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997] port 0
+* Received MESH property update for 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 has mesh URI meru:///sphere.mesh
+	RetObj: I am now a Mesh known as 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3] port 0
+* Received MESH property update for 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 has mesh URI meru:///bornh_bldg_08_roof.mesh
+	RetObj: I am now a Mesh known as 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID a69cb6f7-c916-4075-a3c7-cd8af90e6bc9] port 0
+* Received MESH property update for a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 has mesh URI meru:///bornh_bldg_08_wall_int_02.mesh
+	RetObj: I am now a Mesh known as a69cb6f7-c916-4075-a3c7-cd8af90e6bc9
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 14900025-cdfb-46c9-b40e-7f6f8725247a] port 0
+* Received MESH property update for 14900025-cdfb-46c9-b40e-7f6f8725247a has mesh URI meru:///bornh_bldg_07_floor.mesh
+	RetObj: I am now a Mesh known as 14900025-cdfb-46c9-b40e-7f6f8725247a
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 9ee9d586-f048-4e33-b58c-1428fd699744] port 0
+* Received MESH property update for 9ee9d586-f048-4e33-b58c-1428fd699744 has mesh URI meru:///bornh_bldg_07_walls_ext_01.mesh
+	RetObj: I am now a Mesh known as 9ee9d586-f048-4e33-b58c-1428fd699744
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID f7beaa35-7c6a-476d-a7c8-4f1e9698ade6] port 0
+* Received MESH property update for f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 has mesh URI meru:///bornh_bldg_07_walls_int_02.mesh
+	RetObj: I am now a Mesh known as f7beaa35-7c6a-476d-a7c8-4f1e9698ade6
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 1efaf2e9-7b0c-481e-932b-d7605a45022f] port 0
+* Received MESH property update for 1efaf2e9-7b0c-481e-932b-d7605a45022f has mesh URI mhash:///da542c0771306094157836a55c5645e9cb0e4c56d9ecdb5e02e3ea4b59dc0c4b
+	RetObj: I am now a Mesh known as 1efaf2e9-7b0c-481e-932b-d7605a45022f
+** Message from: 00000000-0000-0000-0000-000000000000 port 1 to [Temporary UUID 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4] port 0
+* Received MESH property update for 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 has mesh URI meru:///cube.mesh
+	RetObj: I am now a Mesh known as 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4
+** Message from: 00000000-0000-0000-0000-000000000000 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	ProxCall ENTERED 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000002B>>
+	ProxCall ENTERED 14900025-cdfb-46c9-b40e-7f6f8725247a (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000002C>>
+	ProxCall ENTERED 15225321-320d-4dfd-8e4a-e5d452acf335 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000002D>>
+	ProxCall ENTERED 1efaf2e9-7b0c-481e-932b-d7605a45022f (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000002E>>
+	ProxCall ENTERED 2be16cf2-9dd4-424b-8238-1f2cef972cc4 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000002F>>
+	ProxCall ENTERED 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000030>>
+	ProxCall ENTERED 3684583f-15e1-4574-8f9c-05f7d2a5f316 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000031>>
+	ProxCall ENTERED 582df572-3b86-4c7e-b411-a0882c4c576f (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000032>>
+	ProxCall ENTERED 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000033>>
+	ProxCall ENTERED 63317c33-54ec-43c8-8145-20ce7d6ee6fa (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000034>>
+	ProxCall ENTERED 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000035>>
+	ProxCall ENTERED 8a25b03c-6536-4e99-9578-2f639f8372bd (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000036>>
+	ProxCall ENTERED 9ee9d586-f048-4e33-b58c-1428fd699744 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000037>>
+	ProxCall ENTERED a1aeca1a-869b-4712-af21-7a5747699217 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000038>>
+	ProxCall ENTERED a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000039>>
+	ProxCall ENTERED b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000003A>>
+	ProxCall ENTERED c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000003B>>
+	ProxCall ENTERED d849aff3-ae52-4555-b823-a3a7e3fd8e91 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000003C>>
+	ProxCall ENTERED da38029c-fac5-4f8d-9096-85f6debe0dc6 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000003D>>
+	ProxCall ENTERED e6949d58-f529-4bfb-8a0f-6028a33f5365 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000003E>>
+	ProxCall ENTERED ecd38343-d764-4284-8f85-fd9616fc84dd (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000003F>>
+	ProxCall ENTERED f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000040>>
+	ProxCall ENTERED fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000041>>
+	ProxCall ENTERED fbfbc087-c30e-4b16-b738-abf9e3fbe059 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000042>>
+** Message from: 00000000-0000-0000-0000-000000000000 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	ProxCall ENTERED 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000043>>
+	ProxCall ENTERED 14900025-cdfb-46c9-b40e-7f6f8725247a (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000044>>
+	ProxCall ENTERED 15225321-320d-4dfd-8e4a-e5d452acf335 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000045>>
+	ProxCall ENTERED 1efaf2e9-7b0c-481e-932b-d7605a45022f (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000046>>
+	ProxCall ENTERED 2be16cf2-9dd4-424b-8238-1f2cef972cc4 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000047>>
+	ProxCall ENTERED 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000048>>
+	ProxCall ENTERED 3684583f-15e1-4574-8f9c-05f7d2a5f316 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000049>>
+	ProxCall ENTERED 582df572-3b86-4c7e-b411-a0882c4c576f (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000004A>>
+	ProxCall ENTERED 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000004B>>
+	ProxCall ENTERED 63317c33-54ec-43c8-8145-20ce7d6ee6fa (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000004C>>
+	ProxCall ENTERED 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000004D>>
+	ProxCall ENTERED 8a25b03c-6536-4e99-9578-2f639f8372bd (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000004E>>
+	ProxCall ENTERED 9ee9d586-f048-4e33-b58c-1428fd699744 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000004F>>
+	ProxCall ENTERED a1aeca1a-869b-4712-af21-7a5747699217 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000050>>
+	ProxCall ENTERED a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000051>>
+	ProxCall ENTERED b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000052>>
+	ProxCall ENTERED c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000053>>
+	ProxCall ENTERED d849aff3-ae52-4555-b823-a3a7e3fd8e91 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000054>>
+	ProxCall ENTERED da38029c-fac5-4f8d-9096-85f6debe0dc6 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000055>>
+	ProxCall ENTERED e6949d58-f529-4bfb-8a0f-6028a33f5365 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000056>>
+	ProxCall ENTERED ecd38343-d764-4284-8f85-fd9616fc84dd (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000057>>
+	ProxCall ENTERED f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000058>>
+	ProxCall ENTERED fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x0000000000000059>>
+	ProxCall ENTERED fbfbc087-c30e-4b16-b738-abf9e3fbe059 (Already known)
+Processing RPC ProxCall
+PY: Got an RPC named ProxCall
+SENDING SOMETHHHING!!!! <bound method PersistenceRead.callback of <util.PersistenceRead instance at 0x000000000000005A>>
+read data 4814 bytes
+read data 762 bytes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_roof
+ImmedResponse: 1
+read data 7950 bytes
+read data 872 bytes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 14900025-cdfb-46c9-b40e-7f6f8725247a port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_floor
+ImmedResponse: 1
+read data 523 bytes
+** Message from: 14900025-cdfb-46c9-b40e-7f6f8725247a port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 14900025-cdfb-46c9-b40e-7f6f8725247a has name-->bornh_bldg_07_floor<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 15225321-320d-4dfd-8e4a-e5d452acf335 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_01
+ImmedResponse: 1
+** Message from: 15225321-320d-4dfd-8e4a-e5d452acf335 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 15225321-320d-4dfd-8e4a-e5d452acf335 has name-->artwork_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 1efaf2e9-7b0c-481e-932b-d7605a45022f port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rsky_box
+ImmedResponse: 1
+** Message from: 1efaf2e9-7b0c-481e-932b-d7605a45022f port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 1efaf2e9-7b0c-481e-932b-d7605a45022f has name-->sky_box<-- <type 'str'>
+read data 4566 bytes
+read data 1522 bytes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 2be16cf2-9dd4-424b-8238-1f2cef972cc4 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_skylights
+ImmedResponse: 1
+** Message from: 2be16cf2-9dd4-424b-8238-1f2cef972cc4 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 2be16cf2-9dd4-424b-8238-1f2cef972cc4 has name-->bornh_bldg_07_skylights<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_04
+ImmedResponse: 1
+** Message from: 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 has name-->artwork_04<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 3684583f-15e1-4574-8f9c-05f7d2a5f316 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_ext_02
+ImmedResponse: 1
+** Message from: 3684583f-15e1-4574-8f9c-05f7d2a5f316 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 3684583f-15e1-4574-8f9c-05f7d2a5f316 has name-->bornh_bldg_07_walls_ext_02<-- <type 'str'>
+read data 79326 bytes
+read data 2572 bytes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 582df572-3b86-4c7e-b411-a0882c4c576f port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_skylights
+ImmedResponse: 1
+** Message from: 582df572-3b86-4c7e-b411-a0882c4c576f port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 582df572-3b86-4c7e-b411-a0882c4c576f has name-->bornh_bldg_08_skylights<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Forward GetProp: Name to Persistence
+ForwardToPersistence: 1 reads and 0writes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 63317c33-54ec-43c8-8145-20ce7d6ee6fa port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_floor
+ImmedResponse: 1
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 0
+Got some persistence back: stat = 0
+** Message from: 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 has name--><-- <type 'str'>
+** Message from: 63317c33-54ec-43c8-8145-20ce7d6ee6fa port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 63317c33-54ec-43c8-8145-20ce7d6ee6fa has name-->bornh_bldg_08_floor<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_03
+ImmedResponse: 1
+** Message from: 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 has name-->artwork_03<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 8a25b03c-6536-4e99-9578-2f639f8372bd port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_roof
+ImmedResponse: 1
+** Message from: 8a25b03c-6536-4e99-9578-2f639f8372bd port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 8a25b03c-6536-4e99-9578-2f639f8372bd has name-->bornh_bldg_07_roof<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 9ee9d586-f048-4e33-b58c-1428fd699744 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_ext_01
+ImmedResponse: 1
+** Message from: 9ee9d586-f048-4e33-b58c-1428fd699744 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 9ee9d586-f048-4e33-b58c-1428fd699744 has name-->bornh_bldg_07_walls_ext_01<-- <type 'str'>
+read data 5602 bytes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to a1aeca1a-869b-4712-af21-7a5747699217 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = RAvatar
+ImmedResponse: 1
+** Message from: a1aeca1a-869b-4712-af21-7a5747699217 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object a1aeca1a-869b-4712-af21-7a5747699217 has name-->Avatar<-- <type 'str'>
+read data 645 bytes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_int_02
+ImmedResponse: 1
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5
+Got a Persistence message: reads size = 0 writes size = 1
+Forward SetProp: Parent to Persistence
+ForwardToPersistence: 0 reads and 1writes
+** Message from: a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 has name-->bornh_bldg_08_wall_int_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Forward GetProp: Name to Persistence
+ForwardToPersistence: 1 reads and 0writes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_ext_01
+ImmedResponse: 1
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+Got some persistence back: stat = 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+Got some persistence back: stat = 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5
+Got a Persistence message: reads size = 0 writes size = 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 has name--><-- <type 'str'>
+** Message from: c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 has name-->bornh_bldg_08_wall_ext_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to d849aff3-ae52-4555-b823-a3a7e3fd8e91 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rframe_skylgt_box_a_01
+ImmedResponse: 1
+** Message from: d849aff3-ae52-4555-b823-a3a7e3fd8e91 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object d849aff3-ae52-4555-b823-a3a7e3fd8e91 has name-->frame_skylgt_box_a_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to da38029c-fac5-4f8d-9096-85f6debe0dc6 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_int_01
+ImmedResponse: 1
+** Message from: da38029c-fac5-4f8d-9096-85f6debe0dc6 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object da38029c-fac5-4f8d-9096-85f6debe0dc6 has name-->bornh_bldg_08_wall_int_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to e6949d58-f529-4bfb-8a0f-6028a33f5365 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Forward GetProp: Name to Persistence
+ForwardToPersistence: 1 reads and 0writes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to ecd38343-d764-4284-8f85-fd9616fc84dd port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_ext_02
+ImmedResponse: 1
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to e6949d58-f529-4bfb-8a0f-6028a33f5365 port 0
+Got some persistence back: stat = 0
+** Message from: e6949d58-f529-4bfb-8a0f-6028a33f5365 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object e6949d58-f529-4bfb-8a0f-6028a33f5365 has name--><-- <type 'str'>
+** Message from: ecd38343-d764-4284-8f85-fd9616fc84dd port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object ecd38343-d764-4284-8f85-fd9616fc84dd has name-->bornh_bldg_08_wall_ext_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_int_02
+ImmedResponse: 1
+** Message from: f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 has name-->bornh_bldg_07_walls_int_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_02
+ImmedResponse: 1
+** Message from: fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 has name-->artwork_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to fbfbc087-c30e-4b16-b738-abf9e3fbe059 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_int_01
+ImmedResponse: 1
+** Message from: fbfbc087-c30e-4b16-b738-abf9e3fbe059 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object fbfbc087-c30e-4b16-b738-abf9e3fbe059 has name-->bornh_bldg_07_walls_int_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_roof
+ImmedResponse: 1
+** Message from: 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 has name-->bornh_bldg_08_roof<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 14900025-cdfb-46c9-b40e-7f6f8725247a port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_floor
+ImmedResponse: 1
+** Message from: 14900025-cdfb-46c9-b40e-7f6f8725247a port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 14900025-cdfb-46c9-b40e-7f6f8725247a has name-->bornh_bldg_07_floor<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 15225321-320d-4dfd-8e4a-e5d452acf335 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_01
+ImmedResponse: 1
+** Message from: 15225321-320d-4dfd-8e4a-e5d452acf335 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 15225321-320d-4dfd-8e4a-e5d452acf335 has name-->artwork_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 1efaf2e9-7b0c-481e-932b-d7605a45022f port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rsky_box
+ImmedResponse: 1
+** Message from: 1efaf2e9-7b0c-481e-932b-d7605a45022f port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 1efaf2e9-7b0c-481e-932b-d7605a45022f has name-->sky_box<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 2be16cf2-9dd4-424b-8238-1f2cef972cc4 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_skylights
+ImmedResponse: 1
+** Message from: 2be16cf2-9dd4-424b-8238-1f2cef972cc4 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 2be16cf2-9dd4-424b-8238-1f2cef972cc4 has name-->bornh_bldg_07_skylights<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_04
+ImmedResponse: 1
+** Message from: 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 has name-->artwork_04<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 3684583f-15e1-4574-8f9c-05f7d2a5f316 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_ext_02
+ImmedResponse: 1
+** Message from: 3684583f-15e1-4574-8f9c-05f7d2a5f316 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 3684583f-15e1-4574-8f9c-05f7d2a5f316 has name-->bornh_bldg_07_walls_ext_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 582df572-3b86-4c7e-b411-a0882c4c576f port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_skylights
+ImmedResponse: 1
+** Message from: 582df572-3b86-4c7e-b411-a0882c4c576f port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 582df572-3b86-4c7e-b411-a0882c4c576f has name-->bornh_bldg_08_skylights<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Forward GetProp: Name to Persistence
+ForwardToPersistence: 1 reads and 0writes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 63317c33-54ec-43c8-8145-20ce7d6ee6fa port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_floor
+ImmedResponse: 1
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 0
+Got some persistence back: stat = 0
+** Message from: 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 5bd898a0-5f5a-4925-bc1d-d8bb334abff7 has name--><-- <type 'str'>
+** Message from: 63317c33-54ec-43c8-8145-20ce7d6ee6fa port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 63317c33-54ec-43c8-8145-20ce7d6ee6fa has name-->bornh_bldg_08_floor<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_03
+ImmedResponse: 1
+** Message from: 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 has name-->artwork_03<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 8a25b03c-6536-4e99-9578-2f639f8372bd port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_roof
+ImmedResponse: 1
+** Message from: 8a25b03c-6536-4e99-9578-2f639f8372bd port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 8a25b03c-6536-4e99-9578-2f639f8372bd has name-->bornh_bldg_07_roof<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 9ee9d586-f048-4e33-b58c-1428fd699744 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_ext_01
+ImmedResponse: 1
+** Message from: 9ee9d586-f048-4e33-b58c-1428fd699744 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 9ee9d586-f048-4e33-b58c-1428fd699744 has name-->bornh_bldg_07_walls_ext_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to a1aeca1a-869b-4712-af21-7a5747699217 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = RAvatar
+ImmedResponse: 1
+** Message from: a1aeca1a-869b-4712-af21-7a5747699217 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object a1aeca1a-869b-4712-af21-7a5747699217 has name-->Avatar<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_int_02
+ImmedResponse: 1
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5
+Got a Persistence message: reads size = 0 writes size = 1
+Forward SetProp: Parent to Persistence
+ForwardToPersistence: 0 reads and 1writes
+** Message from: a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object a69cb6f7-c916-4075-a3c7-cd8af90e6bc9 has name-->bornh_bldg_08_wall_int_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Forward GetProp: Name to Persistence
+ForwardToPersistence: 1 reads and 0writes
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+Got some persistence back: stat = 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_ext_01
+ImmedResponse: 1
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5
+Got a Persistence message: reads size = 0 writes size = 0
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+Got some persistence back: stat = 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 has name--><-- <type 'str'>
+** Message from: c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object c8a5d9e0-5911-44a5-95f1-ee55ff2c3bf0 has name-->bornh_bldg_08_wall_ext_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to d849aff3-ae52-4555-b823-a3a7e3fd8e91 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rframe_skylgt_box_a_01
+ImmedResponse: 1
+** Message from: d849aff3-ae52-4555-b823-a3a7e3fd8e91 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object d849aff3-ae52-4555-b823-a3a7e3fd8e91 has name-->frame_skylgt_box_a_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to da38029c-fac5-4f8d-9096-85f6debe0dc6 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_int_01
+ImmedResponse: 1
+** Message from: da38029c-fac5-4f8d-9096-85f6debe0dc6 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object da38029c-fac5-4f8d-9096-85f6debe0dc6 has name-->bornh_bldg_08_wall_int_01<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to e6949d58-f529-4bfb-8a0f-6028a33f5365 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Forward GetProp: Name to Persistence
+ForwardToPersistence: 1 reads and 0writes
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to ecd38343-d764-4284-8f85-fd9616fc84dd port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_08_wall_ext_02
+ImmedResponse: 1
+** Message from: 00000000-0000-0000-0000-000000000000 port 5 to e6949d58-f529-4bfb-8a0f-6028a33f5365 port 0
+Got some persistence back: stat = 0
+** Message from: e6949d58-f529-4bfb-8a0f-6028a33f5365 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object e6949d58-f529-4bfb-8a0f-6028a33f5365 has name--><-- <type 'str'>
+** Message from: ecd38343-d764-4284-8f85-fd9616fc84dd port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object ecd38343-d764-4284-8f85-fd9616fc84dd has name-->bornh_bldg_08_wall_ext_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_int_02
+ImmedResponse: 1
+** Message from: f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object f7beaa35-7c6a-476d-a7c8-4f1e9698ade6 has name-->bornh_bldg_07_walls_int_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = R
+artwork_02
+ImmedResponse: 1
+** Message from: fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 has name-->artwork_02<-- <type 'str'>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to fbfbc087-c30e-4b16-b738-abf9e3fbe059 port 5
+Got a Persistence message: reads size = 1 writes size = 0
+Cached GetProp: Name = Rbornh_bldg_07_walls_int_01
+ImmedResponse: 1
+** Message from: fbfbc087-c30e-4b16-b738-abf9e3fbe059 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object fbfbc087-c30e-4b16-b738-abf9e3fbe059 has name-->bornh_bldg_07_walls_int_01<-- <type 'str'>
+** Message from: 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 port 5 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+PY: Object 0625bc42-b89c-4e8c-aedc-bf9d43acc5b3 has name-->bornh_bldg_08_roof<-- <type 'str'>
+Texture: 2b4d4a27c51611238140e9980d4954ba56e8d90e7b73545fe46ce3f701cff034: Loading 1 faces(PF_R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_X8R8G8B8,2x2x1.
+Texture: e764ef512cc3c0e8e0d561e1b89db3a2281af2442d5751e86585d33a811ecbe2: Loading 1 faces(PF_R8G8B8,128x128x1) with 7 generated mipmaps from Image. Internal format is PF_X8R8G8B8,128x128x1.
+Mesh: Loading 3cb2ec8ca3155a328b41a8c73c622ee0b209b591f2d56a441019ad007338bf48.
+Texture: white.png: Loading 1 faces(PF_R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_X8R8G8B8,2x2x1.
+Mesh: Loading dd1e894099214db420b7a458f19fc79ec7b6bcb4060d5fb9f7fe2c06f9f0afbd.
+Texture: b7c65594665847843de1aab624db09b5bc95a3a829083588237abef2a2cbb4a5: Loading 1 faces(PF_A8R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_A8R8G8B8,2x2x1.
+Texture: 784a5b0809ed274036733777f9a158678ffa852247deefd4b1140409dffdac14: Loading 1 faces(PF_R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_X8R8G8B8,2x2x1.
+Texture: 9988450094a3db65589313af31542fd93eb87ba8d02d8998825f2a91a808b896: Loading 1 faces(PF_A8R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_A8R8G8B8,2x2x1.
+Texture: ec87ef9b5e733f823da67b523b3bb3631013307d2bcea347701e05a2d33d1110: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 8ce14a1e0f8acdde95f4982a60d784e0595b3e1efda2d28af7740ead3b1002ec: Loading 1 faces(PF_DXT1,4x4x1) with 2 custom mipmaps from Image. Internal format is PF_DXT1,4x4x1.
+Texture: 9eaf6c2e5856c1d25e465b4e468f0dd4886e6f9ef0916f9e2d2cb15328a4564c: Loading 1 faces(PF_DXT1,2048x512x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x512x1.
+GLSL compiling: f6843207618a48d784bc6dc9182b61256101855321e5a403f7c68c035f2d7960:ShadAdvH6VPglsl
+GLSL compiled : f6843207618a48d784bc6dc9182b61256101855321e5a403f7c68c035f2d7960:ShadAdvH6VPglsl
+GLSL compiling: b6abb8c8eccc8fc5fc0dc3d7e5b338eaeee2294610edde1fac987c5b8e50c5d6:TwoSidedAmbOcclDiffuseSpecGlowShadAdvH6FPglsl
+GLSL compiled : b6abb8c8eccc8fc5fc0dc3d7e5b338eaeee2294610edde1fac987c5b8e50c5d6:TwoSidedAmbOcclDiffuseSpecGlowShadAdvH6FPglsl
+GLSL compiling: 8ec683e23feed8dbb417387e2280e6a6db107cc046e8b41743bb8ebf64772a29:TwoSidedAmbOcclDiffuseSpecGlowH6FPglsl
+GLSL compiled : 8ec683e23feed8dbb417387e2280e6a6db107cc046e8b41743bb8ebf64772a29:TwoSidedAmbOcclDiffuseSpecGlowH6FPglsl
+GLSL compiling: 5cd3e4128ee73b3636f3ed83044aa7b0c3c3014eab7f79d7e33432e30c237549:AmbOcclDiffuseSpecH6FPglsl
+GLSL compiled : 5cd3e4128ee73b3636f3ed83044aa7b0c3c3014eab7f79d7e33432e30c237549:AmbOcclDiffuseSpecH6FPglsl
+GLSL compiling: e4f9dd9afba8fc678c9031c1f7b5d67e5b967733d13af6dd26ccb179acb71649:H6VPglsl
+GLSL compiled : e4f9dd9afba8fc678c9031c1f7b5d67e5b967733d13af6dd26ccb179acb71649:H6VPglsl
+GLSL compiling: 88179e0437aec286546da88680624ae3b003598071864b385bda97d025872326:AmbOcclDiffuseSpecShadAdvH6FPglsl
+GLSL compiled : 88179e0437aec286546da88680624ae3b003598071864b385bda97d025872326:AmbOcclDiffuseSpecShadAdvH6FPglsl
+Texture: mhash:///2b4d4a27c51611238140e9980d4954ba56e8d90e7b73545fe46ce3f701cff034: Loading 1 faces(PF_R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_X8R8G8B8,2x2x1.
+Texture: mhash:///8ce14a1e0f8acdde95f4982a60d784e0595b3e1efda2d28af7740ead3b1002ec: Loading 1 faces(PF_DXT1,4x4x1) with 2 custom mipmaps from Image. Internal format is PF_DXT1,4x4x1.
+Mesh: Loading da542c0771306094157836a55c5645e9cb0e4c56d9ecdb5e02e3ea4b59dc0c4b.
+Texture: mhash:///9eaf6c2e5856c1d25e465b4e468f0dd4886e6f9ef0916f9e2d2cb15328a4564c: Loading 1 faces(PF_DXT1,2048x512x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x512x1.
+Texture: mhash:///b7c65594665847843de1aab624db09b5bc95a3a829083588237abef2a2cbb4a5: Loading 1 faces(PF_A8R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_A8R8G8B8,2x2x1.
+Texture: mhash:///784a5b0809ed274036733777f9a158678ffa852247deefd4b1140409dffdac14: Loading 1 faces(PF_R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_X8R8G8B8,2x2x1.
+Texture: mhash:///9988450094a3db65589313af31542fd93eb87ba8d02d8998825f2a91a808b896: Loading 1 faces(PF_A8R8G8B8,2x2x1) with 1 generated mipmaps from Image. Internal format is PF_A8R8G8B8,2x2x1.
+Mesh: Loading 11c21c35c355429ab1771613faae628e4a9a03740bad342ec098f4145539124a.
+Texture: ceb974110db06cffab95544a2953951660d6d5a219dc72f4fc5eaaac3132f02e: Loading 1 faces(PF_DXT1,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT1,1024x1024x1.
+Texture: 93043236cb673184d279e8016b0d9cfe854df5387ef021afe59891d59340d328: Loading 1 faces(PF_DXT5,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT5,1024x1024x1.
+GLSL compiling: 8568b3d2d86e58deb16022d4d4fb9401cf30eef2eae77c4726b3ace58d578633:AmbOcclDiffuse1Spec1Norm1H6FPglsl
+GLSL compiled : 8568b3d2d86e58deb16022d4d4fb9401cf30eef2eae77c4726b3ace58d578633:AmbOcclDiffuse1Spec1Norm1H6FPglsl
+GLSL compiling: fa85e7a3a2201e458f3fd01770c94dfa6bd1dd25034d0fbffc7ea9cef38858fb:AmbOcclDiffuse1Spec1Norm1ShadAdvH6FPglsl
+GLSL compiled : fa85e7a3a2201e458f3fd01770c94dfa6bd1dd25034d0fbffc7ea9cef38858fb:AmbOcclDiffuse1Spec1Norm1ShadAdvH6FPglsl
+Texture: 4af59a3371e551afae89f1e47b3b4b3264e7d3aa472f0f7f0e897d505f403a46: Loading 1 faces(PF_DXT1,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT1,1024x1024x1.
+Texture: 0957bf7b44d60f1f97435b47927574485b583700f7adf428c30fda21a31c3e66: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 9a76f39cf83c70ad993374c62ade42844a72de4611d4056c8d5b208b75702ed3: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 33601de83a585fc50a1e30ffee5acc6c8776eb3aafaaa745911194dfde3d0086: Loading 1 faces(PF_DXT5,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT5,2048x2048x1.
+Texture: 03f4640093300981a7f1feccbad6f5d9f13b409162e1007faa393edf52ba0c5b: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 38749331ebd6b756eafa3116b1b5d0005644a5b9c0517dfb2a314dc147d81ddb: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: dfbbc9f8399251d7a3ce567727c446b8482500bf24984f6e9a978720a46e84f2: Loading 1 faces(PF_DXT5,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT5,2048x2048x1.
+GLSL compiling: 90beb7d168f0185b14e21817c16f2124d9ce5f4de5dd31012f4dd530341aa3ab:TwoSidedAmbOcclDiffuseSpecNormBumpH6FPglsl
+GLSL compiled : 90beb7d168f0185b14e21817c16f2124d9ce5f4de5dd31012f4dd530341aa3ab:TwoSidedAmbOcclDiffuseSpecNormBumpH6FPglsl
+Compiler error: invalid parameters in 90beb7d168f0185b14e21817c16f2124d9ce5f4de5dd31012f4dd530341aa3ab(25): setting of constant failed
+GLSL compiling: 9c8e4d7a6863fec32b6a4b57b7916392d4c2f71e7954fbd7227abe6517daf44b:TwoSidedAmbOcclDiffuseSpecNormH6FPglsl
+GLSL compiled : 9c8e4d7a6863fec32b6a4b57b7916392d4c2f71e7954fbd7227abe6517daf44b:TwoSidedAmbOcclDiffuseSpecNormH6FPglsl
+GLSL compiling: 350fb686456da9e9cb63184709c42dc73e59c513e3abc779ab77d5eb61225390:TwoSidedAmbOcclDiffuseSpecNormBumpShadAdvH6FPglsl
+GLSL compiled : 350fb686456da9e9cb63184709c42dc73e59c513e3abc779ab77d5eb61225390:TwoSidedAmbOcclDiffuseSpecNormBumpShadAdvH6FPglsl
+Compiler error: invalid parameters in 350fb686456da9e9cb63184709c42dc73e59c513e3abc779ab77d5eb61225390(31): setting of constant failed
+GLSL compiling: dd7bfa01792daef33597a302e266581c03a6cc8e9df7e2da358e67efe1d212fe:BumpShadAdvH6VPglsl
+GLSL compiled : dd7bfa01792daef33597a302e266581c03a6cc8e9df7e2da358e67efe1d212fe:BumpShadAdvH6VPglsl
+GLSL compiling: 58b94bcf52bbcf1edf5c24eaaf2b2103cbd65516a6adb53de209703a233c5ac9:BumpH6VPglsl
+GLSL compiled : 58b94bcf52bbcf1edf5c24eaaf2b2103cbd65516a6adb53de209703a233c5ac9:BumpH6VPglsl
+dbm debug mouseClickHandler cancelled due to ActiveButtons
+Texture: d652027436eb521326b8a5a714430b9831f05659a61248fae19da0cea3f1ccb5: Loading 1 faces(PF_DXT1,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT1,1024x1024x1.
+Texture: e01838e4d62dd9a66619c16ed6f983f62a5371a9e73b170f184540d3f2a2c4bc: Loading 1 faces(PF_DXT5,1028x1028x1) with 10 custom mipmaps from Image. Internal format is PF_DXT5,1028x1028x1.
+Texture: 3b3b7281a7c5b012065963d585ca3f47eff27696a583bb23b0b800ddc52b22d5: Loading 1 faces(PF_DXT1,1028x1028x1) with 10 custom mipmaps from Image. Internal format is PF_DXT1,1028x1028x1.
+Texture: 3f2415481328029cc8d260fed6fd4b5db6c0dc6fb31bfcfa0c5edd7defcf6fbe: Loading 1 faces(PF_DXT5,1028x1028x1) with 10 custom mipmaps from Image. Internal format is PF_DXT5,1028x1028x1.
+Texture: 9c04999411564003d4fb04981be16f68ac8dfc583c9a50e4882b015650f9d987: Loading 1 faces(PF_DXT1,512x512x1) with 9 custom mipmaps from Image. Internal format is PF_DXT1,512x512x1.
+Texture: 720b97b0b3ccdd50de49534b9bedd8707eb76124e63ba0e5110b352964940b16: Loading 1 faces(PF_DXT5,512x512x1) with 9 custom mipmaps from Image. Internal format is PF_DXT5,512x512x1.
+Texture: bafb537660326051ce578ecd5e46d9397934bf0dd2c10590dacc330b1e81f97a: Loading 1 faces(PF_DXT5,1028x1028x1) with 10 custom mipmaps from Image. Internal format is PF_DXT5,1028x1028x1.
+Texture: f87a15491bb5953e3c7d095309b19b8f6f3450869ac94ce6c8a93ee0f73c826d: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+GLSL compiling: 89999247a44698622fa5731c8e2c1badef34d9ad511ec913f5bc707682872cb4:TwoSidedAmbOcclDiffuseSpecNormShadAdvH6FPglsl
+GLSL compiled : 89999247a44698622fa5731c8e2c1badef34d9ad511ec913f5bc707682872cb4:TwoSidedAmbOcclDiffuseSpecNormShadAdvH6FPglsl
+Texture: 6ca5dc7f4f21af3458775ef17e8567c0b0fe225a381656bf442d0b011600fedf: Loading 1 faces(PF_DXT1,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT1,1024x1024x1.
+Texture: 83ecd116ef1ddd4aa00f64e98d66fdc193377801739a77ee2a40d4f7f6c3dc43: Loading 1 faces(PF_DXT1,512x512x1) with 9 custom mipmaps from Image. Internal format is PF_DXT1,512x512x1.
+Texture: e5dbccde222b30c5c60f0a88729d128a3ca76deff20c94b7c65abe7fc70b67b2: Loading 1 faces(PF_DXT5,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT5,1024x1024x1.
+Texture: 9056d384dfd2dee35cc08ed1950b2d62b94aa9448f8df8acdda7aca0d6cb0938: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 2b937cdfb59522d1f5913bfb0a2f075b1caaf8e53e421a51ecda5bdcd3bb6051: Loading 1 faces(PF_DXT5,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT5,2048x2048x1.
+GLSL compiling: f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14:AmbOcclDiffuse1Spec1Norm1Bump1ShadAdvH6FPglsl
+Cannot compile GLSL high-level shader : f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14:AmbOcclDiffuse1Spec1Norm1Bump1ShadAdvH6FPglsl 0(929) : error C1115: unable to find compatible overloaded function "texture2D(sampler2D, error)"
+
+High-level program f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14:AmbOcclDiffuse1Spec1Norm1Bump1ShadAdvH6FPglsl encountered an error during loading and is thus not supported.
+OGRE EXCEPTION(7:InternalErrorException): Cannot compile GLSL high-level shader : f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14:AmbOcclDiffuse1Spec1Norm1Bump1ShadAdvH6FPglsl Cannot compile GLSL high-level shader : f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14:AmbOcclDiffuse1Spec1Norm1Bump1ShadAdvH6FPglsl 0(929) : error C1115: unable to find compatible overloaded function "texture2D(sampler2D, error)"
+ in GLSLProgram::loadFromSource at OgreGLSLExtSupport.cpp (line 66)
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(8): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(9): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(10): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(11): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(12): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(13): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(14): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(15): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(16): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(17): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(18): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(19): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(20): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(21): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(22): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(23): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(24): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(25): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(26): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(27): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(28): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(29): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(30): setting of constant failed
+Compiler error: invalid parameters in f0145c846855ec5a2e76884dc268d89e40524023d9da3b9ddb062e3ae0540e14(31): setting of constant failed
+GLSL compiling: 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5:AmbOcclDiffuse1Spec1Norm1Bump1H6FPglsl
+Cannot compile GLSL high-level shader : 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5:AmbOcclDiffuse1Spec1Norm1Bump1H6FPglsl 0(929) : error C1115: unable to find compatible overloaded function "texture2D(sampler2D, error)"
+
+High-level program 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5:AmbOcclDiffuse1Spec1Norm1Bump1H6FPglsl encountered an error during loading and is thus not supported.
+OGRE EXCEPTION(7:InternalErrorException): Cannot compile GLSL high-level shader : 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5:AmbOcclDiffuse1Spec1Norm1Bump1H6FPglsl Cannot compile GLSL high-level shader : 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5:AmbOcclDiffuse1Spec1Norm1Bump1H6FPglsl 0(929) : error C1115: unable to find compatible overloaded function "texture2D(sampler2D, error)"
+ in GLSLProgram::loadFromSource at OgreGLSLExtSupport.cpp (line 66)
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(8): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(9): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(10): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(11): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(12): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(13): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(14): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(15): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(16): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(17): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(18): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(19): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(20): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(21): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(22): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(23): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(24): setting of constant failed
+Compiler error: invalid parameters in 7cbdf8c328f58bbbe5b992d2696d8569a73e9583319212b67867818f54ae01b5(25): setting of constant failed
+Texture: cb8f974854d665b7aa00add9d4c06b7c75cc2451c597476abd49554c23de1c8f: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 7d2bbb00f3ec7ad26c0551cb84b8f558f8af4a5273f4ce2c426e7e24fae7bd27: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 2bdba4b2c75a98ecb3cee715feb8958bb5d08fc818d0e04d7f048943103c98f6: Loading 1 faces(PF_DXT5,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT5,2048x2048x1.
+Texture: 325aeca1dd14a7dfd33b638f174a4d685170fc7926ef96e93e2c15e152be16ad: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 813bb185137f329121b98a7e74511478abe9e0844d4a62be0a26988b17b10bec: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 9a8b77bfecfcd71b6f2276a1c9391a4f1ed46280781a9a23b1529f728e750372: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 0fff3531f4f1b625bbf6f8f9fab82cf0d5204025fb791e8a9678839ccddbf39b: Loading 1 faces(PF_DXT5,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT5,2048x2048x1.
+Texture: 35ad115766122b82520e58d5eba0b5d3be3144f029fcd354552c6df8f2aff450: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 149747e8c254508ae73908f11635b11b51df6040e2c77be1f4027fcb863f857f: Loading 1 faces(PF_DXT1,1024x1024x1) with 10 custom mipmaps from Image. Internal format is PF_DXT1,1024x1024x1.
+Texture: 42eff2806e2eaf742caa73582371a6d7e08c8bd5e24889c4290e08b4821647a8: Loading 1 faces(PF_DXT5,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT5,2048x2048x1.
+Texture: 6779cdc7fa0b0d41faed643a02ca9d23ba76c49f7da2f060e6ceadd09953c378: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: c9fda80de791ec6f67591401736e1e7b437fb5c3696c1769f9082558a7fe9c13: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Texture: 56ef7b5839f95bbdb1d71d325939aec652190320943bcea20deda2103b9639b1: Loading 1 faces(PF_DXT1,2048x2048x1) with 11 custom mipmaps from Image. Internal format is PF_DXT1,2048x2048x1.
+Mesh: Loading 7bdd80ae51342815475922b81846f80b25f2dada7609579ada1c73483d9b9367.
+Mesh: Loading 13cd7369f41e622ef1db72dc43445dacffa78198084d6ad7b868ba407ee6ad54.
+Mesh: Loading d66881d1d0fa4da6d593c5fed6080aab4bfe6f7121954096bad27e0c07f95500.
+Mesh: Loading c9a3765d21ed18da45dedd6a43bd1441b298916802c50faf2469c0ce2d83e226.
+Mesh: Loading a37bd7be2ee28e193678527a79a192b53f47b382529ce582870db220129ef614.
+Mesh: Loading 02135f14a5aff61cf178464d8e70dfd51b74852d1ca2717770c380a6c4e8a7fd.
+Mesh: Loading 14ed8eda567808baf7f20b8e8f553b8f96ce979e81d5538eebd845833a19f5a3.
+Mesh: Loading a85d99547da0deef8ef7b2e2f70955b78ce32c21adaaa8c095c789eb3b589ed3.
+Mesh: Loading fee5c50591dd88614c1ccac3ceaa55ca6350fcd9ba88346599558a7b70749571.
+Mesh: Loading 167f19e257c421fb779d85d76bc745b5beb2aa2a7c97cd80eedf4f7d514ed39c.
+Mesh: Loading 31576f221e020b18a7901d5b8216dd8999b244619a80c13cda2dd95445e5df65.
+Mesh: Loading 2073fc6816191b2d535cc40ae7e3e666ce962dbae4625244d2a065e73537bd99.
+Mesh: Loading 0f70f136cb3fbaa70c08551a1721c5d0cb7d3f0d7fb1fe2a313c160b57168004.
+Mesh: Loading 536a2245a37aa04df17f8f3767958e105d2c73bc160ebdeeb25f4544766deecd.
+Mesh: Loading dac258a6de833473a0d40514c9f29d14c052bc854eaced71baf673a9f586ced8.
+dbm debug mouseClickHandler cancelled due to ActiveButtons
+dbm debug mouseClickHandler cancelled due to ActiveButtons
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: JavascriptMessage
+Processing RPC JavascriptMessage
+PY: Got an RPC named JavascriptMessage
+PY JavascriptMessage: JavascriptMessage inventory placeObject artwork_01 165 248 -9.72062 -1.40895 1.24446 -8.49037e-08 -0.0348995 -2.9649e-09 0.999391
+PY moving artwork_01 15225321-320d-4dfd-8e4a-e5d452acf335 to -9.72062 -1.40895 1.24446 quat: -8.49037e-008 -0.0348995 -2.9649e-009 0.999391
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 15225321-320d-4dfd-8e4a-e5d452acf335 port 0
+Received position update to [(<-9.72062,-1.40895,1.24446>; orientation <-8.49037e-08,-0.0348995,-2.9649e-09,0.999391>); vel=<0,0,0>; angVel = 0 around <1,0,0>]
+	Someone wants to set my position: <-9.72062,-1.40895,1.24446>
+X is -0.618263; Y is 0.132812; pos = <-10.35,-1.81938,3.85>; dir = <0.307625,0.0508251,-0.963495>
+X is -0.618263; Y is 0.132812; pos = <-10.35,-1.81937,3.85>; dir = <0.307625,0.0508251,-0.963495>
+X is -0.618263; Y is 0.132812; pos = <-10.35,-1.81908,3.85>; dir = <0.307625,0.0508251,-0.963495>
+X is -0.618263; Y is 0.132812; pos = <-10.35,-1.81908,3.85>; dir = <0.307625,0.0508251,-0.963495>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: JavascriptMessage
+Processing RPC JavascriptMessage
+PY: Got an RPC named JavascriptMessage
+PY JavascriptMessage: JavascriptMessage inventory placeObject artwork_02 280 236 -10.616 -1.22789 2.66804 0 0.681998 0 0.731354
+PY moving artwork_02 fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 to -10.616 -1.22789 2.66804 quat: 0.0 0.681998 0.0 0.731354
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 0
+Received position update to [(<-10.616,-1.22789,2.66804>; orientation <0,0.681998,0,0.731354>); vel=<0,0,0>; angVel = 0 around <1,0,0>]
+	Someone wants to set my position: <-10.616,-1.22789,2.66804>
+X is -0.61976; Y is 0.166667; pos = <-7.24288,-1.819,3.32622>; dir = <-0.997974,0.0637806,-0.166806>
+X is -0.61976; Y is 0.166667; pos = <-7.24288,-1.819,3.32622>; dir = <-0.997974,0.0637806,-0.166806>
+X is -0.61976; Y is 0.166667; pos = <-7.24288,-1.819,3.32622>; dir = <-0.997974,0.0637806,-0.166806>
+X is -0.61976; Y is 0.166667; pos = <-7.24288,-1.819,3.32622>; dir = <-0.997974,0.0637806,-0.166806>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: JavascriptMessage
+Processing RPC JavascriptMessage
+PY: Got an RPC named JavascriptMessage
+PY JavascriptMessage: JavascriptMessage inventory placeObject artwork_03 415 237 -6.67506 -0.949541 4.6757 0 0.999391 0 0.0348995
+PY moving artwork_03 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 to -6.67506 -0.949541 4.6757 quat: 0.0 0.999391 0.0 0.0348995
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 0
+Received position update to [(<-6.67506,-0.949541,4.6757>; orientation <0,0.999391,0,0.0348991>); vel=<0,0,0>; angVel = 0 around <1,0,0>]
+	Someone wants to set my position: <-6.67506,-0.949541,4.6757>
+X is -0.176647; Y is -0.114583; pos = <-3.03547,-1.819,1.35004>; dir = <-0.761053,-0.0438491,0.536825>
+X is -0.176647; Y is -0.114583; pos = <-3.03547,-1.819,1.35004>; dir = <-0.761053,-0.0438491,0.536825>
+X is -0.176647; Y is -0.114583; pos = <-3.03547,-1.819,1.35004>; dir = <-0.761053,-0.0438491,0.536825>
+X is -0.176647; Y is -0.114583; pos = <-3.03547,-1.819,1.35004>; dir = <-0.761053,-0.0438491,0.536825>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: JavascriptMessage
+Processing RPC JavascriptMessage
+PY: Got an RPC named JavascriptMessage
+PY JavascriptMessage: JavascriptMessage inventory placeObject artwork_04 716 242 -2.72499 -0.626785 1.9828 0 -0.731354 0 0.681998
+PY moving artwork_04 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 to -2.72499 -0.626785 1.9828 quat: 0.0 -0.731354 0.0 0.681998
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 0
+Received position update to [(<-2.72499,-0.626785,1.9828>; orientation <0,-0.731354,0,0.681998>); vel=<0,0,0>; angVel = 0 around <1,0,0>]
+	Someone wants to set my position: <-2.72499,-0.626785,1.9828>
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: JavascriptMessage
+Processing RPC JavascriptMessage
+PY: Got an RPC named JavascriptMessage
+PY JavascriptMessage: JavascriptMessage inventory placeObject artwork_01 380 260 -4.59459 -0.991853 0.533362 0 -0.0348995 -0 0.999391
+PY moving artwork_01 15225321-320d-4dfd-8e4a-e5d452acf335 to -4.59459 -0.991853 0.533362 quat: 0.0 -0.0348995 0.0 0.999391
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 15225321-320d-4dfd-8e4a-e5d452acf335 port 0
+Received position update to [(<-4.59459,-0.991853,0.533362>; orientation <0,-0.0348995,-0,0.999391>); vel=<0,0,0>; angVel = 0 around <1,0,0>]
+	Someone wants to set my position: <-4.59459,-0.991853,0.533362>
+X is -0.44012; Y is -0.257812; pos = <-9.31005,-1.819,3.39872>; dir = <0.817788,-0.0986606,-0.520213>
+X is -0.44012; Y is -0.257812; pos = <-9.31005,-1.819,3.39872>; dir = <0.817787,-0.0986606,-0.520213>
+X is -0.44012; Y is -0.257812; pos = <-9.31005,-1.819,3.39872>; dir = <0.817787,-0.0986606,-0.520213>
+X is -0.44012; Y is -0.257812; pos = <-9.31005,-1.819,3.39872>; dir = <0.817788,-0.0986606,-0.520213>
+dbm debug mouseClickHandler cancelled due to ActiveButtons
+dbm debug mouseClickHandler cancelled due to ActiveButtons
+dbm debug mouseClickHandler cancelled due to ActiveButtons
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: JavascriptMessage
+Processing RPC JavascriptMessage
+PY: Got an RPC named JavascriptMessage
+PY JavascriptMessage: JavascriptMessage inventory saveState dennisloaded thereshouldbecontentonallfourwallsandnospacesinthispost -9.12394 -0.243556 4.50446 -2.23822e-09 0.999391 6.40941e-08 0.0348995
+PY: saveState dennisloaded description: thereshouldbecontentonallfourwallsandnospacesinthispost
+  PY: save artwork_01 15225321-320d-4dfd-8e4a-e5d452acf335
+PY debug A
+PY debug B
+  PY: save artwork_02 fa2a7b36-b84c-4857-b27a-68c8b4eb0a35
+PY debug A
+PY debug B
+  PY: save artwork_03 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4
+PY debug A
+PY debug B
+  PY: save artwork_04 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997
+PY debug A
+PY debug B
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 15225321-320d-4dfd-8e4a-e5d452acf335 port 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 0
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 0
+** Message from: fa2a7b36-b84c-4857-b27a-68c8b4eb0a35 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: 
+Processing RPC 
+PY: Got an RPC named 
+PY: response to our location query.  Dunno why it has no name
+** Message from: b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0 to 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 0
+** Message from: 7a9e27ec-c519-42b5-9fa5-f3479bc54ad4 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: 
+Processing RPC 
+PY: Got an RPC named 
+PY: response to our location query.  Dunno why it has no name
+** Message from: 2e99d9cb-0ad8-43dd-ab28-0215b2fd2997 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: 
+Processing RPC 
+PY: Got an RPC named 
+PY: response to our location query.  Dunno why it has no name
+** Message from: 15225321-320d-4dfd-8e4a-e5d452acf335 port 0 to b7615a5f-ea0f-4b71-9072-e3fa6a2fce01 port 0
+	Message to be handled in script: 
+Processing RPC 
+PY: Got an RPC named 
+PY: response to our location query.  Dunno why it has no name
+PY: will hexify this data (lp0
+(dp1
+Vname
+p2
+Vartwork_02
+p3
+sVpos
+p4
+(F-10.616
+F-1.22789
+F2.66804
+tp5
+sVrot
+p6
+(F0.0
+F0.68199801445007324
+F0.0
+F0.73135402390781834
+tp7
+sa(dp8
+g2
+Vartwork_01
+p9
+sg4
+(F-4.59459
+F-0.99185299999999998
+F0.533362
+tp10
+sg6
+(F0.0
+F-0.034899495542049408
+F0.0
+F0.99939082705961957
+tp11
+sa(dp12
+g2
+Vartwork_03
+p13
+sg4
+(F-6.67506
+F-0.94954099999999997
+F4.6757
+tp14
+sg6
+(F0.0
+F0.99939084053039551
+F0.0
+F0.034899109787350967
+tp15
+sa(dp16
+g2
+Vartwork_04
+p17
+sg4
+(F-2.72499
+F-0.62678500000000004
+F1.9828
+tp18
+sg6
+(F0.0
+F-0.7313539981842041
+F0.0
+F0.68199804203529735
+tp19
+saVthereshouldbecontentonallfourwallsandnospacesinthispost TIMESTAMP:Wed Sep 16 16:18:55 2009
+p20
+a.
+sys:1: DeprecationWarning: The xmllib module is obsolete.  Use xml.sax instead.
+ResourceBackgroundQueue - thread stopped.
+*-*-* OGRE Shutdown
+Unregistering ResourceManager for type Compositor
+Unregistering ResourceManager for type Font
+Unregistering ResourceManager for type Skeleton
+Unregistering ResourceManager for type Mesh
+Unregistering ResourceManager for type HighLevelGpuProgram
+Uninstalling plugin: Octree & Terrain Scene Manager
+Plugin successfully uninstalled
+Unloading library ../../dependencies/lib/OGRE/Plugin_OctreeSceneManager.so
+Uninstalling plugin: ParticleFX
+Plugin successfully uninstalled
+Unloading library ../../dependencies/lib/OGRE/Plugin_ParticleFX.so
+Uninstalling plugin: Cg Program Manager
+Plugin successfully uninstalled
+Unloading library ../../dependencies/lib/OGRE/Plugin_CgProgramManager.so
+Uninstalling plugin: GL RenderSystem
+Unregistering ResourceManager for type GpuProgram
+******************************
+*** Stopping GLX Subsystem ***
+******************************
+Unregistering ResourceManager for type Texture
+Plugin successfully uninstalled
+Unloading library ../../dependencies/lib/OGRE/RenderSystem_GL.so
+Unregistering ResourceManager for type Material
+(0) : fatal error C9999: *** exception during compilation ***
+Cg compiler terminated due to fatal errorpython csv_converter.py scenes/curator.csv scenes/curator_env.csv scenes/curator_art.csv  scene.db
+cd build/cmake; ./cppoh_d --db ../../scene.db
