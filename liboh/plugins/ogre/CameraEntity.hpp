@@ -67,6 +67,7 @@ public:
     Ogre::Viewport* getViewport(){
         return mViewport;
     }
+    void setCompositors(const String &allCompositors);
     static std::string ogreCameraName(const SpaceObjectReference&ref);
     virtual std::string ogreMovableName() const;
 

@@ -172,9 +172,8 @@ namespace Graphics {
 	{
 	}
 
-static void ProcessCompositorEffects(OgreSystem *root, Ogre::Viewport*vp) {
+static void ProcessCompositorEffects(Ogre::Viewport*vp,String allCompositors) {
     static HDRListener hdrListener;
-    String allCompositors=root->getCompositors();
     std::string::size_type where=0;
     do {
         std::string::size_type where2=allCompositors.find_first_of(",",where+1);
@@ -216,7 +215,9 @@ CameraEntity::CameraEntity(OgreSystem *scene,
     getOgreCamera()->setNearClipDistance(scene->getOptions()->referenceOption("nearplane")->as<float32>());
     getOgreCamera()->setFarClipDistance(scene->getOptions()->referenceOption("farplane")->as<float32>());
 }
-
+void CameraEntity::setCompositors(const String&allCompositors) {
+    ProcessCompositorEffects(mViewport,allCompositors);
+}
 void CameraEntity::attach (const String&renderTargetName,
                      uint32 width,
                      uint32 height){
@@ -226,7 +227,9 @@ void CameraEntity::attach (const String&renderTargetName,
                                                height);
     mViewport= mRenderTarget->addViewport(getOgreCamera());
     mViewport->setBackgroundColour(Ogre::ColourValue(0,.125,.25,1));
-    ProcessCompositorEffects(mScene,mViewport);
+    String allCompositors=mScene->getCompositors();
+    setCompositors(allCompositors);
+
     getOgreCamera()->setAspectRatio((float32)mViewport->getActualWidth()/(float32)mViewport->getActualHeight());
     mAttachedIter = mScene->attachCamera(renderTargetName,this);
 }
