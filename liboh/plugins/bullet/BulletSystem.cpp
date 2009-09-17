@@ -442,7 +442,7 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > Duration::seconds(20.0)) {
+        if ((now-mStartTime) > Duration::seconds(30.0)) {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
@@ -507,6 +507,9 @@ bool BulletSystem::tick() {
                         if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6)=="Avatar") {
                             po=lastGoodAvatarPo;
                             cout << "dbm debug POSITION FIX:" << objects[i]->mName << " pos: " << po.p << endl;
+                            loc.setVelocity(Vector3f(0,0,0));
+                            loc.setAxisOfRotation(Vector3f(0,1,0));
+                            loc.setAngularSpeed(0);
                         }
                     }
                     loc.setPosition(po.p);
