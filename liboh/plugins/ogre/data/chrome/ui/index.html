@@ -140,9 +140,9 @@
 				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critique") {
 				setTimeout('critiqueMode() ', 1000);
-			} else if ($.getURLParam('flythru') == "critique") {
+			} else if ($.getURLParam('mode') == "flythru") {
 				setTimeout('flythruMode() ', 1000);
-			} else if ($.getURLParam('fun') == "critique") {
+			} else if ($.getURLParam('mode') == "fun") {
 				setTimeout('funMode() ', 1000);
 			} else {
 				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
