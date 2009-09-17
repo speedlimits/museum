@@ -31,7 +31,7 @@
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_curator.html");	
-				loadScreen("div#bottom-bar", "screens/bottombar.html"); 	
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 	
 				if (mode == 1) { // art 
 					loadScreen("#detail-screen", "screens/curator_art.html");	
 				} else if (mode == 2) { // frames 
@@ -61,7 +61,7 @@
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_critique.html");	
-				
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 				$("body").bind('sirikata_item_select', pictureSelectedEvent);
 				$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
 			
@@ -85,6 +85,7 @@
 				loadScreen("#modal-screen", "screens/flythru_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 			}
 		}
 		
@@ -94,6 +95,7 @@
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 			}
 		}
 		
@@ -136,7 +138,10 @@
 		}
 	
 		$(document).ready( function () {
-			Client.event("navcommand", $.getURLParam('mode'));
+			try {
+				Client.event("navcommand", $.getURLParam('mode'));
+			} catch (err) {debug('set mode failed');}
+			
 			if ($.getURLParam('mode') == "curator") {
 				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critic") {
