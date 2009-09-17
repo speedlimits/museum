@@ -136,13 +136,14 @@
 		}
 	
 		$(document).ready( function () {
+			Client.event("navcommand", $.getURLParam('mode'));
 			if ($.getURLParam('mode') == "curator") {
 				setTimeout('curatorMode(); ', 1000);
-			} else if ($.getURLParam('mode') == "critique") {
+			} else if ($.getURLParam('mode') == "critic") {
 				setTimeout('critiqueMode() ', 1000);
 			} else if ($.getURLParam('mode') == "flythru") {
 				setTimeout('flythruMode() ', 1000);
-			} else if ($.getURLParam('mode') == "fun") {
+			} else if ($.getURLParam('mode') == "funmode") {
 				setTimeout('funMode() ', 1000);
 			} else {
 				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);

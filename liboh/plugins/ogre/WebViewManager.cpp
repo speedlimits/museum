@@ -78,8 +78,13 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
 {
     FILE* f=fopen("mode.txt", "r");
     char mode[20];
-    fread(mode, 1, 19, f);
-    std::cout << "webview option museumMode:" << mode << std::endl;
+    if(f) {
+        int siz=fread(mode, 1, 19, f);
+        mode[siz]=0;
+    }
+    else {
+        strcpy(mode, "dev");
+    }
     tooltipWebView = 0;
 #ifdef HAVE_AWESOMIUM
     webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
@@ -100,9 +105,14 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
         }
         else {
         */
-        std::ostringstream ss;
-        ss << "ui/index.html?mode=" << mode;
-        chromeWebView->loadFile(ss.str());
+//        std::ostringstream ss;
+  //      ss << "ui/index.html?mode=" << mode << std::endl;
+    //    std::cout << "dbm debug calling chromeWebView:" << ss.str() << std::endl;
+        char s[100];
+        sprintf(s, "ui/index.html?mode=%s", mode);
+        std::cout << "dbm debug calling chromeWebView:" << s << std::endl;
+//        chromeWebView->loadFile(ss.str());
+        chromeWebView->loadFile(s);
 //        }
         chromeWebView->setTransparent(true);
 
