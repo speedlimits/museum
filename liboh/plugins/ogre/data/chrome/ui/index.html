@@ -79,6 +79,24 @@
 			}
 		}
 		
+		function flythruMode(mode) {
+		        var mode = (mode == null) ? 0 : mode;
+		        if (mode == 0) {
+				loadScreen("#modal-screen", "screens/flythru_welcome.html");
+			} else {
+				hideScreen("#modal-screen");
+			}
+		}
+		
+		function funMode(mode) {
+		        var mode = (mode == null) ? 0 : mode;
+		        if (mode == 0) {
+				loadScreen("#modal-screen", "screens/fun_welcome.html");
+			} else {
+				hideScreen("#modal-screen");
+			}
+		}
+		
 		function developmentMode() {
 			hideScreen("#modal-screen");
 			loadScreen("#development-screen", "screens/development.html");	
@@ -122,6 +140,10 @@
 				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critique") {
 				setTimeout('critiqueMode() ', 1000);
+			} else if ($.getURLParam('flythru') == "critique") {
+				setTimeout('flythruMode() ', 1000);
+			} else if ($.getURLParam('fun') == "critique") {
+				setTimeout('funMode() ', 1000);
 			} else {
 				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
 			}
