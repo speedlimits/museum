@@ -433,6 +433,7 @@ bool BulletSystem::tick() {
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     //static int mode = 0;
     static positionOrientation lastGoodAvatarPo;
+    static BulletObj* avatar_id=0;
     Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
     positionOrientation po;
@@ -484,10 +485,9 @@ bool BulletSystem::tick() {
                             objects[i]->mPIDControlEnabled=false;
                         }
                     }
-//                    if (objects[i]->mName=="Avatar_fun") {
-//                        Vector3f yax = loc.getOrientation().yAxis() * 10.0;
-//                        objects[i]->mBulletBodyPtr->applyCentralForce(btVector3(-yax.x, -yax.y, -yax.z));
-//                    }
+                    if (objects[i]->mName=="Avatar_fun") {
+                        avatar_id = objects[i];
+                    }
                 }
             }
 //            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
@@ -614,7 +614,13 @@ bool BulletSystem::tick() {
                 for (std::map<ObjectReference,RoutableMessageBody>*whichMessages=&mBeginCollisionMessagesToSend;true;whichMessages=&mEndCollisionMessagesToSend) {//send all items from map 1, then all items from map 2 (for loop of size 2)
                     for (std::map<ObjectReference,RoutableMessageBody>::iterator iter=whichMessages->begin(),iterend=whichMessages->end();iter!=iterend;++iter) {
                         RoutableMessageHeader hdr;
-                        hdr.set_destination_object(iter->first);
+                        if (avatar_id) {
+                            /// for fun mode, send all collision msgs to avatar
+                            hdr.set_destination_object(avatar_id->getObjectReference());
+                        }
+                        else {
+                            hdr.set_destination_object(iter->first);
+                        }
                         hdr.set_destination_space(anExampleCollidingMesh->getSpaceID());
                         hdr.set_source_object(ObjectReference::spaceServiceID());
                         hdr.set_source_port(Services::PHYSICS);
