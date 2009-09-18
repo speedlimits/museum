@@ -40,6 +40,7 @@
 #include "OgreHeaders.hpp"
 #include <OgreResourceManager.h>
 #include <OgrePixelFormat.h>
+#include "WebViewManager.hpp"
 //Thank you Apple:
 // /System/Library/Frameworks/CoreServices.framework/Headers/../Frameworks/CarbonCore.framework/Headers/MacTypes.h
 #ifdef nil
@@ -221,6 +222,11 @@ public:
         s = mDumbMsg;
         mDumbMsg=temp;
         std::cout << "dumbMsg Ogre: " << mDumbMsg << std::endl;
+        std::ostringstream ss;
+                //ss << "document.selected='" << msg << "'; debug(document.selected);";
+        ss << "popUpMessage(" << '"' << s << '"' << "," << 10 << ","<< 10 << ");";
+        std::cout << "cameraPathTick msg to JS:" << ss.str() << std::endl;
+        WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
     };
     ~OgreSystem();
 };
