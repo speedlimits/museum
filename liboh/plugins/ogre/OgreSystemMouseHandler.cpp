@@ -66,7 +66,8 @@ using namespace Input;
 using namespace Task;
 using namespace std;
 
-#define DEG2RAD 0.0174532925
+#define DEG2RAD (M_PI / 180.0)
+#define RAD2DEG (180.0 / M_PI)
 #ifdef _WIN32
 #undef SDL_SCANCODE_UP
 #define SDL_SCANCODE_UP 0x60
@@ -955,7 +956,7 @@ private:
         quat2Euler(orient, p, r, y);
         Vector3f raxis;
         raxis.x = 0;
-        raxis.y = std::cos(p*DEG2RAD);
+        raxis.y =  std::cos(p*DEG2RAD);
         raxis.z = -std::sin(p*DEG2RAD);
 
         Protocol::ObjLoc rloc;
@@ -1047,11 +1048,14 @@ private:
         q1=q.z;
         q0=q.w;
         roll = std::atan2((2*((q0*q1)+(q2*q3))), (1-(2*(std::pow(q1,2.0)+std::pow(q2,2.0)))));
-        pitch = std::asin((2*((q0*q2)-(q3*q1))));
+        pitch = (2*((q0*q2)-(q3*q1)));
+        pitch = (pitch <= -1.0) ? -M_PI_2 :
+                (pitch >= +1.0) ? +M_PI_2 :
+                std::asin((pitch));
         yaw = std::atan2((2*((q0*q3)+(q1*q2))), (1-(2*(std::pow(q2,2.0)+std::pow(q3,2.0)))));
-        pitch /= DEG2RAD;
-        roll /= DEG2RAD;
-        yaw /= DEG2RAD;
+        pitch *= RAD2DEG;
+        roll  *= RAD2DEG;
+        yaw   *= RAD2DEG;
         if (std::abs(pitch) > 89.0) {
             return false;
         }
@@ -2205,7 +2209,7 @@ private:
         lightLocation->setOrientation(Quaternion(lightX, lightY, lightZ));
 
         // Adjust the cone.
-        const float coneFactor = 1.7;
+        const float coneFactor = 2.718281828;
         float coneAngle = atan(objSphere.radius() * coneFactor / (objSphere.center() - lightPosition).length());
         float coneInnerAngle = 0;
         float coneOuterAngle = coneAngle;   // Spotlights don't look as expected
