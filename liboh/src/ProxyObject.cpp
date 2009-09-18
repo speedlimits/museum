@@ -174,6 +174,7 @@ bool validateAbsoluteLocation(const Location&location) {
 
 bool validateLocation(SpaceID space,
                       ProxyObject::Extrapolator *extrapolated) {
+    return true;
     Location test(extrapolated->extrapolate(SpaceTimeOffsetManager::getSingleton().now(space)));
     if (!validateAbsoluteLocation(test)){
         SILOG(oh,fatal,"Extrapolated Location invalid "<<test.getPosition());
