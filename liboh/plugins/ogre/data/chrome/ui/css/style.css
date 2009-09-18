@@ -74,8 +74,8 @@ ul#topbar-critique {
 	/*height: 37px; */
 	padding: 0px;
 	margin: 0px ;
-	background: url(../images/vertical_menu.png) no-repeat ;
-	list-style: none;
+	/*background: url(../images/vertical_menu.png) no-repeat ;
+	*/list-style: none;
 }
 #bottombar li {
 	/*float:left;*/
@@ -85,7 +85,7 @@ ul#topbar-critique {
 	padding-bottom:0px;
 	background: url(../images/vertical_menu.png) no-repeat;
 	height: 33px;
-	width: 139px;
+	width: 140px;
 	text-align: center;
 }
 
