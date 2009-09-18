@@ -1545,7 +1545,7 @@ private:
         assert(cam);
         RoutableMessageBody msg;
         ostringstream ss;
-        ss << "funmode reset";
+        ss << "reset";
         ProxyObjectPtr avatar = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         assert(avatar);
         msg.add_message("JavascriptMessage", ss.str());
@@ -1624,6 +1624,10 @@ private:
         String smsg;
         msg.SerializeToString(&smsg);
         cam->sendMessage(MemoryReference(smsg));
+    }
+
+    void resetHandler(WebViewManager::NavigationAction action, const String& arg) {
+        resetAction();
     }
 
 
@@ -2831,6 +2835,7 @@ private:
             StringMessageHandler    handler;
         };
         static const StringMessageDispatch dispatchTable[] = {
+            { "reset",                  &Sirikata::Graphics::OgreSystem::MouseHandler::resetHandler },
             { "inventory",              &Sirikata::Graphics::OgreSystem::MouseHandler::inventoryHandler },
             { "walk",                   &Sirikata::Graphics::OgreSystem::MouseHandler::walkHandler },
             { "step",                   &Sirikata::Graphics::OgreSystem::MouseHandler::stepHandler },

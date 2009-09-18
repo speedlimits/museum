@@ -98,6 +98,9 @@ class exampleclass:
         self.ammoMod=6
         self.arthits=set()
         self.oldhits=0
+        f=open("mode.txt")
+        self.mode=f.read().strip()
+        f.close()
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -220,17 +223,17 @@ class exampleclass:
                     if DEBUG_OUTPUT: print "PY: rot:", qx, qy, qz, qw, "axis:", zx, zy, zz, "pos+off:", x, y, z, "vel:", vx, vy, vz
                     self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
                                      velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
-                elif tok[1]=="reset":
-                    self.setPosition(objid=self.objects["Avatar_fun"], position = (0,-2.5,0), orientation = (0,0,0,1),
-                                     velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
-                    for i in self.objects:
-                        if i[:4] == "pin_":
-                            pos, rot = self.pinstate[i]
-                            self.setPosition(objid=self.objects[i], position = pos, orientation = rot,
-                                             velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
-##                    cmd = "python domail.py dennis_museum_2 an_artistic_museum, abcde"
-##                    print "PY test sendmail-->"+ cmd + "<--"
-##                    os.system(cmd)
+
+            elif tok[0]=="reset":
+                if self.mode=="funmode":
+                    if DEBUG_OUTPUT: print "PY: funmode reset"
+##                    self.setPosition(objid=self.objects["Avatar_fun"], position = (0,-2.5,0), orientation = (0,0,0,1),
+##                                     velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+##                    for i in self.objects:
+##                        if i[:4] == "pin_":
+##                            pos, rot = self.pinstate[i]
+##                            self.setPosition(objid=self.objects[i], position = pos, orientation = rot,
+##                                             velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
             else:
                 print "PY: unknown JavascriptMessage:", tok
 
