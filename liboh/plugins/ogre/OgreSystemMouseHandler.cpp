@@ -831,6 +831,7 @@ private:
             proxyMgr->createObject(newLightObject);
             {
                 LightInfo li;
+                li.setLightType(LightInfo::POINT);
                 li.setLightDiffuseColor(Color(0.976471, 0.992157, 0.733333));
                 li.setLightAmbientColor(Color(.24,.25,.18));
                 li.setLightSpecularColor(Color(0,0,0));
@@ -879,18 +880,6 @@ private:
             camProxy=parentProxy;
         }
         return camProxy;
-    }
-
-
-    //--------------------------------------------------------------------------
-    void controlLightAction() {
-        // Find the selected light
-
-        // Save current parameters, in case the user wants to cancel
-
-        // Open light control dialog
-
-        //
     }
 
 
@@ -2944,8 +2933,8 @@ public:
                 WebViewEvent::Id,
                 std::tr1::bind(&MouseHandler::webviewHandler, this, _1)));
 
-        const float trnSpeed = 0.05f;   // Speed for translational motion, in meters/sec. (FIXME: 5 cm/sec isn't what is perceived)
-        const float rotSpeed = 0.5f;    // Speed for  rotational   motion, in rdians/sec.
+        const float trnSpeed = 0.20f;   // Speed for translational motion, in meters/sec.
+        const float rotSpeed = 0.75f;   // Speed for  rotational   motion, in radians/sec.
         // ----------------------------------------------------------------------------------------------------------  ------ direction --------  ---on--- off
         mInputResponses["moveForward"]  = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  0, -1), _1), trnSpeed, 0);
         mInputResponses["moveBackward"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  0, +1), _1), trnSpeed, 0);
@@ -2965,7 +2954,6 @@ public:
         mInputResponses["stableRotateNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, -1.f, _1),      rotSpeed, 0);
 
         mInputResponses["createLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::createLightAction, this));
-        mInputResponses["controlLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::controlLightAction, this));
         mInputResponses["toggleLightVisibility"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::toggleLightVisibilityAction, this));
         mInputResponses["enterObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::enterObjectAction, this));
         mInputResponses["leaveObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::leaveObjectAction, this));
@@ -3036,7 +3024,6 @@ public:
 
         // Various other actions
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B), mInputResponses["createLight"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_CTRL), mInputResponses["controlLight"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_SHIFT), mInputResponses["toggleLightVisibility"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_ENTER), mInputResponses["enterObject"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RETURN), mInputResponses["enterObject"]);
