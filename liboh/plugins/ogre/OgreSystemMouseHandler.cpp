@@ -2362,7 +2362,6 @@ private:
     //     light get 292ae805-393b-f239-8df8-8f129f9ddb03:12345678-1111-1111-1111-defa01759ace
     //--------------------------------------------------------------------------
 
-//    void lightGet(const String& arg, size_t argCaret) {
     void lightGet(const String& arg, size_t argCaret) {
             String info;
         int ix = 0;
@@ -2372,10 +2371,11 @@ private:
         String id;
         bool printOne = getNextToken(arg, &argCaret, &id);     // id or index
         if (printOne) {
-            isIndex = id.find_first_of(':');
+            isIndex = id.find_first_of(':') == String::npos;
             if (isIndex)    index = strtol(id.c_str(), NULL, 10);
             else            sor = SpaceObjectReference(id);
-        } else {
+        }
+        else {
             info = "[ ";
         }
 
@@ -2423,11 +2423,21 @@ private:
     // Set the parameters of a light, with specifications in JSON format.
     // Invoked as
     //     light set { 'id':'<id>' ... }
+    //     light set [ { 'id':'<id>' ... }, ... { 'id':'<id>' ... } ]
     //--------------------------------------------------------------------------
 
     void lightSet(const String& arg, size_t argCaret) {
+        String params;
+        argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
+        if (arg[argCaret] == '[') {                         // Array
+            ++argCaret;                                     // Skip over '['
+            while (getNextObject(arg, &argCaret, &params))  // Get next "{...}" string
+                lightSet(params, 0);
+            return;
+        }
+
+        params = arg.substr(argCaret);
         String id;
-        String params(arg.substr(argCaret));
         JavascriptArgumentParser jap(params);
         if (!jap.getAttributeValue("id", &id)) {
             SILOG(input, error, "lightHandler: no light id specified");
@@ -2629,17 +2639,24 @@ private:
 
     void lightRemove(const String& arg, size_t argCaret) {
         String id;
-        String params(arg.substr(argCaret));
-        JavascriptArgumentParser jap(params);
-        if (!jap.getAttributeValue("id", &id)) {
+        if (!getNextToken(arg, &argCaret, &id)) {
             SILOG(input, error, "lightRemove: no light id specified");
             return;
         }
+        int index = -1, ix = 0;
+        SpaceObjectReference sor = SpaceObjectReference::null();
+        bool isIndex = id.find_first_of(':') == String::npos;
+        if (isIndex)    index = strtol(id.c_str(), NULL, 10);
+        else            sor = SpaceObjectReference(id);
 
-        ProxyLightObject *obj = getLightProxyForID(id);
-        Entity *ent = obj ? mParent->getEntity(obj->getObjectReference()) : NULL;
-        if (ent)
-            ent->getProxy().getProxyManager()->destroyObject(ent->getProxyPtr());
+        for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
+            Entity *ent = iter->second;                                     if (!ent)   continue;
+            ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
+            ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
+            if ((isIndex && ix == index) || obj->getObjectReference() == sor)
+                ent->getProxy().getProxyManager()->destroyObject(ent->getProxyPtr());
+            ++ix;
+        }
     }
 
 
