@@ -97,6 +97,7 @@ class exampleclass:
         self.ammoNum=0
         self.ammoMod=6
         self.arthits=set()
+        self.oldhits=0
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -243,11 +244,14 @@ class exampleclass:
                 print "hit another painting! score now", len(self.arthits)
                 body = pbSiri.MessageBody()
                 body.message_names.append("EvaluateJavascript")
-                body.message_arguments.append("hit another painting!" + str(len(self.arthits)))
-                header = pbHead.Header()
-                header.destination_space = util.tupleFromUUID(self.spaceid)
-                header.destination_object = util.tupleFromUUID(self.objid)
-                HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+                if len(self.arthits) > self.oldhits:
+                    msg = 'popUpMessage("hit painting, score now: ' + str(len(self.arthits)) + '", 10, 10)'
+                    body.message_arguments.append(msg)
+                    header = pbHead.Header()
+                    header.destination_space = util.tupleFromUUID(self.spaceid)
+                    header.destination_object = util.tupleFromUUID(self.objid)
+                    HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+                    self.oldhits=len(self.arthits)
 
         elif header.reply_id==12345:
             if DEBUG_OUTPUT: print "PY: response to our location query.  Dunno why it has no name"

@@ -153,9 +153,9 @@ public:
     String mDumbMsg;
     void exchangeDumbMsg(String& s) {
         //std::cout << "dbm debug HostedObject::exchangeDumbMsg" << std::endl;
-        String temp = s;
+//        String temp = s;
         s = mDumbMsg;
-        mDumbMsg=temp;
+//        mDumbMsg=temp;
     };
 }; // class ObjectHost
 

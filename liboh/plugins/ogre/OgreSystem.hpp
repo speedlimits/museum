@@ -216,17 +216,16 @@ public:
     Ogre::SceneManager* getSceneManager();
     virtual void createProxy(ProxyObjectPtr p);
     virtual void destroyProxy(ProxyObjectPtr p);
-    String mDumbMsg;
+    //String mDumbMsg;
+    String oldMsg;
     virtual void exchangeDumbMsg(String& s) {
-        String temp = s;
-        s = mDumbMsg;
-        mDumbMsg=temp;
-        std::cout << "dumbMsg Ogre: " << mDumbMsg << std::endl;
-        std::ostringstream ss;
-                //ss << "document.selected='" << msg << "'; debug(document.selected);";
-        ss << "popUpMessage(" << '"' << s << '"' << "," << 10 << ","<< 10 << ");";
-        std::cout << "cameraPathTick msg to JS:" << ss.str() << std::endl;
-        WebViewManager::getSingleton().evaluateJavaScript("__chrome", ss.str());
+//        String temp = s;
+        if (s != "" && s != oldMsg) {
+//        mDumbMsg=temp;
+            std::cout << "dumbMsg Ogre: " << s << std::endl;
+            WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
+            oldMsg=s;
+        }
     };
     ~OgreSystem();
 };
