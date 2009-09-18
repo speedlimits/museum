@@ -141,31 +141,43 @@ bool reasonableNorm(const Quaternion&loc) {
         loc.w>=-3&&loc.w<=3;
 }
 volatile const char **doNotDereference=NULL;
-void crashNow() {
+template <class T> void crashNow(const T&value, const char *place) {
+    SILOG(oh,fatal,"Fatal error:"<<value<<" invalid floating point at "<<place);
     *doNotDereference="This should crash the engine: invalid float encountered--please track down root cause";
 }
-bool validateLocation(TemporalValue<Location>::Time timeStamp,
-                      const Location&location) {
+
+bool validateAbsoluteLocation(const Location&location) {
     if (reasonablePos(location.getPosition())==false) {
-        crashNow();
+        crashNow(location.getPosition(),"position");
         return false;
     }
 
     if (reasonablePos(location.getVelocity())==false) {
-        crashNow();
+        crashNow(location.getVelocity(),"velocity");
         return false;
     }
     if (reasonableNorm(location.getOrientation())==false) {
-        crashNow();
+        crashNow(location.getOrientation(),"orientation");
         return false;
     }
     if (reasonableNorm(location.getAxisOfRotation())==false) {
-        crashNow();
+        crashNow(location.getAxisOfRotation(),"axis of rotation");
         return false;
     }
     if (!(location.getAngularSpeed()>=-10000&&
           location.getAngularSpeed()<=10000)) {
-        crashNow();
+        crashNow(location.getAngularSpeed(),"angular speed");
+        return false;
+    }
+    return true;
+}
+
+bool validateLocation(SpaceID space,
+                      ProxyObject::Extrapolator *extrapolated) {
+    Location test(extrapolated->extrapolate(SpaceTimeOffsetManager::getSingleton().now(space)));
+    if (!validateAbsoluteLocation(test)){
+        SILOG(oh,fatal,"Extrapolated Location invalid "<<test.getPosition());
+        crashNow(SpaceTimeOffsetManager::getSingleton().now(space).raw(),"time");
         return false;
     }
     return true;
@@ -174,9 +186,10 @@ bool validateLocation(TemporalValue<Location>::Time timeStamp,
 
 void ProxyObject::setLocation(TemporalValue<Location>::Time timeStamp,
                               const Location&location) {
-    if (validateLocation(timeStamp,location)) {
+    if (validateAbsoluteLocation(location)) {
         mLocation.updateValue(timeStamp,
                               location);
+        validateLocation(mID.space(),&mLocation);
         PositionProvider::notify(&PositionListener::updateLocation, timeStamp, location);
     }
 }
@@ -215,9 +228,10 @@ void ProxyObject::requestLocation(TemporalValue<Location>::Time timeStamp, const
 }
 void ProxyObject::resetLocation(TemporalValue<Location>::Time timeStamp,
                                 const Location&location) {
-    if (validateLocation(timeStamp,location)) {
+    if (validateAbsoluteLocation(location)) {
         mLocation.resetValue(timeStamp,
                              location);
+        validateLocation(mID.space(),&mLocation);
         PositionProvider::notify(&PositionListener::resetLocation, timeStamp, location);
     }
 }

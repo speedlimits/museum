@@ -37,7 +37,9 @@
 		function curatorMode(mode) {
 			setup();
 			var mode = (mode == null) ? 0 : mode;
-			
+		        
+		        reset = resetCurator;        
+		        	
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/curator_welcome.html");
 			} else {
@@ -63,6 +65,7 @@
 			var mode = (mode == null) ? 0 : mode;
 			
 			setup();
+			reset = resetCritique; 
 			try {
 				$("body").unbind('sirikata_item_select', pictureSelectedEvent);
 				$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
@@ -96,6 +99,7 @@
 		
 		function flythruMode(mode) {
 		        var mode = (mode == null) ? 0 : mode;
+		        reset = resetFlythru; 
 		        if (mode == 0) {
 				loadScreen("#modal-screen", "screens/flythru_welcome.html");
 			} else {
@@ -106,6 +110,7 @@
 		
 		function funMode(mode) {
 			setup();
+			reset = resetFunmode; 
 			var mode = (mode == null) ? 0 : mode;
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
@@ -192,6 +197,26 @@
 				}
 				
 		}
+		
+		
+		var reset = function (){}
+		
+		function resetFunmode() {
+		        alert('reset fun');
+		}
+		
+		function resetCurator() {
+		        alert('reset curator');
+		}
+		
+		function resetCritique() {
+		
+		}
+		
+		function resetFlythru() {
+		
+		}
+		
 	</script>
 
 <link href="css/style.css" rel="stylesheet" type="text/css" />
