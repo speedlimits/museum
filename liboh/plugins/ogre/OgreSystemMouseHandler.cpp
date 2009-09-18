@@ -2656,6 +2656,7 @@ private:
     //--------------------------------------------------------------------------
     // Get the power of one or all of the lights.
     // Invoked as
+    //     light getpower average
     //     light getpower <id>
     //     light getpower
     // The latter form will get the power level of all lights.
@@ -2766,7 +2767,7 @@ private:
     //  light getmood <level> [<type>]
     //  light selected
     //  light remove <id>
-    //  light getpower [<id>]
+    //  light getpower [<id> | average]
     //  light setpower <power> [<id>]
     //  light setpower { id:<id>, power:<power> }
     //--------------------------------------------------------------------------
