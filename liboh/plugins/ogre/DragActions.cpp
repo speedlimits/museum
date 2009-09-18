@@ -756,7 +756,7 @@ MoveObjectOnWallDrag::MoveObjectOnWallDrag(const DragStartInfo &info)
     Time now = SpaceTimeOffsetManager::getSingleton().now(mCamera->getProxy().getObjectReference().space());
     float distanceToObject = 0.f; // Will be reset on first foundObject
     bool foundObject = false;
-    const float kDistanceFromWall = 10.e-2f;   // 10 cm
+    const float kDistanceFromWall = 5.e-2f;   // 5 cm
     mDistanceFrontOfWall = kDistanceFromWall;
     
     mCameraLocation = mCamera->getProxy().globalLocation(now);
