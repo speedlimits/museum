@@ -40,6 +40,7 @@
 #include "OgreHeaders.hpp"
 #include <OgreResourceManager.h>
 #include <OgrePixelFormat.h>
+#include "WebViewManager.hpp"
 //Thank you Apple:
 // /System/Library/Frameworks/CoreServices.framework/Headers/../Frameworks/CarbonCore.framework/Headers/MacTypes.h
 #ifdef nil
@@ -219,6 +220,17 @@ public:
     Ogre::SceneManager* getSceneManager();
     virtual void createProxy(ProxyObjectPtr p);
     virtual void destroyProxy(ProxyObjectPtr p);
+    //String mDumbMsg;
+    String oldMsg;
+    virtual void exchangeDumbMsg(String& s) {
+//        String temp = s;
+        if (s != "" && s != oldMsg) {
+//        mDumbMsg=temp;
+            std::cout << "dumbMsg Ogre: " << s << std::endl;
+            WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
+            oldMsg=s;
+        }
+    };
     ~OgreSystem();
 };
 

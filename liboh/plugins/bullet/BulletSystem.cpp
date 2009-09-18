@@ -449,7 +449,7 @@ bool BulletSystem::tick() {
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     Location loc=objects[i]->mMeshptr->getLastLocation();
-
+                    
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
