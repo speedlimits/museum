@@ -2663,7 +2663,7 @@ private:
 
     void lightGetPower(const String& arg, size_t argCaret) {
         String id;
-        bool getOne = getNextToken(arg, &argCaret, &id);
+        bool getOne = getNextToken(arg, &argCaret, &id) && id != "average";
         SpaceObjectReference sor = SpaceObjectReference::null();
         String info;
         if (getOne)
@@ -2671,6 +2671,8 @@ private:
         else
             info = "[ ";
 
+        int ix = 0;
+        float avgPower = 0;
         for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
             Entity *ent = iter->second;                                     if (!ent)   continue;
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
@@ -2679,11 +2681,17 @@ private:
             if (!getOne && info.size() > 2)
                 info += ", ";
             LightInfo li = light->getLastLightInfo();
-            string_appendf(&info, "{ 'id':'%s', 'power':%.7g }", light->getObjectReference().toString().c_str(), light->getLastLightInfo().mPower);
+            float power = light->getLastLightInfo().mPower;
+            string_appendf(&info, "{ 'id':'%s', 'power':%.7g }", light->getObjectReference().toString().c_str(), power);
+            ++ix;
+            avgPower += (power - avgPower) / (float)ix;
         }
         
         if (!getOne)
             info += " ]";
+        
+        if (id == "average")
+            info = string_printf("%.7g", avgPower);
 
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
             "receivePower(\"" + info + "\");"
