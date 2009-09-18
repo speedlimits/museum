@@ -1,3 +1,8 @@
+<script type="text/javascript">
+    function setGlobalPower() {
+        Client.event("navcommand", "light setpower " + curLightForm.power.value * 0.01);
+    }
+</script>
 <p>Select Mood:&nbsp;
     <a href='javascript:Client.event("navcommand", "light selectmood 0");'>0</a>&nbsp;
     <a href='javascript:Client.event("navcommand", "light selectmood 1");'>1</a>&nbsp;
@@ -8,3 +13,8 @@
     |&nbsp;
     <a href="javascript:location.reload();">Reload</a>
 </p>
+<form id="curLightForm">
+  Power <input name="power" type="text" value="100" size="5" />
+%
+<input type="button" onclick="setGlobalPower()" value="Set Power" />
+</form>
