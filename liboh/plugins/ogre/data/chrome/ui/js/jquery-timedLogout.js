@@ -56,6 +56,7 @@
       {
         $.get(opts.logout_url);
       }
+      reset();
       window.location.href = opts.redirect_url;
     }
     

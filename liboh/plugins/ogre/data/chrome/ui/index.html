@@ -38,7 +38,7 @@
 			setup();
 			var mode = (mode == null) ? 0 : mode;
 		        
-		        reset = resetCurator;        
+		             
 		        	
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/curator_welcome.html");
@@ -65,7 +65,7 @@
 			var mode = (mode == null) ? 0 : mode;
 			
 			setup();
-			reset = resetCritique; 
+			
 			try {
 				$("body").unbind('sirikata_item_select', pictureSelectedEvent);
 				$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
@@ -99,7 +99,7 @@
 		
 		function flythruMode(mode) {
 		        var mode = (mode == null) ? 0 : mode;
-		        reset = resetFlythru; 
+		       
 		        if (mode == 0) {
 				loadScreen("#modal-screen", "screens/flythru_welcome.html");
 			} else {
@@ -109,7 +109,7 @@
 		}
 		
 		function funMode(mode) {
-			reset = resetFunmode; 
+			
 			var mode = (mode == null) ? 0 : mode;
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
@@ -198,25 +198,14 @@
 		}
 		
 		
-		var reset = function (){}
+		var reset = function (){
 		
-		function resetFunmode() {
 		        try {
 	        		Client.event("navcommand", "funmode reset ");
-			} catch (err) {debug('load data failed');}
-		}
-		
-		function resetCurator() {
-		        alert('reset curator');
-		}
-		
-		function resetCritique() {
+			} catch (err) {debug('reset failed');}
 		
 		}
 		
-		function resetFlythru() {
-		
-		}
 		
 	</script>
 
