@@ -811,7 +811,7 @@ private:
     // If nothing is currently selected, throw a lightbulb in front of the user.
     // Otherwise, shine a spotlight on the selected object.
     //--------------------------------------------------------------------------
-#define ATTACH_MESH_TO_LIGHTS 1
+#define ATTACH_MESH_TO_LIGHTS 0
 
     void createLightAction() {
         if (mSelectedObjects.size() == 0) {
@@ -3050,7 +3050,9 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_5), mInputResponses["setCameraSpeed5"]);
 
         // Mouse Zooming
+#if 0   // This would be great if it workd, but it only zooms out
         mInputBinding.add(InputBindingEvent::Axis(SDLMouse::WHEELY), mInputResponses["zoom"]);
+#endif
 
         // Selection
         mInputBinding.add(InputBindingEvent::MouseClick(1), mInputResponses["selectObject"]);
