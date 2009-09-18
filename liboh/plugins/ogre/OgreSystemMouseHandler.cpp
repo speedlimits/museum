@@ -66,7 +66,8 @@ using namespace Input;
 using namespace Task;
 using namespace std;
 
-#define DEG2RAD 0.0174532925
+#define DEG2RAD (M_PI / 180.0)
+#define RAD2DEG (180.0 / M_PI)
 #ifdef _WIN32
 #undef SDL_SCANCODE_UP
 #define SDL_SCANCODE_UP 0x60
@@ -831,6 +832,7 @@ private:
             proxyMgr->createObject(newLightObject);
             {
                 LightInfo li;
+                li.setLightType(LightInfo::POINT);
                 li.setLightDiffuseColor(Color(0.976471, 0.992157, 0.733333));
                 li.setLightAmbientColor(Color(.24,.25,.18));
                 li.setLightSpecularColor(Color(0,0,0));
@@ -879,18 +881,6 @@ private:
             camProxy=parentProxy;
         }
         return camProxy;
-    }
-
-
-    //--------------------------------------------------------------------------
-    void controlLightAction() {
-        // Find the selected light
-
-        // Save current parameters, in case the user wants to cancel
-
-        // Open light control dialog
-
-        //
     }
 
 
@@ -966,7 +956,7 @@ private:
         quat2Euler(orient, p, r, y);
         Vector3f raxis;
         raxis.x = 0;
-        raxis.y = std::cos(p*DEG2RAD);
+        raxis.y =  std::cos(p*DEG2RAD);
         raxis.z = -std::sin(p*DEG2RAD);
 
         Protocol::ObjLoc rloc;
@@ -1058,11 +1048,14 @@ private:
         q1=q.z;
         q0=q.w;
         roll = std::atan2((2*((q0*q1)+(q2*q3))), (1-(2*(std::pow(q1,2.0)+std::pow(q2,2.0)))));
-        pitch = std::asin((2*((q0*q2)-(q3*q1))));
+        pitch = (2*((q0*q2)-(q3*q1)));
+        pitch = (pitch <= -1.0) ? -M_PI_2 :
+                (pitch >= +1.0) ? +M_PI_2 :
+                std::asin((pitch));
         yaw = std::atan2((2*((q0*q3)+(q1*q2))), (1-(2*(std::pow(q2,2.0)+std::pow(q3,2.0)))));
-        pitch /= DEG2RAD;
-        roll /= DEG2RAD;
-        yaw /= DEG2RAD;
+        pitch *= RAD2DEG;
+        roll  *= RAD2DEG;
+        yaw   *= RAD2DEG;
         if (std::abs(pitch) > 89.0) {
             return false;
         }
@@ -2216,7 +2209,7 @@ private:
         lightLocation->setOrientation(Quaternion(lightX, lightY, lightZ));
 
         // Adjust the cone.
-        const float coneFactor = 1.7;
+        const float coneFactor = 2.718281828;
         float coneAngle = atan(objSphere.radius() * coneFactor / (objSphere.center() - lightPosition).length());
         float coneInnerAngle = 0;
         float coneOuterAngle = coneAngle;   // Spotlights don't look as expected
@@ -2663,6 +2656,7 @@ private:
     //--------------------------------------------------------------------------
     // Get the power of one or all of the lights.
     // Invoked as
+    //     light getpower average
     //     light getpower <id>
     //     light getpower
     // The latter form will get the power level of all lights.
@@ -2670,7 +2664,7 @@ private:
 
     void lightGetPower(const String& arg, size_t argCaret) {
         String id;
-        bool getOne = getNextToken(arg, &argCaret, &id);
+        bool getOne = getNextToken(arg, &argCaret, &id) && id != "average";
         SpaceObjectReference sor = SpaceObjectReference::null();
         String info;
         if (getOne)
@@ -2678,6 +2672,8 @@ private:
         else
             info = "[ ";
 
+        int ix = 0;
+        float avgPower = 0;
         for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin(); iter != mParent->mSceneEntities.end(); ++iter) {
             Entity *ent = iter->second;                                     if (!ent)   continue;
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
@@ -2686,11 +2682,17 @@ private:
             if (!getOne && info.size() > 2)
                 info += ", ";
             LightInfo li = light->getLastLightInfo();
-            string_appendf(&info, "{ 'id':'%s', 'power':%.7g }", light->getObjectReference().toString().c_str(), light->getLastLightInfo().mPower);
+            float power = light->getLastLightInfo().mPower;
+            string_appendf(&info, "{ 'id':'%s', 'power':%.7g }", light->getObjectReference().toString().c_str(), power);
+            ++ix;
+            avgPower += (power - avgPower) / (float)ix;
         }
         
         if (!getOne)
             info += " ]";
+        
+        if (id == "average")
+            info = string_printf("%.7g", avgPower);
 
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
             "receivePower(\"" + info + "\");"
@@ -2765,7 +2767,7 @@ private:
     //  light getmood <level> [<type>]
     //  light selected
     //  light remove <id>
-    //  light getpower [<id>]
+    //  light getpower [<id> | average]
     //  light setpower <power> [<id>]
     //  light setpower { id:<id>, power:<power> }
     //--------------------------------------------------------------------------
@@ -2944,8 +2946,8 @@ public:
                 WebViewEvent::Id,
                 std::tr1::bind(&MouseHandler::webviewHandler, this, _1)));
 
-        const float trnSpeed = 0.05f;   // Speed for translational motion, in meters/sec. (FIXME: 5 cm/sec isn't what is perceived)
-        const float rotSpeed = 0.5f;    // Speed for  rotational   motion, in rdians/sec.
+        const float trnSpeed = 0.20f;   // Speed for translational motion, in meters/sec.
+        const float rotSpeed = 0.75f;   // Speed for  rotational   motion, in radians/sec.
         // ----------------------------------------------------------------------------------------------------------  ------ direction --------  ---on--- off
         mInputResponses["moveForward"]  = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  0, -1), _1), trnSpeed, 0);
         mInputResponses["moveBackward"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::moveAction, this, Vector3f( 0,  0, +1), _1), trnSpeed, 0);
@@ -2965,7 +2967,6 @@ public:
         mInputResponses["stableRotateNeg"] = new FloatToggleInputResponse(std::tr1::bind(&MouseHandler::stableRotateAction, this, -1.f, _1),      rotSpeed, 0);
 
         mInputResponses["createLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::createLightAction, this));
-        mInputResponses["controlLight"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::controlLightAction, this));
         mInputResponses["toggleLightVisibility"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::toggleLightVisibilityAction, this));
         mInputResponses["enterObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::enterObjectAction, this));
         mInputResponses["leaveObject"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::leaveObjectAction, this));
@@ -3036,7 +3037,6 @@ public:
 
         // Various other actions
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B), mInputResponses["createLight"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_CTRL), mInputResponses["controlLight"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_SHIFT), mInputResponses["toggleLightVisibility"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_ENTER), mInputResponses["enterObject"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RETURN), mInputResponses["enterObject"]);
