@@ -1,27 +1,10 @@
-<script type="text/javascript">
-        function receiveLightMood(moodStr) { lightForm.lightInfo.value = moodStr; }
-
-</script>
-
-<form id="lightForm" name="lightForm" method="post" action="">
 <p>Select Mood:&nbsp;
-<a href='javascript:Client.event("navcommand", "light selectmood 0");'>0</a>&nbsp;
-<a href='javascript:Client.event("navcommand", "light selectmood 1");'>1</a>&nbsp;
-<a href='javascript:Client.event("navcommand", "light selectmood 2");'>2</a>&nbsp;
-<a href='javascript:Client.event("navcommand", "light selectmood 3");'>3</a>&nbsp;
-|&nbsp;Edit Mood:&nbsp;
-<a href='javascript:Client.event("navcommand", "light getmood 0");'>0</a>&nbsp;
-<a href='javascript:Client.event("navcommand", "light getmood 1");'>1</a>&nbsp;
-<a href='javascript:Client.event("navcommand", "light getmood 2");'>2</a>&nbsp;
-<a href='javascript:Client.event("navcommand", "light getmood 3");'>3</a>&nbsp;
-|&nbsp;
-<a href="javascript:Client.event('navcommand', 'light selected');">Light Selected</a>&nbsp;
-|&nbsp;
-<a href="javascript:location.reload();">Reload</a>
+    <a href='javascript:Client.event("navcommand", "light selectmood 0");'>0</a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 1");'>1</a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 2");'>2</a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 3");'>3</a>&nbsp;
+    |&nbsp;
+    <a href="javascript:Client.event('navcommand', 'light selected');">Light Selected</a>&nbsp;
+    |&nbsp;
+    <a href="javascript:location.reload();">Reload</a>
 </p>
-
-<p>
-  <textarea name="lightInfo" rows="5" wrap="soft" style="width: 600px; font: 67% Verdana, Arial, Helvetica, sans-serif"></textarea>
-  <input name="setMoodButton" type="button" onclick="javascript:Client.event('navcommand', 'light setmood ' + lightForm.lightInfo.value);" value="Set" />
-</p>
-</form>

@@ -1,75 +1,103 @@
-
-<div style="background: #CCC">
-	<p>
-	Console
-	</p>
-    <p id="development-console" style="overflow:scroll; height:300px; width: 400px;background: #FFC; text-align: left;">&nbsp; 
-	</p>
-	<p style="text-align: left;">
-    	<form>
-		<input id="console-input" type="text" size="30" >
-		<input type="button" onclick="debug(eval($('#console-input').val()));" value="run">
-        </form>
-        
-	</p>
-
-
-	<a href="javascript:location.reload();">Reload</a>
-	Mode: <select id="debugfns" ></select>
-	<br>
-	
-	<a href="javascript:Client.event('navcommand', 'getselectedids');">sel</a>
-	<a href="javascript:Client.event('navcommand', 'light list');">lsLite</a>
-	<a href="javascript:Client.event('navcommand', 'light get');">getLite</a>
-	<a href="javascript:Client.event('navcommand', 'light selected');">liteSel</a>
-	<a href="javascript:Client.event('navcommand', 'light getmood 3');">liteGetMood</a>
-	<a href="javascript:top.location = '../artist/lights.html';">toploc</a>
-
+<div style="background:#CCC">
+    <p style="text-align:center;">Development Console</p>
+    <p id="development-console" style="overflow:scroll; height:150px; width:500px; background:#FFC; text-align:left; font:67% Verdana, Arial, Helvetica, sans-serif">&nbsp;  </p>
+    <form id="devForm">
+        <table width="400px" border="0" align="left" cellpadding="0" cellspacing="0">
+            <tr>
+                <td align="right">
+                    <input id="console-input" type="text" style="width:430px;" />
+                </td>
+                <td align="center">
+                    <input type="button" onclick="debug(eval($('#console-input').val()));" value="Run" />
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="2" align="right">
+                    <textarea name="lightInfo" rows="5" wrap="soft" style="width:430px; font:67% Verdana, Arial, Helvetica, sans-serif"></textarea>
+                </td>
+                <td align="center">
+                    <input name="dataType" type="dataType" disabled="disabled" size="5" readonly="true" />
+                </td>
+            </tr>
+            <tr>
+                <td align="center">
+                    <input name="setMoodButton" type="button"
+                        onclick="javascript:Client.event('navcommand', 'light set' + lightForm.type + ' ' + lightForm.lightInfo.value);"
+                        value="Set"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <a href="javascript:Client.event('navcommand', 'light selected');">Light sel</a> |
+                    <a href='javascript:Client.event("navcommand", "light get");'>Edit lights</a> |
+                    Edit mood: 
+                        <a href='javascript:Client.event("navcommand", "light getmood 0");'>0</a>
+                        <a href='javascript:Client.event("navcommand", "light getmood 1");'>1</a>
+                        <a href='javascript:Client.event("navcommand", "light getmood 2");'>2</a>
+                        <a href='javascript:Client.event("navcommand", "light getmood 3");'>3</a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><a href="javascript:location.reload();">Reload</a> Mode:
+                    <select name="debugfns" id="debugfns" >
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <br>
+    <p><br>
+    </p>
 </div>
-
 <script type="text/javascript"> 
-	debugoptions = {
-		"":"",
-		"debug(1+1)":"Calculate what 1 + 1 is",
-		"curatorMode()":"Curator - 0",
-		"curatorMode(1)":"Curator - 1",
-		"curatorMode(2)":"Curator - 2",
-		"curatorMode(3)":"Curator - 3",
-		"curatorMode(4)":"Curator - 4",
-		"curatorMode(5)":"Curator - 5",
-		
-		"critiqueMode()":"Critique - 0",
-		"critiqueMode(1)":"Critique - 1",
-		"critiqueMode(2)":"Critique - 2",
-		"critiqueMode(3)":"Critique - 3",
+    debugoptions = {
+        "":"",
+        "debug(1+1)":"Calculate what 1 + 1 is",
+        "curatorMode()":"Curator - 0",
+        "curatorMode(1)":"Curator - 1",
+        "curatorMode(2)":"Curator - 2",
+        "curatorMode(3)":"Curator - 3",
+        "curatorMode(4)":"Curator - 4",
+        "curatorMode(5)":"Curator - 5",
+        
+        "critiqueMode()":"Critique - 0",
+        "critiqueMode(1)":"Critique - 1",
+        "critiqueMode(2)":"Critique - 2",
+        "critiqueMode(3)":"Critique - 3",
 
-		"top.location = '../artist/lights.html';":"artist tool - lights",
-		"debug($.getURLParam('param'));":"getparameter"
-		
-	};
-	
-	$("#debugfns").ready ( function () {
-									 
-		//$("#dev-console").draggable();
-		$("#development-screen").draggable({distance: 10});
+        "top.location = '../artist/lights.html';":"artist tool - lights",
+        "debug($.getURLParam('param'));":"getparameter"
+    };
+    
+    $("#debugfns").ready ( function () {
+                                                                 
+        //$("#dev-console").draggable();
+        $("#development-screen").draggable({distance: 10});
 
-		$("#development-console").bind('mousedown', stopPropagation ) ;
-		$("#debugfns").bind('mousedown', stopPropagation ) ;
+        $("#development-console").bind('mousedown', stopPropagation ) ;
+        $("#debugfns").bind('mousedown', stopPropagation ) ;
 
-		
-		debug('addOption ... ');
+        
+        debug('addOption ... ');
 
-		$("#debugfns").addOption(debugoptions,false);
+        $("#debugfns").addOption(debugoptions,false);
 
-		$("#debugfns").change(function (event,ui) {
-										
-			var dropdown = document.getElementById("debugfns");  
-        		var index = dropdown.selectedIndex;  
-			
-        		eval(dropdown.options[index].value); 
-		});
-
-		
-	});
-
+        $("#debugfns").change(function (event,ui) {
+                                                                        
+            var dropdown = document.getElementById("debugfns");  
+                var index = dropdown.selectedIndex;  
+        
+                eval(dropdown.options[index].value); 
+        });
+    });
+    
+    function receiveLightMood(moodStr) {
+        devForm.lightInfo.value = moodStr;
+        devForm.dataType.value = "mood";
+    }
+    function receiveLight(li) {
+        devForm.lightInfo.value = li;
+        devForm.dataType.value = "";
+    }
 </script>
