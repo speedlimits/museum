@@ -1,0 +1,27 @@
+fragment_program TerrainFPglsl glsl
+{
+	source TerrainShader.hlsl
+
+        preprocessor_defines DEBUG=0;USE_TWO_SIDED=0;USE_AMBIENT=1;USE_AMBIENT_ENVIRONMENT=0;USE_DIFFUSE=1;USE_SPOTLIGHT=1;USE_SPECULAR=1;USE_GLOSSINESS=0;USE_NORMAL=1;USE_REFLEECTION=0;USE_SHADOWS=0;START_LIGHT=0;DERIVATIVE_SUPPORT=1;HAVE_LOD=0;HAVE_TEN_TEXCOORD=0;NUM_LIGHTS=6;NUM_SHADOW_LIGHTS=0;MAX_LIGHTS=6;USE_VERTEX_SHADER=0;main_fp=main;USE_FRAGMENT_SHADER=1;USE_GLSL=1
+	default_params
+	{
+        param_named coverageMap   int 0
+		param_named diffuseMap0   int 1
+		param_named diffuseMap1   int 2
+		param_named diffuseMap2   int 3
+		param_named diffuseMap3   int 4
+		param_named normalMap0    int 5
+		param_named normalMap1    int 6
+		param_named normalMap2    int 7
+		param_named normalMap3    int 8
+
+		param_named_auto derived_ambient_color ambient_light_colour
+		param_named_auto light_position light_position_array 6
+		param_named_auto spotlight_direction light_direction_array 6
+		param_named_auto light_spotlight_params spotlight_params_array 6
+		param_named_auto light_attenuation light_attenuation_array 6
+		param_named_auto derived_light_specular_color light_specular_colour_power_scaled_array 6
+		param_named_auto derived_light_diffuse_color light_diffuse_colour_power_scaled_array 6
+		param_named_auto eyePosition camera_position
+	}
+}

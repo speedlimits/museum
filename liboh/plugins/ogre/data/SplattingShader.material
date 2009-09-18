@@ -1,0 +1,66 @@
+vertex_program TerrainVP unified
+{
+    delegate TerrainVPcgGL
+    delegate TerrainVPglsl
+}
+
+fragment_program TerrainFP unified
+{
+    delegate TerrainFPcgGL
+    delegate TerrainFPglsl
+}
+
+material DynamicTerrain
+{
+    technique
+    {
+        pass
+        {
+			vertex_program_ref TerrainVP
+			{
+			}
+			fragment_program_ref TerrainFP
+			{
+                param_named specularParams0 float4 0.3 16.0 0.3 16.0
+                param_named specularParams1 float4 0.3 16.0 0.3 16.0
+                param_named texScale float4 0.3 0.3 0.3 0.3
+            }
+            texture_unit Coverage
+            {
+                texture terrain_coverage.png
+            }
+            texture_unit Diffuse0
+            {
+                texture Ground_SoilRed_a_01_COLterrain.dds
+            }
+            texture_unit Diffuse1
+            {
+                texture Ground_grass_a_01_COLterrain.dds
+            }
+            texture_unit Diffuse2
+            {
+                texture Boulder_Rocky_01_COLterrain.dds
+            }
+            texture_unit Diffuse3
+            {
+                texture Ground_grass_a_01_COLterrain.dds
+            }
+            texture_unit Normal0
+            {
+                texture Ground_SoilRed_a_01_NRM.dds
+            }
+            texture_unit Normal1
+            {
+                texture Ground_grass_a_01_NRM.dds
+            }
+            texture_unit Normal2
+            {
+                texture Boulder_Rocky_01_NRM.dds
+            }
+            texture_unit Normal3
+            {
+                texture Ground_grass_a_01_NRM.dds
+            }
+        }
+    }
+}

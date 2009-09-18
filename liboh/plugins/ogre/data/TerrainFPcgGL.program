@@ -1,0 +1,28 @@
+fragment_program TerrainFPcgGL cg
+{
+	source TerrainShader.hlsl
+    entry_point main
+    profiles arbfp1
+    compile_arguments -DDEBUG=0 -DUSE_TWO_SIDED=0 -DUSE_AMBIENT=1 -DUSE_AMBIENT_ENVIRONMENT=0 -DUSE_DIFFUSE=1 -DUSE_SPOTLIGHT=1 -DUSE_SPECULAR=1 -DUSE_GLOSSINESS=0 -DUSE_NORMAL=1 -DUSE_REFLEECTION=0 -DUSE_SHADOWS=0 -DSTART_LIGHT=0 -DDERIVATIVE_SUPPORT=1 -DHAVE_LOD=0 -DHAVE_TEN_TEXCOORD=0 -DNUM_LIGHTS=6 -DNUM_SHADOW_LIGHTS=0 -DMAX_LIGHTS=6 -DUSE_VERTEX_SHADER=0 -Dmain_fp=main -DUSE_FRAGMENT_SHADER=1 -DUSE_GLSL=0 -profileopts MaxLocalParams=224
+	default_params
+	{
+        param_named coverageMap   int 0
+		param_named diffuseMap0   int 1
+		param_named diffuseMap1   int 2
+		param_named diffuseMap2   int 3
+		param_named diffuseMap3   int 4
+		param_named normalMap0    int 5
+		param_named normalMap1    int 6
+		param_named normalMap2    int 7
+		param_named normalMap3    int 8
+
+		param_named_auto derived_ambient_color ambient_light_colour
+		param_named_auto light_position light_position_array 6
+		param_named_auto spotlight_direction light_direction_array 6
+		param_named_auto light_spotlight_params spotlight_params_array 6
+		param_named_auto light_attenuation light_attenuation_array 6
+		param_named_auto derived_light_specular_color light_specular_colour_power_scaled_array 6
+		param_named_auto derived_light_diffuse_color light_diffuse_colour_power_scaled_array 6
+		param_named_auto eyePosition camera_position
+	}
+}

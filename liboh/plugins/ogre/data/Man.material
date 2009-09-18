@@ -1,0 +1,19 @@
+material hair_transparent
+{
+	// Hardware skinning techniique
+
+	// Software blending technique
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			texture_unit
+			{
+				texture casual06_m_25_hair.dds
+				tex_address_mode clamp
+			}
+		}
+	}
+	
+}
