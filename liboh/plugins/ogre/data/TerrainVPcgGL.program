@@ -1,0 +1,13 @@
+vertex_program TerrainVPcgGL cg
+{
+	source TerrainShader.hlsl
+    entry_point main
+    profiles arbvp1
+    compile_arguments -DDEBUG=0 -DUSE_TWO_SIDED=0 -DUSE_AMBIENT=1 -DUSE_AMBIENT_ENVIRONMENT=0 -DUSE_DIFFUSE=1 -DUSE_SPOTLIGHT=1 -DUSE_SPECULAR=1 -DUSE_GLOSSINESS=0 -DUSE_NORMAL=1 -DUSE_REFLEECTION=0 -DUSE_SHADOWS=0 -DSTART_LIGHT=0 -DDERIVATIVE_SUPPORT=1 -DHAVE_LOD=0 -DHAVE_TEN_TEXCOORD=0 -DNUM_LIGHTS=6 -DNUM_SHADOW_LIGHTS=0 -DMAX_LIGHTS=6 -DUSE_VERTEX_SHADER=1 -Dmain_vp=main -DUSE_FRAGMENT_SHADER=0 -DUSE_GLSL=0 -profileopts MaxLocalParams=224
+	default_params
+	{
+		param_named_auto worldMatrix world_matrix
+		param_named_auto worldViewProj worldviewproj_matrix
+		param_named_auto eyePosition camera_position
+	}
+}

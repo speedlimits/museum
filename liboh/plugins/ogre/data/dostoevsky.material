@@ -1,0 +1,20 @@
+material mesher-auto-material(error?export-mesh-0#0)
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 1 1
+			specular 1 1 1 1 60
+			emissive 0 0 0 1
+
+			texture_unit
+			{
+				texture dostoevsky.dds 2d
+			}
+		}
+	}
+}
+
+
+

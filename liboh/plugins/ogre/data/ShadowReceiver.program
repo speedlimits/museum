@@ -1,0 +1,54 @@
+vertex_program DecompressVertexShadowReceiver/VPCg cg
+{
+	source DecompressShadowReceiver.cg
+	entry_point main_vp
+	profiles arbvp1
+	compile_arguments -DBLENDINDICES=ATTR7 -DBLENDWEIGHT=ATTR1
+}
+vertex_program DecompressVertexShadowReceiver/VPHLSL cg
+{
+	source DecompressShadowReceiver.cg
+	entry_point main_vp
+	profiles vs_1_1
+}
+vertex_program DecompressVertexShadowReceiver/VP unified
+{
+	delegate DecompressVertexShadowReceiver/VPCg
+	delegate DecompressVertexShadowReceiver/VPHLSL
+}
+ 
+vertex_program VertexShadowReceiver/VP cg
+{
+	source ShadowReceiver.cg
+	entry_point main_vp
+	profiles vs_1_1 arbvp1
+	compile_arguments -DBLENDINDICES=ATTR7 -DBLENDWEIGHT=ATTR1
+}
+vertex_program DecompressVertexShadowCaster/VPCg cg
+{
+	source ShadowCaster.cg
+	entry_point main_decompress_vp
+	profiles arbvp1
+	compile_arguments -DBLENDINDICES=ATTR7 -DBLENDWEIGHT=ATTR1
+}
+vertex_program DecompressVertexShadowCaster/VPHLSL cg
+{
+	source ShadowCaster.cg
+	entry_point main_decompress_vp
+	profiles vs_1_1
+}
+vertex_program DecompressVertexShadowCaster/VP unified
+{
+	delegate DecompressVertexShadowCaster/VPCg
+	delegate DecompressVertexShadowCaster/VPHLSL
+}
+
+
+ 
+vertex_program VertexShadowCaster/VP cg
+{
+	source ShadowCaster.cg
+	entry_point main_vp
+	profiles vs_1_1 arbvp1
+}
+

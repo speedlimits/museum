@@ -297,6 +297,8 @@ void    setupResources(const String &filename){
         }
     }
     ResourceGroupManager::getSingleton().addResourceLocation(".", typeName, secName);
+    ResourceGroupManager::getSingleton().addResourceLocation("../../liboh/plugins/ogre/data/", typeName, secName);
+    ResourceGroupManager::getSingleton().addResourceLocation(getResourcesDir(), typeName, secName);
 
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups(); /// Although the override is optional, this is mandatory
 }
@@ -352,6 +354,7 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
     OptionValue*transferManager,*workQueue,*eventManager;
     OptionValue*grabCursor;
     InitializeClassOptions("ogregraphics",this,
+                           mCompositors=new OptionValue("compositors","HDR",OptionValueType<String>(),"Set of active compositors"),
                            pluginFile=new OptionValue("pluginfile","plugins.cfg",OptionValueType<String>(),"sets the file ogre should read options from."),
                            configFile=new OptionValue("configfile","ogre.cfg",OptionValueType<String>(),"sets the ogre config file for config options"),
                            ogreLogFile=new OptionValue("logfile","Ogre.log",OptionValueType<String>(),"sets the ogre log file"),
@@ -408,9 +411,8 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
             sRoot->installPlugin(&*mCDNArchivePlugin);
             Ogre::ResourceGroupManager::getSingleton().addResourceLocation("", "CDN", "General");
             Ogre::ResourceGroupManager::getSingleton().addResourceLocation(".", "FileSystem", "General");
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(getResourcesDir(), "FileSystem", "General");
 
-            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(); /// Although t    //just to test if the cam is setup ok ==>
-                                                                                      /// setupResources("/home/daniel/clipmapterrain/trunk/resources.cfg");
             bool ogreCreatedWindow=
 #if defined(__APPLE__)||defined(_WIN32)
                 true
@@ -499,6 +501,9 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
         } else
             throw e;
     }
+            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(); /// Although t    //just to test if the cam is setup ok ==>
+                                                                                      /// setupResources("/home/daniel/clipmapterrain/trunk/resources.cfg");
+
     mInputManager->subscribe(
         Input::DragAndDropEvent::getId(),
         std::tr1::bind(&OgreSystem::performUpload,this,_1));

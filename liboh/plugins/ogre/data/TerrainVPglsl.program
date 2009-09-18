@@ -1,0 +1,12 @@
+vertex_program TerrainVPglsl glsl
+{
+	source TerrainShader.hlsl
+
+        preprocessor_defines DEBUG=0;USE_TWO_SIDED=0;USE_AMBIENT=1;USE_AMBIENT_ENVIRONMENT=0;USE_DIFFUSE=1;USE_SPOTLIGHT=1;USE_SPECULAR=1;USE_GLOSSINESS=0;USE_NORMAL=1;USE_REFLEECTION=0;USE_SHADOWS=0;START_LIGHT=0;DERIVATIVE_SUPPORT=1;HAVE_LOD=0;HAVE_TEN_TEXCOORD=0;NUM_LIGHTS=6;NUM_SHADOW_LIGHTS=0;MAX_LIGHTS=6;USE_VERTEX_SHADER=1;main_vp=main;USE_FRAGMENT_SHADER=0;USE_GLSL=1
+	default_params
+	{
+		param_named_auto worldMatrix world_matrix
+		param_named_auto worldViewProj worldviewproj_matrix
+		param_named_auto eyePosition camera_position
+	}
+}

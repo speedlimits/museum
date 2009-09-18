@@ -98,6 +98,7 @@ class OgreSystem: public TimeSteppedQueryableSimulation {
     friend class Entity; //Entity will insert/delete itself from these arrays.
     friend class CameraEntity; //CameraEntity will insert/delete itself from the scene cameras array.
     OptionValue*mWindowWidth;
+    OptionValue*mCompositors;
     OptionValue*mWindowHeight;
     OptionValue*mWindowDepth;
     OptionValue*mFullScreen;
@@ -131,6 +132,9 @@ class OgreSystem: public TimeSteppedQueryableSimulation {
                      Vector3f &returnNormal,
                      int which=0) const;
 public:
+    String getCompositors() {
+        return mCompositors->as<String>();
+    }
     bool forwardMessagesTo(MessageService*){return false;}
     bool endForwardingMessagesTo(MessageService*){return false;}
     /**

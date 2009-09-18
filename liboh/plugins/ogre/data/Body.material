@@ -1,0 +1,44 @@
+import * from "Body.program"
+
+material body : CompleteCharacter
+{
+	technique *
+	{
+		pass *
+		{
+			fragment_program_ref *
+			{
+                            param_named surfaceSpecularEmissive float4 .9 16 .5 .2
+                            param_named bumpScaleBiasNormScale float3 .02 -.01 1
+			}
+			texture_unit AmbientOcclusion
+			{
+				texture casual06_m_AmbientOcclusion.dds
+			}
+			texture_unit Diffuse
+			{
+				texture casual06_m_25.dds
+			}
+			texture_unit DiffuseDirt
+			{
+				texture whiteclear.png
+			}
+			texture_unit AmbientEnvironment
+			{
+				cubic_texture grass_noon_diff.png combinedUVW
+			}
+			texture_unit Normal
+			{
+				texture casual06_m_25_normal.dds
+			}
+			texture_unit Specular
+			{
+				texture casual06_m_25_spec.tga
+			}
+			texture_unit Reflection
+			{
+				cubic_texture grass_noon_spec.png combinedUVW
+			}
+		}
+	}
+}

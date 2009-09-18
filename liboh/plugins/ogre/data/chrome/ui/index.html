@@ -24,6 +24,7 @@
 		}
 		
 		function curatorMode(mode) {
+			setup();
 			var mode = (mode == null) ? 0 : mode;
 			
 			if (mode == 0) {
@@ -49,6 +50,7 @@
 		function critiqueMode(mode, c2) {
 			var mode = (mode == null) ? 0 : mode;
 			
+			setup();
 			try {
 				$("body").unbind('sirikata_item_select', pictureSelectedEvent);
 				$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
@@ -90,8 +92,9 @@
 		}
 		
 		function funMode(mode) {
-		        var mode = (mode == null) ? 0 : mode;
-		        if (mode == 0) {
+			setup();
+			var mode = (mode == null) ? 0 : mode;
+			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
@@ -138,6 +141,7 @@
 		}
 	
 		$(document).ready( function () {
+									 
 			try {
 				Client.event("navcommand", $.getURLParam('mode'));
 			} catch (err) {debug('set mode failed');}
@@ -151,7 +155,7 @@
 			} else if ($.getURLParam('mode') == "funmode") {
 				setTimeout('funMode() ', 1000);
 			} else {
-				setTimeout('setup(); loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
+				setTimeout('loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
 			}
 			 
 									 

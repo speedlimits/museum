@@ -1,0 +1,103 @@
+material BaseWhiteTexture{
+	technique
+	{
+		pass
+		{
+            texture_unit 
+            {
+                texture white.png
+            }
+		}
+	}
+}
+material Missing
+{
+	technique
+	{
+		pass
+		{
+            texture_unit 
+            {
+                texture missing.png
+            }
+		}
+	}
+}
+
+
+
+material SkyBox
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				cubic_texture ExteriorCubeMap separateUV
+				//cubic_texture env_spec.jpg separateUV
+				tex_address_mode clamp
+			}
+			
+		}
+	}
+}
+
+//param_named sunlight_color float4 .6 .6 2.83 2.27
+
+vertex_program cloudsV glsl
+{
+  source cloudsV.glsl
+}
+fragment_program cloudsF glsl
+{
+  source cloudsF.glsl
+}
+material SkyDome
+{
+	technique
+	{
+		pass
+		{
+            iteration once_per_light directional
+            vertex_program_ref cloudsV
+            {
+                param_named_auto timex time_0_x_packed 128
+		        param_named_auto lightnorm light_position 0
+                param_named sunlight_color float4 2.8 2.8 2.8 1
+                param_named ambient float4 .05 .05 .05 .35
+                param_named blue_density float4 .2 .4 .75 .37
+                param_named blue_horizon float4 .3 .4 .75 .37
+                param_named haze_horizon float4 .19 .2 .2 1.0
+                param_named haze_density float4 1.0 .0 .0 1.0
+//                param_named haze_horizon float4 .0 1.0 .0 1.0
+//                param_named haze_density float4 .1 .1 .1 1.0
+                param_named cloud_shadow float4 0.0 0.0 0.0 0.0
+                param_named density_multiplier float4 0.001 0.001 0.001 0.001
+                param_named max_y float4 1605.0 1605.0 1605.0 0.0
+                param_named glow float4 20.0 0.001 -2.0 0.0
+                param_named cloud_color float4 0.0 0.0 0.0 1.0 
+                param_named cloud_scale float4 0.42 0.0 0.0 1.0
+                param_named_auto camPosLocal camera_position_object_space 
+
+            }
+            fragment_program_ref cloudsF
+            {
+                param_named cloud_noise_texture int 0
+                param_named cloud_pos_density1 float4 .5 .5 .125 1.0
+                param_named cloud_pos_density2 float4 .5 .25 .125 1.0
+                param_named gamma float4 2.0 2.0 2.0 0.0
+
+            }
+			texture_unit
+			{
+				texture perlin.jpg
+				tex_address_mode wrap
+			}
+			
+		}
+	}
+}
