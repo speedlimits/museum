@@ -944,7 +944,7 @@ private:
     //--------------------------------------------------------------------------
     void stableRotateAction(float dir, float amount) {
 
-        float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
+//        float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
@@ -961,7 +961,7 @@ private:
 
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
-        rloc.set_angular_speed(dir*amount);
+        rloc.set_angular_speed(dir*amount*mCamSpeed);
         cam->requestLocation(now, rloc);
     }
 
