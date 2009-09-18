@@ -240,18 +240,22 @@ class exampleclass:
             other = util.tupleToUUID(collision.other_object_reference)
             if DEBUG_OUTPUT: print "PY: BegCol with", self.objects.keys()[self.objects.values().index(other)]
             if not other in self.arthits:
-                self.arthits.add(other)
-                print "hit another painting! score now", len(self.arthits)
-                body = pbSiri.MessageBody()
-                body.message_names.append("EvaluateJavascript")
-                if len(self.arthits) > self.oldhits:
-                    msg = 'popUpMessage("hit painting, score now: ' + str(len(self.arthits)) + '", 10, 10)'
-                    body.message_arguments.append(msg)
-                    header = pbHead.Header()
-                    header.destination_space = util.tupleFromUUID(self.spaceid)
-                    header.destination_object = util.tupleFromUUID(self.objid)
-                    HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
-                    self.oldhits=len(self.arthits)
+                oname = self.objects.keys()[self.objects.values().index(other)]
+                if oname[:8]=="artwork_":
+                    self.arthits.add(other)
+                    print "hit another painting! score now", len(self.arthits)
+                    body = pbSiri.MessageBody()
+                    body.message_names.append("EvaluateJavascript")
+                    if len(self.arthits) > self.oldhits:
+                        msg = 'popUpMessage("hit painting, score now: ' + str(len(self.arthits)) + '", 10, 10)'
+                        body.message_arguments.append(msg)
+                        header = pbHead.Header()
+                        header.destination_space = util.tupleFromUUID(self.spaceid)
+                        header.destination_object = util.tupleFromUUID(self.objid)
+                        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+                        self.oldhits=len(self.arthits)
+                else:
+                    print "PY debug: shouldn't collide with", oname
 
         elif header.reply_id==12345:
             if DEBUG_OUTPUT: print "PY: response to our location query.  Dunno why it has no name"
