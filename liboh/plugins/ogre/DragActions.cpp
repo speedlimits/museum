@@ -845,7 +845,8 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
     if (!endPlane.intersectRay(mCameraLocation.getPosition(), endVec, &endPosition))
         return; // Ray is parallel to plane
 
-    constrainPictureHeight(&endPosition);
+    if (fabs((fabs(endPlane.y) - 1)) > 1e-4) // Not horizontal
+        constrainPictureHeight(&endPosition);
     
     endPosition += (double)mDistanceFrontOfWall * ((const Plane&)endPlane).normal();
     
