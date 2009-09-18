@@ -11,6 +11,7 @@
  	<script type="text/javascript" src="js/sirikata.ui.js"></script>
     <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
 	<script type="text/javascript" src="js/jquery.geturlparam.js"></script>
+	<script type="text/javascript" src="js/jquery-timedLogout.js"></script>
 
 <script type="text/javascript">
 
@@ -21,6 +22,16 @@
 		
 		function setup () {
 			loadScreen("#navigation-screen", "screens/navigation.html");	
+			
+		}
+		
+		function timedReset() {
+		        $(document).timedLogout({
+		                inactivity: 120000, 
+                     		noconfirm: 10000, 
+             		        sessionAlive: false,
+             		        redirect_url: ''
+		        });
 		}
 		
 		function curatorMode(mode) {
@@ -30,6 +41,7 @@
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/curator_welcome.html");
 			} else {
+			        timedReset(); 
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_curator.html");	
 				loadScreen("#bottom-bar", "screens/bottombar.html"); 	
@@ -59,7 +71,8 @@
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/critique_welcome.html");
 			} else if (mode == 1) { // load
-					loadScreen("#modal-screen", "screens/critique_load_gallery.html");	
+			        timedReset(); 
+				loadScreen("#modal-screen", "screens/critique_load_gallery.html");	
 			} else {
 				hideScreen("#modal-screen");
 				loadScreen("#top-bar", "screens/topbar_critique.html");	
@@ -87,7 +100,7 @@
 				loadScreen("#modal-screen", "screens/flythru_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
-				loadScreen("#bottom-bar", "screens/bottombar.html"); 
+				
 			}
 		}
 		
@@ -97,6 +110,7 @@
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
+			        timedReset(); 
 				hideScreen("#modal-screen");
 				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 			}
@@ -179,7 +193,9 @@
 				
 		}
 	</script>
+
 <link href="css/style.css" rel="stylesheet" type="text/css" />
+<link href="css/ui.all.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body id="body">
