@@ -201,7 +201,9 @@
 		var reset = function (){}
 		
 		function resetFunmode() {
-		        alert('reset fun');
+		        try {
+	        		Client.event("navcommand", "funmode reset ");
+			} catch (err) {debug('load data failed');}
 		}
 		
 		function resetCurator() {
