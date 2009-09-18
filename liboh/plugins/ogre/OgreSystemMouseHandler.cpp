@@ -1541,7 +1541,13 @@ private:
 
     //--------------------------------------------------------------------------
     void resetAction() {
-        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        /// fun mode has script on avatar
+        ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        if (!cam) {
+            /// other modes just have camera script
+            ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+            std::cout << "dbm debug resetAction: no avatar script, using camera" << std::endl;
+        }
         assert(cam);
         RoutableMessageBody msg;
         ostringstream ss;

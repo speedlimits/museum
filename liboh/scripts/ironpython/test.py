@@ -90,9 +90,14 @@ def hexify(s):
         ret.append(hex(hi)[-1])
     return ret.tostring()
 
+example_singleton=None
 class exampleclass:
     def __init__(self):
-        if DEBUG_OUTPUT: print "PY: exampleclass.__init__ pid:", os.getpid()
+        global example_singleton
+        if example_singleton:
+            return example_singleton
+        example_singleton=self
+        if DEBUG_OUTPUT: print "PY: exampleclass.__init__ pid:", os.getpid(), "id:", id(self)
         self.objects={}
         self.ammoNum=0
         self.ammoMod=6
@@ -101,6 +106,20 @@ class exampleclass:
         f=open("mode.txt")
         self.mode=f.read().strip()
         f.close()
+        if self.mode=="funmode":
+            self.reset_funmode()
+
+    def reset_funmode(self):
+        #initialize Jscript
+        body = pbSiri.MessageBody()
+        body.message_names.append("EvaluateJavascript")
+        if len(self.arthits) > self.oldhits:
+            msg = 'popUpMessage("score: 0", 10, 10)'
+            body.message_arguments.append(msg)
+            header = pbHead.Header()
+            header.destination_space = util.tupleFromUUID(self.spaceid)
+            header.destination_object = util.tupleFromUUID(self.objid)
+            HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -109,7 +128,7 @@ class exampleclass:
         }
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
-        print "PY: Got an RPC named",name, "pid:", os.getpid()
+        print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
         header = pbHead.Header()
         header.ParseFromString(util.fromByteArray(serialheader))
         if name == "RetObj":
@@ -227,6 +246,9 @@ class exampleclass:
             elif tok[0]=="reset":
                 if self.mode=="funmode":
                     if DEBUG_OUTPUT: print "PY: funmode reset"
+                    self.arthits=set()
+                    self.oldhits=0
+                    print "PY debug: reset hits:", self.oldhits, self.arthits, id(self)
                     hexed = "82c60703a082460713a065e616d656a00723a06516274777f627b6f50343a00733a0376507f637a00743a08264d273e2535303030303139303733343836333a064d223e21313939393938383535353930383a06433e21393030303030353732323034363a0470753a0376527f647a00763a08264d203e27303731303637363930383439333034323a06403e203a06403e203a06403e27303731303637393332383831363433393a0470773a0371682460783a07623a06516274777f627b6f50333a00793a0377643a08264d273e24363939393937393031393136353a064d213e2037303030303035323435323038373a064d203e2035393939393939383635383839353439333a047071303a0377663a0826403e203a064d203e27333133353337303031363039383032323a06403e203a06403e26383139393833363136323632313630383a047071313a037168246071323a07623a06516274777f627b6f50323a0071333a0377643a08264d293e2334303030303135323538373839313a064d213e203a06413e253a047071343a0377663a0826403e20303031373434323636303436343433393534313a064d203e2033343839393439353534323034393430383a06463e20393131313036363239363436333833356d2030363a06403e29393933393038313138313934363435343a047071353a0371665465637362796074796f6e6c20216c637f6027796478602370716365637024594d454354514d405a364279602355607021383021303a34353a333730223030393a0071363a016e2"
                     arts = pkl.loads(unHex(hexed))
                     for art in arts:
@@ -248,6 +270,7 @@ class exampleclass:
                             i+=1
                     self.setPosition(objid=self.objects["Avatar_fun"], position = (-9,-1.4,2.5), orientation = (0,0,0,1),
                                  velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+                    self.reset_funmode()
             else:
                 print "PY: unknown JavascriptMessage:", tok
 
@@ -256,23 +279,24 @@ class exampleclass:
             collision.ParseFromString(util.fromByteArray(serialarg))
             other = util.tupleToUUID(collision.other_object_reference)
             if DEBUG_OUTPUT: print "PY: BegCol with", self.objects.keys()[self.objects.values().index(other)]
+##            print "PY debug -------------- oldhits:", self.oldhits, "arthits:", self.arthits, id(self)
             if not other in self.arthits:
                 oname = self.objects.keys()[self.objects.values().index(other)]
                 if oname[:8]=="artwork_":
                     self.arthits.add(other)
-                    print "hit another painting! score now", len(self.arthits)
+                    print "hit another painting! score now", len(self.arthits), id(self)
                     body = pbSiri.MessageBody()
                     body.message_names.append("EvaluateJavascript")
                     if len(self.arthits) > self.oldhits:
-                        msg = 'popUpMessage("hit painting, score now: ' + str(len(self.arthits)) + '", 10, 10)'
+                        msg = 'popUpMessage("score: ' + str(len(self.arthits)) + '", 10, 10)'
                         body.message_arguments.append(msg)
                         header = pbHead.Header()
                         header.destination_space = util.tupleFromUUID(self.spaceid)
                         header.destination_object = util.tupleFromUUID(self.objid)
                         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
                         self.oldhits=len(self.arthits)
-                else:
-                    print "PY debug: shouldn't collide with", oname
+##                else:
+##                    print "PY debug: shouldn't collide with", oname
 
         elif header.reply_id==12345:
             if DEBUG_OUTPUT: print "PY: response to our location query.  Dunno why it has no name"
