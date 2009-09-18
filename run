@@ -31,12 +31,12 @@ def check_for_proc(proc):
 if os.path.exists("build/cmake/cppoh_d"):
     spaceserver = "space_d"
     proxserver = "proximity_d"
-    executable = "cppoh_d"
+    executable = "cppoh_wrapper.sh"
 else:
     if os.path.exists("build/cmake/cppoh"):
         spaceserver = "space"
         proxserver = "proximity"
-        executable = "cppoh"
+        executable = "cppoh_wrapper.sh cppoh"
     else:
         print "can't find executable"
         exit()
