@@ -215,6 +215,13 @@ public:
     Ogre::SceneManager* getSceneManager();
     virtual void createProxy(ProxyObjectPtr p);
     virtual void destroyProxy(ProxyObjectPtr p);
+    String mDumbMsg;
+    virtual void exchangeDumbMsg(String& s) {
+        String temp = s;
+        s = mDumbMsg;
+        mDumbMsg=temp;
+        std::cout << "dumbMsg Ogre: " << mDumbMsg << std::endl;
+    };
     ~OgreSystem();
 };
 

@@ -4,6 +4,7 @@ import traceback
 import protocol.Sirikata_pb2 as pbSiri
 import protocol.Persistence_pb2 as pbPer
 import protocol.MessageHeader_pb2 as pbHead
+import protocol.Physics_pb2 as pbPhy
 
 from Sirikata.Runtime import HostedObject
 import System
@@ -91,10 +92,11 @@ def hexify(s):
 
 class exampleclass:
     def __init__(self):
-        if DEBUG_OUTPUT: print "PY: exampleclass.__init__"
+        if DEBUG_OUTPUT: print "PY: exampleclass.__init__ pid:", os.getpid()
         self.objects={}
         self.ammoNum=0
         self.ammoMod=6
+        self.arthits=set()
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -103,7 +105,7 @@ class exampleclass:
         }
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
-        print "PY: Got an RPC named",name
+        print "PY: Got an RPC named",name, "pid:", os.getpid()
         header = pbHead.Header()
         header.ParseFromString(util.fromByteArray(serialheader))
         if name == "RetObj":
@@ -231,6 +233,22 @@ class exampleclass:
             else:
                 print "PY: unknown JavascriptMessage:", tok
 
+        elif name == "BegCol":
+            collision = pbPhy.CollisionBegin()
+            collision.ParseFromString(util.fromByteArray(serialarg))
+            other = util.tupleToUUID(collision.other_object_reference)
+            if DEBUG_OUTPUT: print "PY: BegCol with", self.objects.keys()[self.objects.values().index(other)]
+            if not other in self.arthits:
+                self.arthits.add(other)
+                print "hit another painting! score now", len(self.arthits)
+                body = pbSiri.MessageBody()
+                body.message_names.append("EvaluateJavascript")
+                body.message_arguments.append("hit another painting!" + str(len(self.arthits)))
+                header = pbHead.Header()
+                header.destination_space = util.tupleFromUUID(self.spaceid)
+                header.destination_object = util.tupleFromUUID(self.objid)
+                HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+
         elif header.reply_id==12345:
             if DEBUG_OUTPUT: print "PY: response to our location query.  Dunno why it has no name"
             loc = pbSiri.ObjLoc()
@@ -258,6 +276,7 @@ class exampleclass:
                 #print "PY test sendmail-->"+ cmd + "<--"
                 #os.system(cmd)
                 data = pkl.dumps(arts)
+                print "PY: will hexify this data %s" % (data)
                 hexart=hexify(data)
                 blog.saveMuseum(self.saveStateFile, self.saveStateDesc, hexart)
 

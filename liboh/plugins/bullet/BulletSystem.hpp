@@ -460,7 +460,7 @@ class BulletSystem: public TimeSteppedQueryableSimulation {
     btSequentialImpulseConstraintSolver* solver;
     btCollisionShape* groundShape;
     btRigidBody* groundBody;
-
+    String mDumbMsg;
 
 public:
     BulletSystem();
@@ -531,6 +531,13 @@ public:
     Task::EventResponse downloadFinished(Task::EventPtr evbase, BulletObj* bullobj);
     ///returns if rendering should continue
     virtual bool tick();
+    virtual void exchangeDumbMsg(String& s) {
+        /*
+        String temp = s;
+        s = mDumbMsg;
+        mDumbMsg=temp;
+        */
+    };
     ~BulletSystem();
 };
 }
