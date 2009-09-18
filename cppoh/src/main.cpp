@@ -284,7 +284,7 @@ int main ( int argc,const char**argv ) {
     }
     String s;
     while ( continue_simulation ) {
-	usleep(30000);
+	usleep(3000);
         for(SimList::iterator it = sims.begin(); it != sims.end(); it++) {
             continue_simulation = continue_simulation && (*it)->tick();
             (*it)->exchangeDumbMsg(s);

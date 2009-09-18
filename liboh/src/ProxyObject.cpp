@@ -116,11 +116,69 @@ bool ProxyObject::sendMessage(MemoryReference message) const {
     }
 }
 
+
+
+bool reasonablePos(const Vector3d&loc) {
+    return loc.x>=-10000&&loc.x<=10000&&
+        loc.y>=-10000&&loc.y<=10000&&
+        loc.z>=-10000&&loc.z<=10000;
+}
+
+bool reasonablePos(const Vector3f&loc) {
+    return loc.x>=-1000&&loc.x<=1000&&
+        loc.y>=-1000&&loc.y<=1000&&
+        loc.z>=-1000&&loc.z<=1000;
+}
+bool reasonableNorm(const Vector3f&loc) {
+    return loc.x>=-3&&loc.x<=3&&
+        loc.y>=-3&&loc.y<=3&&
+        loc.z>=-3&&loc.z<=3;
+}
+bool reasonableNorm(const Quaternion&loc) {
+    return loc.x>=-3&&loc.x<=3&&
+        loc.y>=-3&&loc.y<=3&&
+        loc.z>=-3&&loc.z<=3&&
+        loc.w>=-3&&loc.w<=3;
+}
+volatile const char **doNotDereference=NULL;
+void crashNow() {
+    *doNotDereference="This should crash the engine: invalid float encountered--please track down root cause";
+}
+bool validateLocation(TemporalValue<Location>::Time timeStamp,
+                      const Location&location) {
+    if (reasonablePos(location.getPosition())==false) {
+        crashNow();
+        return false;
+    }
+
+    if (reasonablePos(location.getVelocity())==false) {
+        crashNow();
+        return false;
+    }
+    if (reasonableNorm(location.getOrientation())==false) {
+        crashNow();
+        return false;
+    }
+    if (reasonableNorm(location.getAxisOfRotation())==false) {
+        crashNow();
+        return false;
+    }
+    if (!(location.getAngularSpeed()>=-10000&&
+          location.getAngularSpeed()<=10000)) {
+        crashNow();
+        return false;
+    }
+    return true;
+}
+
+
 void ProxyObject::setLocation(TemporalValue<Location>::Time timeStamp,
                               const Location&location) {
-    mLocation.updateValue(timeStamp,
-                          location);
-    PositionProvider::notify(&PositionListener::updateLocation, timeStamp, location);
+    if (validateLocation(timeStamp,location)) {
+        mLocation.updateValue(timeStamp,
+                              location);
+        PositionProvider::notify(&PositionListener::updateLocation, timeStamp, location);
+    }
 }
 
 void ProxyObject::updateLocationWithObjLoc(
@@ -157,9 +215,11 @@ void ProxyObject::requestLocation(TemporalValue<Location>::Time timeStamp, const
 }
 void ProxyObject::resetLocation(TemporalValue<Location>::Time timeStamp,
                                 const Location&location) {
-    mLocation.resetValue(timeStamp,
-                         location);
-    PositionProvider::notify(&PositionListener::resetLocation, timeStamp, location);
+    if (validateLocation(timeStamp,location)) {
+        mLocation.resetValue(timeStamp,
+                             location);
+        PositionProvider::notify(&PositionListener::resetLocation, timeStamp, location);
+    }
 }
 void ProxyObject::setParent(const ProxyObjectPtr &parent,
                             TemporalValue<Location>::Time timeStamp) {
