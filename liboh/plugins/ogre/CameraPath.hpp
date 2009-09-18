@@ -114,12 +114,24 @@ private:
     void parse_csv_values(string line, vector<string>& values) {
         values.clear();
         string temp("");
-
+        bool quoting=false;
+    
         for (unsigned int i=0; i<line.size(); i++) {
             char c = line[i];
-            if (c!=',') {
+            if (quoting) {
                 if (c!='"') {
                     temp.push_back(c);
+                }
+                else {
+                    quoting=false;
+                }
+            }
+            else if (c!=',') {
+                if (c!='"') {
+                    temp.push_back(c);
+                }
+                else {
+                    quoting=true;
                 }
             }
             else {
