@@ -961,7 +961,7 @@ private:
 
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
-        rloc.set_angular_speed(dir*amount*mCamSpeed);
+        rloc.set_angular_speed(dir*amount*sqrt(mCamSpeed));
         cam->requestLocation(now, rloc);
     }
 
