@@ -16,6 +16,8 @@ Description: <textarea id='description' cols="30" rows="3"></textarea>
                 try { 
                         Client.event("navcommand", command );
                 } catch (err) {debug('load save failed' + command);}
+                $("#detail-screen").html("<p>&nbsp;</p><p> Your gallery has been saved! </p><a href='javascript:reset()'>Start Over</a>");
+                setTimeout('reset(); ', 10000);
         }
 
 </script>
