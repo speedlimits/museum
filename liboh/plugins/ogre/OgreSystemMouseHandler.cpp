@@ -1583,21 +1583,23 @@ private:
         ostringstream ss;
         if (num==1)
             ss << "inventory loadState 82c60703a082460713a065e616d656a00723a06516274777f627b6f50343a00733a0376507f637a00743a08264d273e2535303030303139303733343836333a064d223e21313939393938383535353930383a06433e21393030303030353732323034363a0470753a0376527f647a00763a08264d203e27303731303637363930383439333034323a06403e203a06403e203a06403e27303731303637393332383831363433393a0470773a0371682460783a07623a06516274777f627b6f50333a00793a0377643a08264d273e24363939393937393031393136353a064d213e2037303030303035323435323038373a064d203e2035393939393939383635383839353439333a047071303a0377663a0826403e203a064d203e27333133353337303031363039383032323a06403e203a06403e26383139393833363136323632313630383a047071313a037168246071323a07623a06516274777f627b6f50323a0071333a0377643a08264d293e2334303030303135323538373839313a064d213e203a06413e253a047071343a0377663a0826403e20303031373434323636303436343433393534313a064d203e2033343839393439353534323034393430383a06463e20393131313036363239363436333833356d2030363a06403e29393933393038313138313934363435343a047071353a0371665465637362796074796f6e6c20216c637f6027796478602370716365637024594d454354514d405a364279602355607021383021303a34353a333730223030393a0071363a016e2";
-        else
+        else if (num==2) {
             ss << "inventory saveState \"name with spaces\" \"description, also with spaces\"";
+        }
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
         msg.SerializeToString(&smsg);
         cam->sendMessage(MemoryReference(smsg));
-        /*
-        /// place art
-        static int pic=0;
-        pic++;
-        WebViewManager::NavigationAction act;
-        ostringstream ss;
-        ss << "inventory placeObject artwork_0" << pic << " 400 300 ";
-        inventoryHandler(act, ss.str());
-        */
+        
+        if (num==3) {
+            /// place art
+            static int pic=0;
+            pic++;
+            WebViewManager::NavigationAction act;
+            ostringstream ss;
+            ss << "inventory placeObject artwork_0" << pic << " 400 300";
+            inventoryHandler(act, ss.str());
+        }
     }
 
     /// WebView Actions
@@ -3099,6 +3101,7 @@ public:
         mInputResponses["resetAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::resetAction, this));
         mInputResponses["debugAction1"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 1));
         mInputResponses["debugAction2"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 2));
+        mInputResponses["debugAction3"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 3));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
         mInputResponses["webBack"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateBack));
@@ -3181,6 +3184,7 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_MINUS), mInputResponses["debugAction1"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction2"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F10), mInputResponses["debugAction3"]);
 
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
