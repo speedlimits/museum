@@ -501,7 +501,7 @@ bool BulletSystem::tick() {
                     Time remoteNow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(objects[i]->mMeshptr->getObjectReference().space()));
                     Location loc (objects[i]->mMeshptr->globalLocation(remoteNow));
                     if (    (po.p.x <= 100000. && po.p.x >= -100000.)==false ||
-                            (po.p.y <= 100000. && po.p.y >= -100000.)==false
+                            (po.p.y <= 100000. && po.p.y >= -100000.)==false ||
                             (po.p.z <= 100000. && po.p.z >= -100000.)==false ) {
                         cout << "dbm debug BAD POSITION!" << objects[i]->mName << " pos: " << po.p << endl;
                         if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6)=="Avatar") {
