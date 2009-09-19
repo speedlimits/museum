@@ -14,14 +14,13 @@ body  {
 #top-bar {
 	display: none;
 	position: absolute;
-	margin: 0;
+        margin: 0;
 	padding: 0;
 	/*	display:none; 
 	background: #DDDDDD; */ 
 	top: 1px;
-	padding: 0 0px;
-	left: 281px;
 	z-index: 7002;
+        left: 370px;
 }
 ul#topbar-curator  {
 	height: 37px;
@@ -102,6 +101,9 @@ ul#topbar-critique {
 	padding: 100px 70px 100px 80px;
 	overflow: hidden;
 	z-index: 7001;
+
+	color: #fff;
+	
 }
 #modal-screen-buttons {
 	position: absolute;
@@ -118,7 +120,7 @@ ul#topbar-critique {
  	position: absolute;
 	bottom: 50px;
 	left: 50px;
-	z-index: 6001;
+	z-index: 6201;
 	
 }
 
