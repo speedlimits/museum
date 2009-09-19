@@ -218,7 +218,8 @@ class exampleclass:
                             mood = art[-1]
                     body = pbSiri.MessageBody()
                     body.message_names.append("EvaluateJavascript")
-                    msg = 'setLightMood(' +'"'+mood+'");'
+#                    msg = 'setLightMood(' +'"'+mood+'");'
+                    msg = 'Client.event("navmessage", "light setmood "'+mood+'");'
                     body.message_arguments.append(msg)
                     header = pbHead.Header()
                     header.destination_space = util.tupleFromUUID(self.spaceid)
