@@ -116,7 +116,7 @@ class exampleclass:
         body = pbSiri.MessageBody()
         body.message_names.append("EvaluateJavascript")
         if len(self.arthits) > self.oldhits:
-            msg = 'popUpMessage("score: 0", 10, 10)'
+            msg = 'popUpMessage("score: 0", 10, 10);'
             body.message_arguments.append(msg)
             header = pbHead.Header()
             header.destination_space = util.tupleFromUUID(self.spaceid)
@@ -217,13 +217,12 @@ class exampleclass:
                             mood = art[-1]
                     body = pbSiri.MessageBody()
                     body.message_names.append("EvaluateJavascript")
-                    if len(self.arthits) > self.oldhits:
-                        msg = 'setLightMood(' + mood + ')'
-                        body.message_arguments.append(msg)
-                        header = pbHead.Header()
-                        header.destination_space = util.tupleFromUUID(self.spaceid)
-                        header.destination_object = util.tupleFromUUID(self.objid)
-                        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+                    msg = 'setLightMood(' +'"'+mood+'");'
+                    body.message_arguments.append(msg)
+                    header = pbHead.Header()
+                    header.destination_space = util.tupleFromUUID(self.spaceid)
+                    header.destination_object = util.tupleFromUUID(self.objid)
+                    HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
             elif tok[0]=="funmode":
                 if tok[1]=="fire":
