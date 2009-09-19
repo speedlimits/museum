@@ -1156,7 +1156,7 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
 //        WebViewManager::getSingleton().evaluateJavaScript("__chrome", (char*)args.data());
     } 
     else {
-        printstr<<"Message to be handled in script: "<<name <<" "<< (char*)args.data();
+        printstr<<"Message to be handled in script: "<<name;
     }
     SILOG(cppoh,debug,printstr.str());
     if (mObjectScript) {
