@@ -432,7 +432,7 @@ bool BulletSystem::tick() {
     static Task::LocalTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
     //static int mode = 0;
-    static positionOrientation lastGoodAvatarPo;
+    static positionOrientation lastGoodAvatarPo=positionOrientation(Vector3d(0,0,0),Quaternion::identity());
     static BulletObj* avatar_id=0;
     Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
@@ -510,14 +510,25 @@ bool BulletSystem::tick() {
                             loc.setVelocity(Vector3f(0,0,0));
                             loc.setAxisOfRotation(Vector3f(0,1,0));
                             loc.setAngularSpeed(0);
+                        }else {
+                            Location lastKnown=objects[i]->mMeshptr->extrapolateLocation(remoteNow);
+                            po.p.x=lastKnown.getPosition().x;
+                            po.p.y=lastKnown.getPosition().y;
+                            po.p.z=lastKnown.getPosition().z;
+                            po.o=lastKnown.getOrientation();
+                            cout << "dbm debug POSITION FIX:" << objects[i]->mName << " pos: " << po.p << endl;
+                            loc.setVelocity(Vector3f(0,0,0));
+                            loc.setAxisOfRotation(Vector3f(0,1,0));
+                            loc.setAngularSpeed(0);
+                        }
+                    }else {
+                        if (objects[i]->mName.size()>=6 && objects[i]->mName.substr(0,6)=="Avatar") {
+                            lastGoodAvatarPo = po;//don't want to set this if things went bad
                         }
                     }
                     loc.setPosition(po.p);
                     loc.setOrientation(po.o);
                     objects[i]->mMeshptr->setLocation(remoteNow, loc);
-                    if (objects[i]->mName.size()>=7 && objects[i]->mName.substr(0,7)=="Avatar") {
-                        lastGoodAvatarPo = po;
-                    }
                 }
             }
             
