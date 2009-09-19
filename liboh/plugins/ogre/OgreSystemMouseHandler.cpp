@@ -440,6 +440,7 @@ private:
         lookat.y = 0;
         lookat.normalizeThis();
 
+        /*
         // Here is where we would call python magic to do an animation. Right now we just set it.
         Protocol::ObjLoc rloc;
         rloc.set_position(position);
@@ -449,7 +450,19 @@ private:
         rloc.set_angular_speed(0);
         ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+    //    camera->requestLocation(now, rloc);
         camera->requestLocation(now, rloc);
+        */
+        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
+        Time now(SpaceTimeOffsetManager::getSingleton().now(camera->getObjectReference().space()));
+        Location loc = camera->extrapolateLocation(now);
+
+        loc.setPosition( position );
+        loc.setOrientation( Quaternion(Vector3f::unitY().cross(lookat), Vector3f::unitY(), lookat) );
+        loc.setVelocity(Vector3f(0,0,0));
+        loc.setAngularSpeed(0);
+
+        camera->setLocation(now, loc);
     }
 
 
@@ -515,7 +528,7 @@ private:
         }
         else
 #endif // 0
-        if (mParent->mInputManager->isModifierDown(Input::MOD_ALT)) {   // click to go
+        if (mParent->mInputManager->isModifierDown(Input::MOD_CTRL)) {   // click to go
             // Look for an object intersected by the ray.
             const Entity *obj = NULL;
             Vector3d position;
