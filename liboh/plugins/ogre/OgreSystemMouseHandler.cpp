@@ -2125,6 +2125,16 @@ private:
     };
 
 
+    static LightInfo::LightTypes getLightTypeEnum(const String typeString) {
+        LightInfo::LightTypes type = static_cast<LightInfo::LightTypes>(-1);
+        if       (typeString == "point")                                type = LightInfo::POINT;
+        else if  (typeString == "directional")                          type = LightInfo::DIRECTIONAL;
+        else if ((typeString == "spot") || (typeString == "spotlight")) type = LightInfo::SPOTLIGHT;
+        else     SILOG(input, error, "getLightTypeEnum: unknown light type \"" + typeString + "\"");
+        return type;
+    }
+
+
     //--------------------------------------------------------------------------
     // This parses a string of the form:
     // diffusecolor=1.0,1.0,0.95 specularcolor=1,1,1 ambientcolor=.05,.05,.05 shadowcolor=.02,.02,.02
@@ -2144,10 +2154,8 @@ private:
         if (jap.getAttributeValue("lightrange",    &lightInfo->mLightRange,       1))   lightInfo->mWhichFields |= LightInfo::LIGHT_RANGE;     // range
         if (jap.getAttributeValue("castsshadow",   &lightInfo->mCastsShadow,      1))   lightInfo->mWhichFields |= LightInfo::CAST_SHADOW;     // bool
         if (jap.getAttributeValue("type",             &type)) {                         lightInfo->mWhichFields |= LightInfo::TYPE;            // type
-            if       (type == "point")                          lightInfo->mType = LightInfo::POINT;
-            else if  (type == "directional")                    lightInfo->mType = LightInfo::DIRECTIONAL;
-            else if ((type == "spot") || (type == "spotlight")) lightInfo->mType = LightInfo::SPOTLIGHT;
-            else lightInfo->mWhichFields &= ~LightInfo::TYPE;
+            lightInfo->mType = getLightTypeEnum(type);
+            if (lightInfo->mType < 0) lightInfo->mWhichFields &= ~LightInfo::TYPE;
         }
     }
 
@@ -2303,13 +2311,13 @@ private:
     void initLightMoods() {
         if (mMoodLightsInited)
             return;
-        const int numMoods = sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]);
-        for (int i = 0; i < numMoods; ++i) {
+
+        for (int i = 0; i < numMoods(); ++i) {
             mSpotLightMoods[i].mWhichFields          = 0;
             mPointLightMoods[i].mWhichFields         = 0;
             mDirectionalLightMoods[i].mWhichFields   = 0;
         }
-                
+
         mSpotLightMoods[0].setLightDiffuseColor(Color(.7,.6,.5)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
         mSpotLightMoods[1].setLightDiffuseColor(Color(.8,.7,.6)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
         mSpotLightMoods[2].setLightDiffuseColor(Color(.9,.9,.8)).setLightRange(10.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::SPOTLIGHT).setLightPower(1);
@@ -2327,6 +2335,36 @@ private:
 
         mMoodLightsInited = true;
     }
+
+
+    //--------------------------------------------------------------------------
+    // Get the light info for the specified mood and type
+    //--------------------------------------------------------------------------
+    const LightInfo& getMoodLightInfo(int mood, LightInfo::LightTypes type)  {
+        initLightMoods();
+        return type == LightInfo::SPOTLIGHT ? mSpotLightMoods[mood] :
+               type == LightInfo::POINT     ? mPointLightMoods[mood] :
+                                              mDirectionalLightMoods[mood];
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Set the lightinfo for the specified mood.
+    //--------------------------------------------------------------------------
+    void setMoodLightInfo(int mood, const LightInfo &li) {
+        initLightMoods();
+        switch (li.mType) {
+            case LightInfo::SPOTLIGHT:   mSpotLightMoods[mood]        = li; break;
+            case LightInfo::POINT:       mPointLightMoods[mood]       = li; break;
+            case LightInfo::DIRECTIONAL: mDirectionalLightMoods[mood] = li; break;
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Set the lightinfo for the specified mood.
+    //--------------------------------------------------------------------------
+    int numMoods() const { return 4; }
 
 
     //--------------------------------------------------------------------------
@@ -2459,19 +2497,18 @@ private:
 
 
     //--------------------------------------------------------------------------
-    // Select the lighting mood. Choose from { 0, 1, 2, 3}
+    // Select the lighting mood. Choose from { 0, 1, 2, 3 }
     // Invoked as
     //     light selectmood <level>
     //--------------------------------------------------------------------------
 
     void lightSelectMood(const String& arg, size_t argCaret) {
-        initLightMoods();
         long mood;
         if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
             SILOG(input, error, "lightSelectMood: no mood level was specified");
             return;
         }
-        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+        if (mood < 0 || mood >= numMoods()) {
             SILOG(input, error, "lightSelectMood: mood level out of range");
             return;
         }
@@ -2483,14 +2520,74 @@ private:
             ProxyObject *obj = ent->getProxyPtr().get();                    if (!obj)   continue;
             ProxyLightObject *light = dynamic_cast<ProxyLightObject*>(obj); if (!light) continue;
             LightInfo li = light->getLastLightInfo();
-            switch (li.mType) {
-                case LightInfo::POINT:          li =        mPointLightMoods[mood]; break;
-                case LightInfo::SPOTLIGHT:      li =         mSpotLightMoods[mood]; break;
-                case LightInfo::DIRECTIONAL:    li =  mDirectionalLightMoods[mood]; break;
-                default:                        continue;
-            }
+            li = getMoodLightInfo(mood, li.mType);
             light->update(li);
         }
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Get the lighting mood as a string. Choose from { 0, 1, 2, 3 }
+    // Invoked as
+    //     light getmood <level> <type>
+    //     light getmood <level>
+    //     light getmood
+    // The second form will return all types of the given mood level.
+    // The last form will get all moods for all levels and types.
+    //--------------------------------------------------------------------------
+
+    String lightGetMoodString(const String& arg, size_t argCaret) {
+        int firstMood = 0, lastMood = numMoods() - 1;                           // If no mood level is specified, print them all
+        int mood;
+        String info;
+        LightInfo::LightTypes lightType = static_cast<LightInfo::LightTypes>(-1);
+        if (getNextTokenAsInt(arg, &argCaret, &mood)) {                         // Found a mood level parameter
+            firstMood = lastMood = mood;
+            if (mood < 0 || mood >= numMoods()) {
+                SILOG(input, error, "lightGetMood: mood level out of range");
+                return info;
+            }
+            String lightTypeString;
+            if (getNextToken(arg, &argCaret, &lightTypeString))                 // Found a light type parameter
+                lightType = getLightTypeEnum(lightTypeString);
+        }
+
+        if (lightType < 0) {                                                    // No light type was specified
+            info = "[ ";
+            for (mood = firstMood; mood <= lastMood; ++mood) {
+                String prelude(string_printf(" 'mood':%d,", mood));
+                if (info.size() > 2)
+                    info += ",\\n  ";
+                info += printLightInfoToString(prelude.c_str(), getMoodLightInfo(mood, LightInfo::DIRECTIONAL), NULL);   info += ",\\n  ";
+                info += printLightInfoToString(prelude.c_str(), getMoodLightInfo(mood, LightInfo::POINT),       NULL);   info += ",\\n  ";
+                info += printLightInfoToString(prelude.c_str(), getMoodLightInfo(mood, LightInfo::SPOTLIGHT),   NULL);
+            }
+            info += " ]";
+        }
+        else {                                                                  // Light type and mood were specified
+            const LightInfo *moodPtr = &getMoodLightInfo(mood, lightType);
+            String prelude(string_printf(" 'mood':%d,", mood));
+            info = printLightInfoToString(prelude.c_str(), *moodPtr, NULL);
+        }
+        return info;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Get a string for saving the moods.
+    // String info = getMoodStringForSaving();  // This saves into a string
+    // lightSetMood(info, 0);                   // This restores from a string
+
+    //--------------------------------------------------------------------------
+    String getMoodStringForSaving() {
+        String info(lightGetMoodString("", 0));
+        for (String::iterator s = info.begin(); s != info.end(); ++s) {
+            if (s[0] == '\\' && s[1] == 'n') {  // Found a '\' followed by a 'n'
+                s[0] = ' ';                     // Convert them both to spaces.
+                s[1] = ' ';
+            }
+        }
+        return info;
     }
 
 
@@ -2499,41 +2596,13 @@ private:
     // Invoked as
     //     light getmood <level> <type>
     //     light getmood <level>
-    // The latter form will return all types of the given mood level.
+    //     light getmood
+    // The second form will return all types of the given mood level.
+    // The last form will get all moods for all levels and types.
     //--------------------------------------------------------------------------
 
     void lightGetMood(const String& arg, size_t argCaret) {
-        initLightMoods();
-        long mood;
-        if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
-            SILOG(input, error, "lightGetMood: no mood level was specified");
-            return;
-        }
-        if (mood < 0 || mood > (long)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
-            SILOG(input, error, "lightGetMood: mood level out of range");
-            return;
-        }
-        String prelude(string_printf(" 'mood':%d,", mood));
-        String lightType;
-        String info;
-        if (!getNextToken(arg, &argCaret, &lightType)) {
-            info = "[ ";
-                info += printLightInfoToString(prelude.c_str(), mDirectionalLightMoods[mood], NULL);   info += ",\\n  ";
-                info += printLightInfoToString(prelude.c_str(), mPointLightMoods[mood],       NULL);   info += ",\\n  ";
-                info += printLightInfoToString(prelude.c_str(), mSpotLightMoods[mood],        NULL);
-            info += " ]";
-        }
-        else {
-            LightInfo *moodPtr = NULL;
-            if      (lightType == "spotlight")      moodPtr = &mSpotLightMoods[mood];
-            else if (lightType == "directional")    moodPtr = &mDirectionalLightMoods[mood];
-            else if (lightType == "point")          moodPtr = &mPointLightMoods[mood];
-            else {
-                SILOG(input, error, "lightEditMood: unknown light type \"" + lightType + "\"");
-                return;
-            }
-            info = printLightInfoToString(prelude.c_str(), *moodPtr, NULL);
-        }
+        String info(lightGetMoodString(arg, argCaret));
         WebViewManager::getSingleton().evaluateJavaScript("__chrome",
             "receiveLightMood(\"" + info + "\");"
         );
@@ -2544,10 +2613,10 @@ private:
     // Set the lighting mood. Choose from { 0, 1, 2, 3}
     // Invoked as
     //     light setmood { mood:<level>, type:<type> ... }
+    //     light setmood [ { mood:<level>, type:<type> ... }, ... { ... } ]
     //--------------------------------------------------------------------------
 
     void lightSetMood(const String& arg, size_t argCaret) {
-        initLightMoods();
         String params;
         argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
         if (arg[argCaret] == '[') {                         // Array
@@ -2563,25 +2632,14 @@ private:
             SILOG(input, error, "lightSetMood: no mood level specified");
             return;
         }
-        if (mood < 0 || mood > (int)(sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]))) {
+        if (mood < 0 || mood >= numMoods()) {
             SILOG(input, error, "lightSetMood: mood level out of range");
             return;
         }
-        String lightType;
-        if (!jap.getAttributeValue("type", &lightType)) {
-            SILOG(input, error, "lightSetMood: no light type specified");
-            return;
-        }
-        LightInfo *moodPtr = NULL;
-        if      (lightType == "spotlight")      moodPtr = &mSpotLightMoods[mood];
-        else if (lightType == "directional")    moodPtr = &mDirectionalLightMoods[mood];
-        else if (lightType == "point")          moodPtr = &mPointLightMoods[mood];
-        else {
-            SILOG(input, error, "lightSetMood: unknown light type \"" + lightType + "\"");
-            return;
-        }
-
-        setLightInfoFromString(params, moodPtr);
+        LightInfo li;
+        li.mWhichFields = 0;
+        setLightInfoFromString(params, &li);
+        setMoodLightInfo(mood, li);
     }
 
 
@@ -2594,8 +2652,7 @@ private:
     //--------------------------------------------------------------------------
 
     void lightSelected(const String& arg, size_t argCaret) {
-        initLightMoods();
-        LightInfo li = mSpotLightMoods[sizeof(mSpotLightMoods) / sizeof(mSpotLightMoods[0]) - 1];     // Initialize with the max mood.
+        LightInfo li = mSpotLightMoods[numMoods() - 1];     // Initialize with the max mood.
         Location lightLocation;
         setLightInfoFromString(arg, &li);
         initSelectedObjectLightLocation(mDefaultSpotLightInclination, mDefaultLightHeight, &lightLocation, &li);
@@ -2697,10 +2754,10 @@ private:
             ++ix;
             avgPower += (power - avgPower) / (float)ix;
         }
-        
+
         if (!getOne)
             info += " ]";
-        
+
         if (id == "average")
             info = string_printf("%.7g", avgPower);
 
@@ -2752,7 +2809,7 @@ private:
             }
             setOne = getNextToken(arg, &argCaret, &id);
         }
-        
+
         if (setOne)
             sor = SpaceObjectReference(id);
 
