@@ -108,6 +108,8 @@ class exampleclass:
         f.close()
         if self.mode=="funmode":
             self.reset_funmode()
+        if self.mode=="curator":
+            self.reset_curator()
 
     def reset_funmode(self):
         #initialize Jscript
@@ -120,6 +122,12 @@ class exampleclass:
             header.destination_space = util.tupleFromUUID(self.spaceid)
             header.destination_object = util.tupleFromUUID(self.objid)
             HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+
+    def reset_curator(self):
+        print "PY dbm debug: reset_curator"
+        for art, uid in self.objects.items():
+            if art[:8]=="artwork_":
+                self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
     pinstate = {
         "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
@@ -179,7 +187,8 @@ class exampleclass:
                 elif tok[1]=="saveState":
                     filename = tok[2]
                     description = tok[3]
-                    print "PY: saveState", filename, "description:", description
+                    moodstring = tok[4]
+                    print "PY: saveState", filename, "description:", description, "mood:", moodstring
                     self.saveStateArt={}
                     for art, uid in self.objects.items():
                         if art[:8]=="artwork_":
@@ -190,15 +199,9 @@ class exampleclass:
                     if DEBUG_OUTPUT:
                         description += " TIMESTAMP:" + str(time.ctime())
                     self.saveStateDesc=description
+                    self.saveStateMood = moodstring
 
                 elif tok[1]=="loadState":
-                    """
-                    filename = tok[2]
-                    print "PY: loadState", filename
-                    f = open("art/" + filename)
-                    arts = pkl.load(f)
-                    f.close()
-                    """
                     data = unHex(tok[2])
                     arts = pkl.loads(data)
                     if DEBUG_OUTPUT: print "loadState:", arts
@@ -210,6 +213,17 @@ class exampleclass:
                             uid = self.objects[nam]
                             self.setPosition(objid=uid, position = pos, orientation = rot,
                                  velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+                        else:
+                            mood = art[-1]
+                    body = pbSiri.MessageBody()
+                    body.message_names.append("EvaluateJavascript")
+                    if len(self.arthits) > self.oldhits:
+                        msg = 'setLightMood(' + mood + ')'
+                        body.message_arguments.append(msg)
+                        header = pbHead.Header()
+                        header.destination_space = util.tupleFromUUID(self.spaceid)
+                        header.destination_object = util.tupleFromUUID(self.objid)
+                        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
             elif tok[0]=="funmode":
                 if tok[1]=="fire":
@@ -278,25 +292,24 @@ class exampleclass:
             collision = pbPhy.CollisionBegin()
             collision.ParseFromString(util.fromByteArray(serialarg))
             other = util.tupleToUUID(collision.other_object_reference)
-            if DEBUG_OUTPUT: print "PY: BegCol with", self.objects.keys()[self.objects.values().index(other)]
-##            print "PY debug -------------- oldhits:", self.oldhits, "arthits:", self.arthits, id(self)
             if not other in self.arthits:
-                oname = self.objects.keys()[self.objects.values().index(other)]
-                if oname[:8]=="artwork_":
-                    self.arthits.add(other)
-                    print "hit another painting! score now", len(self.arthits), id(self)
-                    body = pbSiri.MessageBody()
-                    body.message_names.append("EvaluateJavascript")
-                    if len(self.arthits) > self.oldhits:
-                        msg = 'popUpMessage("score: ' + str(len(self.arthits)) + '", 10, 10)'
-                        body.message_arguments.append(msg)
-                        header = pbHead.Header()
-                        header.destination_space = util.tupleFromUUID(self.spaceid)
-                        header.destination_object = util.tupleFromUUID(self.objid)
-                        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
-                        self.oldhits=len(self.arthits)
-##                else:
-##                    print "PY debug: shouldn't collide with", oname
+                if other in self.objects.values():
+                    oname = self.objects.keys()[self.objects.values().index(other)]
+                    if oname[:8]=="artwork_":
+                        self.arthits.add(other)
+                        print "hit another painting! score now", len(self.arthits), id(self)
+                        body = pbSiri.MessageBody()
+                        body.message_names.append("EvaluateJavascript")
+                        if len(self.arthits) > self.oldhits:
+                            msg = 'popUpMessage("score: ' + str(len(self.arthits)) + '", 10, 10);'
+                            body.message_arguments.append(msg)
+                            header = pbHead.Header()
+                            header.destination_space = util.tupleFromUUID(self.spaceid)
+                            header.destination_object = util.tupleFromUUID(self.objid)
+                            HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+                            self.oldhits=len(self.arthits)
+                else:
+                    print "PY debug: unknown object:", other
 
         elif header.reply_id==12345:
             if DEBUG_OUTPUT: print "PY: response to our location query.  Dunno why it has no name"
@@ -316,6 +329,7 @@ class exampleclass:
             if done:
                 arts = [i for i in self.saveStateArt.values()]
                 arts.append(self.saveStateDesc)
+                arts.append(self.saveStateMood)
                 #if DEBUG_OUTPUT: print "           PY save art done:", arts
                 #fname = self.saveStateFile.replace(" ", "_").replace('"',"")
                 #f = open("art/" + fname, "w")
@@ -346,13 +360,13 @@ class exampleclass:
             se=rws.writes.add()
             se.field_name="Parent"
             parentProperty=pbSiri.ParentProperty()
-            parentProperty.value=util.tupleFromUUID(uuid);
+            parentProperty.value=util.tupleFromUUID(uuid)
             se.data=parentProperty.SerializeToString()
             header = pbHead.Header()
-            header.destination_space=util.tupleFromUUID(self.spaceid);
-            header.destination_object=util.tupleFromUUID(self.objid);
+            header.destination_space=util.tupleFromUUID(self.spaceid)
+            header.destination_object=util.tupleFromUUID(self.objid)
             header.destination_port=5#FIXME this should be PERSISTENCE_SERVICE_PORT
-            HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString());
+            HostedObject.SendMessage(header.SerializeToString()+rws.SerializeToString())
         self.objects[myName]=uuid
 
     def processRPC(self,header,name,arg):
@@ -422,7 +436,7 @@ class exampleclass:
             body.message_names.append("NewProxQuery")
             body.message_arguments.append(prox.SerializeToString())
             header = pbHead.Header()
-            header.destination_space = util.tupleFromUUID(self.spaceid);
+            header.destination_space = util.tupleFromUUID(self.spaceid)
 
             from System import Array, Byte
             arry=Array[Byte](tuple(Byte(c) for c in util.tupleFromUUID(self.spaceid)))

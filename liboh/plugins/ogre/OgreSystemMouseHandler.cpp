@@ -1620,25 +1620,34 @@ private:
         String tok;
         size_t pos=0;
         double mx, my;
-        getNextToken(arg, &pos, &tok);          //  inventory
-        getNextToken(arg, &pos, &tok);          //  placeObject
-        getNextToken(arg, &pos, &tok);          //  artwork_xx
-        getNextTokenAsDouble(arg, &pos, &mx);   // mouse x
-        getNextTokenAsDouble(arg, &pos, &my);   // mouse y
-        double width  = mParent->mPrimaryCamera->getViewport()->getActualWidth();
-        double height = mParent->mPrimaryCamera->getViewport()->getActualHeight();
-        mx = (mx-width*.5) / (width*.5);
-        my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for title bar?
-        Vector3d position;
-        Quaternion orientation;
-        bool err=getPositionAndOrientationForNewArt(mx, my, 0.1, false, &position, &orientation);
-        if (!err) {
-            std::cout << "dbm debug ERROR --getPos-etc failed" << std::endl;
-            position = Vector3d(0,2,0);
-        }
         std::ostringstream fullmsg;
-        fullmsg << arg << " " << position.x <<" "<< position.y <<" "<< position.z <<" "<<
-                orientation.x <<" "<< orientation.y <<" "<< orientation.z <<" "<< orientation.w;
+        getNextToken(arg, &pos, &tok);          //  inventory
+        getNextToken(arg, &pos, &tok);          //  placeObject, saveState, loadState
+        if (tok=="placeObject") {
+            getNextToken(arg, &pos, &tok);          //  artwork_xx
+            getNextTokenAsDouble(arg, &pos, &mx);   // mouse x
+            getNextTokenAsDouble(arg, &pos, &my);   // mouse y
+            double width  = mParent->mPrimaryCamera->getViewport()->getActualWidth();
+            double height = mParent->mPrimaryCamera->getViewport()->getActualHeight();
+            mx = (mx-width*.5) / (width*.5);
+            my = -((my-20)-height*.5) / (height*.5);    // 20 pixels for title bar?
+            Vector3d position;
+            Quaternion orientation;
+            bool err=getPositionAndOrientationForNewArt(mx, my, 0.1, false, &position, &orientation);
+            if (!err) {
+                std::cout << "dbm debug ERROR --getPos-etc failed" << std::endl;
+                position = Vector3d(0,2,0);
+            }
+            fullmsg << arg << " " << position.x <<" "<< position.y <<" "<< position.z <<" "<<
+            orientation.x <<" "<< orientation.y <<" "<< orientation.z <<" "<< orientation.w;
+        }
+        else if (tok=="saveState") {
+            std::cout << "dbm debug inventoryHandler add mood" << std::endl;
+            fullmsg << arg << " " << getMoodStringForSaving();
+        }
+        else if (tok=="loadState") {
+            fullmsg << arg;
+        }
         msg.add_message("JavascriptMessage", fullmsg.str());
         String smsg;
         msg.SerializeToString(&smsg);
