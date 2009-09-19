@@ -69,7 +69,7 @@
 "mesh","staticmesh","bornh_bldg_08_wall_int_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_wall_int_01.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","bornh_bldg_08_wall_int_02",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_wall_int_02.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","bornh_bldg_08_wall_int_03",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_wall_int_03.mesh",,,,,,,,,,,,,,,,,
-"mesh","staticmesh","bornh_bldg_08_wall_int_04",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_wall_int_04.mesh",,,,,,,,,,,,,,,,,
+"mesh","staticmesh","bornh_bldg_08_wall_int_01_dup",,-7.57,0.59,-2.53,0,90,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_wall_int_01.mesh",,,,,,,,,,,,,,,,,
 "#","graphiconly","bornh_bldg_09_ext_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_09_ext_01.mesh",,,,,,,,,,,,,,,,,
 "#","graphiconly","bornh_bldg_09_ext_02",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_09_ext_02.mesh",,,,,,,,,,,,,,,,,
 "#","staticmesh","bornh_bldg_09_int_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_09_int_01.mesh",,,,,,,,,,,,,,,,,
