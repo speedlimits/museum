@@ -1556,11 +1556,10 @@ private:
     void resetAction() {
         /// fun mode has script on avatar
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
-        if (!cam) {
-            /// other modes just have camera script
-            ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
-            std::cout << "dbm debug resetAction: no avatar script, using camera" << std::endl;
-        }
+            
+        /// other modes just have camera script
+        ProxyObjectPtr cam2 = mParent->mPrimaryCamera->getProxyPtr();
+        
         assert(cam);
         RoutableMessageBody msg;
         ostringstream ss;
@@ -1571,6 +1570,7 @@ private:
         String smsg;
         msg.SerializeToString(&smsg);
         cam->sendMessage(MemoryReference(smsg));
+        cam2->sendMessage(MemoryReference(smsg));
     }
 
     /// curator mode

@@ -124,8 +124,9 @@ class exampleclass:
             HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def reset_curator(self):
-        print "PY dbm debug: reset_curator"
+        print "PY dbm debug: reset_curator objects length:", len(self.objects)
         for art, uid in self.objects.items():
+            print "PY dbm debug reset_curator art, uid:", art, uid
             if art[:8]=="artwork_":
                 self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
@@ -284,6 +285,10 @@ class exampleclass:
                     self.setPosition(objid=self.objects["Avatar_fun"], position = (-9,-1.4,2.5), orientation = (0,0,0,1),
                                  velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
                     self.reset_funmode()
+                if self.mode=="curator":
+                    if DEBUG_OUTPUT: print "PY: curator reset"
+                    self.reset_curator()
+
             else:
                 print "PY: unknown JavascriptMessage:", tok
 

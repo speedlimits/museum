@@ -1156,7 +1156,7 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
 //        WebViewManager::getSingleton().evaluateJavaScript("__chrome", (char*)args.data());
     } 
     else {
-        printstr<<"Message to be handled in script: "<<name;
+        printstr<<"Message to be handled in script: "<<name <<" "<< (char*)args.data();
     }
     SILOG(cppoh,debug,printstr.str());
     if (mObjectScript) {
@@ -1168,6 +1168,8 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
                       std::insert_iterator<std::string>(*response, response->begin()));
         }
     }
+    else
+        std::cout << "dbm debug: Message to be handled has no script!" << std::endl;
 }
 const Duration&HostedObject::getSpaceTimeOffset(const SpaceID&space) {
     static Duration nil(Duration::seconds(0));

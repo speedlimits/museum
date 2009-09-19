@@ -161,10 +161,11 @@
 		$(document).ready( function () {
 									 
 			try {
-				Client.event("navcommand", $.getURLParam('mode'));
+				Client.event("navcommand", "reset " + $.getURLParam('mode'));
 			} catch (err) {debug('set mode failed');}
 			
 			if ($.getURLParam('mode') == "curator") {
+//				Client.event("navcommand", "reset curator");
 				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critic") {
 				setTimeout('critiqueMode() ', 1000);
