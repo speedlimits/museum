@@ -57,7 +57,7 @@
 "mesh","graphiconly","bornh_bldg_07_skylights",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_07_skylights.mesh",,,,,,,,,,,,,,,,,
 "mesh","graphiconly","bornh_bldg_07_walls_ext_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_07_walls_ext_01.mesh",,,,,,,,,,,,,,,,,
 "mesh","graphiconly","bornh_bldg_07_walls_ext_02",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_07_walls_ext_02.mesh",,,,,,,,,,,,,,,,,
-"mesh","staticmesh","bornh_bldg_07_walls_int_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_07_walls_int_01.mesh",,,,,,,,,,,,,,,,,
+"mesh","staticmesh","bornh_bldg_07_walls_int_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_07_walls_int_a_01.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","bornh_bldg_07_walls_int_02",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_07_walls_int_02.mesh",,,,,,,,,,,,,,,,,
 "mesh","graphiconly","bornh_bldg_08_ceiling_drop",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_ceiling_drop.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","bornh_bldg_08_floor",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_bldg_08_floor.mesh",,,,,,,,,,,,,,,,,
