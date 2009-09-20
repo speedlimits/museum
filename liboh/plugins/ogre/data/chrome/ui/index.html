@@ -142,18 +142,18 @@
 			//$('#popup-message').css('left', x);
 			//$('#popup-message').css('top', y);
 			if(text==" ") {
-				$('#detail-screen').fadeOut('fast');
+				$('#flythru-screen').fadeOut('fast');
 				
 				$('#modal-screen').fadeOut('fast');
 			} else if (text == "credits"){
-				$('#detail-screen').fadeOut('fast');
-				hideScreen('#detail-screen');
+				$('#flythru-screen').fadeOut('fast');
+				hideScreen('#flythru-screen');
 				loadScreen('#modal-screen', 'screens/credits.html')
 				// show credits	
 			} else if (text == "done") {
 				reset();	
 			} else {
-			$("#detail-screen").html('<div style="position:absolute; top:50%; height:4em; margin-top:-2em; width:80%; left: 10%; text-align:center;vertical-align: middle;">' + text + "</div>").fadeIn("fast");
+			$("#flythru-screen").html('<p style="padding-top: 0px; top: 30%;">' + text + "</div>").fadeIn("fast");
 			}
 			
 		}
@@ -246,6 +246,9 @@
 <div id="help-screen" ></div>
 
 <div id="detail-screen"></div>
+
+<div id="flythru-screen"></div>
+
 
 <div id="top-bar"></div>
 

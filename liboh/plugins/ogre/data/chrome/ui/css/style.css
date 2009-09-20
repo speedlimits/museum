@@ -175,6 +175,23 @@ ul#topbar-critique {
 	/*line-height: 200px;*/
 }
 
+#flythru-screen {
+	display: none;
+	position: absolute;
+	bottom: 28px;
+
+	left: 328px;
+	width: 700px;
+	height: 80px;
+	z-index: 6103;
+	color: #FFF;
+	background: url(../images/flythrough.png);
+	text-align: center; 
+	vertical-align:middle;
+	
+	/*line-height: 80px;*/
+}
+
 #popup-message {
 	/*display: none;*/
 	position: absolute;
