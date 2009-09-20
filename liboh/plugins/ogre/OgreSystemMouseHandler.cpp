@@ -1225,15 +1225,25 @@ private:
         if (!buttonev) {
             return EventResponse::nop();
         }
-
+    
         // Give the browsers a chance to use this input first
-        EventResponse browser_resp = WebViewManager::getSingleton().onButton(buttonev);
-        if (browser_resp == EventResponse::cancel())
-            return EventResponse::cancel();
-
+        // but some kbd stuff should only go to ogre (not sure how, but these keys still get to webview)
+        if (    buttonev->mButton != SDL_SCANCODE_UP &&
+                buttonev->mButton != SDL_SCANCODE_DOWN &&
+                buttonev->mButton != SDL_SCANCODE_LEFT &&
+                buttonev->mButton != SDL_SCANCODE_RIGHT &&
+                buttonev->mButton != SDL_SCANCODE_PAGEUP &&
+                buttonev->mButton != SDL_SCANCODE_PAGEDOWN &&
+                buttonev->mButton != SDL_SCANCODE_SPACE) {
+            EventResponse browser_resp = WebViewManager::getSingleton().onButton(buttonev);
+            if (browser_resp == EventResponse::cancel()) {
+                return EventResponse::cancel();
+            }
+        }
+    
         InputEventPtr inputev (std::tr1::dynamic_pointer_cast<InputEvent>(ev));
         mInputBinding.handle(inputev);
-
+    
         return EventResponse::nop();
     }
 
@@ -3128,27 +3138,27 @@ public:
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RIGHT), mInputResponses["stableRotateNeg"]);
 
         // Various other actions
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B), mInputResponses["createLight"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_SHIFT), mInputResponses["toggleLightVisibility"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_ENTER), mInputResponses["enterObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RETURN), mInputResponses["enterObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_0), mInputResponses["leaveObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_ESCAPE), mInputResponses["leaveObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_G), mInputResponses["groupObjects"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_G, Input::MOD_ALT), mInputResponses["ungroupObjects"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DELETE), mInputResponses["deleteObjects"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_V, Input::MOD_CTRL), mInputResponses["cloneObjects"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_O, Input::MOD_CTRL), mInputResponses["import"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S, Input::MOD_CTRL), mInputResponses["saveScene"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B), mInputResponses["createLight"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_B, Input::MOD_SHIFT), mInputResponses["toggleLightVisibility"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_ENTER), mInputResponses["enterObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_RETURN), mInputResponses["enterObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_KP_0), mInputResponses["leaveObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_ESCAPE), mInputResponses["leaveObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_G), mInputResponses["groupObjects"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_G, Input::MOD_ALT), mInputResponses["ungroupObjects"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DELETE), mInputResponses["deleteObjects"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_V, Input::MOD_CTRL), mInputResponses["cloneObjects"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_O, Input::MOD_CTRL), mInputResponses["import"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S, Input::MOD_CTRL), mInputResponses["saveScene"]);
 
         // Drag modes
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Q, Input::MOD_CTRL), mInputResponses["setDragModeNone"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_CTRL), mInputResponses["setDragModeMoveObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_CTRL|Input::MOD_SHIFT), mInputResponses["setDragModeMoveObjectOnWall"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_E, Input::MOD_CTRL), mInputResponses["setDragModeRotateObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R, Input::MOD_CTRL), mInputResponses["setDragModeScaleObject"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T, Input::MOD_CTRL), mInputResponses["setDragModeRotateCamera"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y, Input::MOD_CTRL), mInputResponses["setDragModePanCamera"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Q, Input::MOD_CTRL), mInputResponses["setDragModeNone"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_CTRL), mInputResponses["setDragModeMoveObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W, Input::MOD_CTRL|Input::MOD_SHIFT), mInputResponses["setDragModeMoveObjectOnWall"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_E, Input::MOD_CTRL), mInputResponses["setDragModeRotateObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R, Input::MOD_CTRL), mInputResponses["setDragModeScaleObject"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_T, Input::MOD_CTRL), mInputResponses["setDragModeRotateCamera"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Y, Input::MOD_CTRL), mInputResponses["setDragModePanCamera"]);
 
 
         // camera speeds
@@ -3168,22 +3178,22 @@ public:
         //mInputBinding.add(InputBindingEvent::MouseClick(3), mInputResponses["selectObjectReverse"]);
 
         // Camera Path
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F1), mInputResponses["cameraPathLoad"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F2), mInputResponses["cameraPathSave"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F3), mInputResponses["cameraPathNextKeyFrame"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F4), mInputResponses["cameraPathPreviousKeyFrame"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F5), mInputResponses["cameraPathInsertKeyFrame"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F6), mInputResponses["cameraPathDeleteKeyFrame"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F7), mInputResponses["cameraPathRun"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_O), mInputResponses["cameraPathSpeedUp"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_P), mInputResponses["cameraPathSlowDown"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F1), mInputResponses["cameraPathLoad"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F2), mInputResponses["cameraPathSave"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F3), mInputResponses["cameraPathNextKeyFrame"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F4), mInputResponses["cameraPathPreviousKeyFrame"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F5), mInputResponses["cameraPathInsertKeyFrame"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F6), mInputResponses["cameraPathDeleteKeyFrame"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F7), mInputResponses["cameraPathRun"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F8), mInputResponses["cameraPathSpeedUp"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_O), mInputResponses["cameraPathSpeedUp"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F9), mInputResponses["cameraPathSlowDown"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_P), mInputResponses["cameraPathSlowDown"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_SPACE), mInputResponses["fireAction"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_MINUS), mInputResponses["debugAction1"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction2"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F10), mInputResponses["debugAction3"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_R), mInputResponses["resetAction"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_MINUS), mInputResponses["debugAction1"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction2"]);
+        if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F10), mInputResponses["debugAction3"]);
 
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
