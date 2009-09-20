@@ -143,3 +143,4 @@
 "#","graphiconly","window_bldg_03_small_01.7",,-37.62,1.27,-5.25,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///window_bldg_03_small_01.mesh",,,,,,,,,,,,,,,,,
 "#","graphiconly","window_bldg_03_small_01.8",,-39.34,1.27,1.78,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///window_bldg_03_small_01.mesh",,,,,,,,,,,,,,,,,
 "#","graphiconly","window_bldg_03_small_01.9",,-31.6,1.46,-5.25,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///window_bldg_03_small_01.mesh",,,,,,,,,,,,,,,,,
+"mesh","staticmesh","bornh_door_gallery_connector_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///bornh_door_gallery_connector_01.mesh",,,,,,,,,,,,,,,,,
