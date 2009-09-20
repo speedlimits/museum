@@ -114,6 +114,7 @@
 "mesh","graphiconly","stairs_03",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///stairs_03.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","straightstair_bldg05_exit",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///straightstair_bldg05_exit.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","straightstair_entry_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///straightstair_entry_01.mesh",,,,,,,,,,,,,,,,,
+"mesh","staticmesh","straightstair_entry_02",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///straightstair_entry_02.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","straightstair_smallgallery",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///straightstair_smallgallery.mesh",,,,,,,,,,,,,,,,,
 "mesh","staticmesh","straightstair_tier2_01",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///straightstair_tier2_01.mesh",,,,,,,,,,,,,,,,,
 "mesh","graphiconly","tower_top",,0,0,0,0,0,0,,1,1,1,0,0,0,0,0,0,0,0,"meru:///tower_top.mesh",,,,,,,,,,,,,,,,,
