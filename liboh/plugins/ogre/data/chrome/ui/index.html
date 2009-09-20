@@ -38,7 +38,7 @@
 			setup();
 			var mode = (mode == null) ? 0 : mode;
 		        
-		             
+		    help = function () { loadScreen("#help-screen", "screens/help_curator.html") } ;     
 		        	
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/curator_welcome.html");
@@ -65,6 +65,7 @@
 			var mode = (mode == null) ? 0 : mode;
 			
 			setup();
+			help = function () { loadScreen("#help-screen", "screens/help_critic.html");  } ;  
 			
 			try {
 				$("body").unbind('sirikata_item_select', pictureSelectedEvent);
@@ -111,6 +112,8 @@
 		function funMode(mode) {
 			
 			var mode = (mode == null) ? 0 : mode;
+			help = function () { loadScreen("#help-screen", "screens/help_fun.html") } ;  
+			
 			if (mode == 0) {
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
@@ -222,6 +225,7 @@
 		        location.reload();
 		}
 		
+		var help = function () { alert('not reset') };
 		
 	</script>
 
@@ -232,6 +236,8 @@
 <body id="body">
 
 <div id="modal-screen" ></div>
+
+<div id="help-screen" ></div>
 
 <div id="detail-screen"></div>
 
