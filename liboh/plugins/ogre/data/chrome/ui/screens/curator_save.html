@@ -15,14 +15,26 @@
 
 <script type="text/javascript">
         function saveGallery() {
-                var title = $('#title').val();
-                var description = $('#description').val();
-                var command = "inventory saveState \"" + title + "\" \"" + description + "\"";
-                try { 
-                        Client.event("navcommand", command );
-                } catch (err) {debug('load save failed' + command);}
-                $("#detail-screen").html("<p>&nbsp;</p><p> Your gallery has been saved! </p><a href='javascript:reset()'><img src='images/continue.png' /></a>");
-                setTimeout('reset(); ', 10000);
+                var title =  jQuery.trim($('#title').val());
+                var description = jQuery.trim($('#description').val());
+				if (description.length < 3){
+					//$('#description').val('no description');
+					$('#description').animate({backgroundColor:'#f00'}, 1000).animate({backgroundColor:'#fff'}, 1000);
+				}
+				if (title.length < 3){
+					//$('#title').val('no title');
+					$('#title').animate({backgroundColor:'#f00'}, 1000).animate({backgroundColor:'#fff'}, 1000);
+				}
+				if (description.length < 3 || title.length < 3){
+					return;
+				}
+				var command = "inventory saveState \"" + title + "\" \"" + description + "\"";
+				try { 
+						Client.event("navcommand", command );
+				} catch (err) {debug('load save failed' + command);}
+				$("#detail-screen").html("<p>&nbsp;</p><p> Your gallery has been saved! </p><a href='javascript:reset()'><img src='images/continue.png' /></a>");
+				setTimeout('reset(); ', 10000);
+				
         }
 
 </script>
