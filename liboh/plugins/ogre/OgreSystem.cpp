@@ -354,7 +354,7 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
     OptionValue*transferManager,*workQueue,*eventManager;
     OptionValue*grabCursor;
     InitializeClassOptions("ogregraphics",this,
-                           mCompositors=new OptionValue("compositors","Bloom2",OptionValueType<String>(),"Set of active compositors"),
+                           mCompositors=new OptionValue("compositors","",OptionValueType<String>(),"Set of active compositors"),
                            pluginFile=new OptionValue("pluginfile","plugins.cfg",OptionValueType<String>(),"sets the file ogre should read options from."),
                            configFile=new OptionValue("configfile","ogre.cfg",OptionValueType<String>(),"sets the ogre config file for config options"),
                            ogreLogFile=new OptionValue("logfile","Ogre.log",OptionValueType<String>(),"sets the ogre log file"),
