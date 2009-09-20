@@ -1527,6 +1527,11 @@ private:
                 std::cout << "dbm debug animate: " << animation << std::endl;
             }
             if (!success) {
+            /// That was fun! Let's do it again!
+                std::cout << "dbm debug: flythru again" << std::endl;
+                WebViewManager::getSingleton().evaluateJavaScript("__chrome",
+                                             "setTimeout('flythruMode(); ', 5000);"
+                                                                 );
                 mRunningCameraPath = false;
                 return;
             }
@@ -1667,6 +1672,9 @@ private:
 
     void resetHandler(WebViewManager::NavigationAction action, const String& arg) {
         resetAction();
+        if (arg == "reset flythru") {
+            cameraPathRun();
+        }
     }
 
 
