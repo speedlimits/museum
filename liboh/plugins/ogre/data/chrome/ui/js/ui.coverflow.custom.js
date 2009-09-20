@@ -90,7 +90,7 @@
 					- (parseInt(this.element.css("paddingLeft")) || 0) //Subtract the padding of the items container
 				)
 			}, {
-				duration: 1000,
+				duration: 900,
 				easing: "easeOutQuint"
 			});
 			

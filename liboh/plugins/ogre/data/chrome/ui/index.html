@@ -1,7 +1,7 @@
 <html>
 
 <head>
-
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.6.custom.min.js"></script>
     <script type="text/javascript" src="js/ui.coverflow.custom.js"></script> 
@@ -128,10 +128,25 @@
 		
 
 		function popUpMessage(text,x,y) {
-			$('#popup-message').fadeIn("slow");
-			$('#popup-message').html(text);
-			$('#popup-message').css('left', x);
-			$('#popup-message').css('top', y);
+			//$('#popup-message').fadeIn("slow");
+			//$('#popup-message').html(text);
+			//$('#popup-message').css('left', x);
+			//$('#popup-message').css('top', y);
+			if(text==" ") {
+				$('#detail-screen').fadeOut('fast');
+				
+				$('#modal-screen').fadeOut('fast');
+			} else if (text == "credits"){
+				$('#detail-screen').fadeOut('fast');
+				hideScreen('#detail-screen');
+				loadScreen('#modal-screen', 'screens/credits.html')
+				// show credits	
+			} else if (text == "done") {
+				reset();	
+			} else {
+			$("#detail-screen").html('<div style="position:absolute; top:50%; height:4em; margin-top:-2em; width:80%; left: 10%; text-align:center;vertical-align: middle;">' + text + "</div>").fadeIn("fast");
+			}
+			
 		}
 		function hidePopUpMessage() {$('#popup-message').fadeOut("slow");};
 		

@@ -100,7 +100,9 @@
 					 
 					start: function () {debug('drag start');$("#drop-screen").show(); },		  
 					stop: function (event, ui) {$("#drop-screen").hide(); debug('drag stop'); },
-					revert: true
+					revert: true,
+					revertDuration:1
+					
 	 			});
 
 				$("ul.magnifyme").coverflow();
@@ -137,7 +139,9 @@
 </script> 
  
 								
-	
+<div>
+	Vælg et billede og træk det ind i galleriet:
+</div>	
 		
 <div class="wrapper"> 
 	<ul class="magnifyme"> 

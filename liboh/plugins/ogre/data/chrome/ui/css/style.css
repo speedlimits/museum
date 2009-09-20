@@ -98,9 +98,10 @@ ul#topbar-critique {
 	height: 568px;
 	width: 1216px;
 	background:url(../images/_0000s_0001_Fullscreen-Modal.png) no-repeat;
-	padding: 100px 70px 100px 80px;
+	padding: 200px 200px 200px 210px;
 	overflow: hidden;
 	z-index: 7001;
+	font-size: 20px;
 
 	color: #fff;
 	
@@ -108,8 +109,8 @@ ul#topbar-critique {
 #modal-screen-buttons {
 	position: absolute;
 	list-style: none;
-	bottom: 100px;
-	right: 100px;
+	left: 670px;
+	top: 400px;
 }
 
 #modal-screen-buttons li {
@@ -141,12 +142,15 @@ ul#topbar-critique {
 	bottom: 28px;
 
 	left: 328px;
-	width: 680px;
+	width: 700px;
 	height: 210px;
 	z-index: 6103;
-	background: #ccc;
+	color: #FFF;
 	background: url(../images/_0000_Detail.png);
+	text-align: center; 
+	vertical-align:middle;
 	
+	/*line-height: 200px;*/
 }
 
 #popup-message {
