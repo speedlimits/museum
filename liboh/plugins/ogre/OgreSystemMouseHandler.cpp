@@ -86,6 +86,27 @@ using namespace std;
 /// developer mode?
 #define DEV false
 
+String getMode() {
+    static String themode;
+    if (themode=="") {
+        FILE* f=fopen("mode.txt", "r");
+        char mode[20];
+        if(f) {
+            int siz=fread(mode, 1, 19, f);
+            mode[siz]=0;
+        }
+        else {
+            strcpy(mode, "dev");
+        }
+        themode=mode;
+        if (themode.substr(0,6) == "critic")
+            themode=themode.substr(0,6);
+        else
+            themode=themode.substr(0,7);
+    }
+    return themode;
+}
+
 //------------------------------------------------------------------------------
 
 bool compareEntity (const Entity* one, const Entity* two) {
@@ -567,7 +588,8 @@ private:
             mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
 //            }
             if (mouseOver) {
-                if (isArtWork(mouseOver)) {
+                std::cout << "dbm debug mode : " << getMode() << " != " << (getMode() != "funmode") << std::endl;
+                if (isArtWork(mouseOver) && (getMode() != "funmode")) {
                     mSelectedObjects.insert(mouseOver->getProxyPtr());
                     mouseOver->setSelected(true);
                     SILOG(input,info,"Replaced selection with " << mouseOver->id());

@@ -76,6 +76,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
       lastTooltip(0), tooltipShowTime(0), isDraggingFocusedWebView(0),
           mInputManager(inputMgr)
 {
+    /*
     FILE* f=fopen("mode.txt", "r");
     char mode[20];
     if(f) {
@@ -85,6 +86,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     else {
         strcpy(mode, "dev");
     }
+    */
     tooltipWebView = 0;
 #ifdef HAVE_AWESOMIUM
     webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
