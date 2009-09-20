@@ -118,6 +118,9 @@
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
 //			        timedReset(); 
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				hideScreen("#modal-screen");
 				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 			}
@@ -176,9 +179,6 @@
 			} else if ($.getURLParam('mode') == "flythru") {
 				setTimeout('flythruMode() ', 1000);
 			} else if ($.getURLParam('mode') == "funmode") {
-				try {
-					Client.event("navcommand", "reset " + $.getURLParam('mode'));
-				} catch (err) {debug('set mode failed');}									 
 				setTimeout('funMode() ', 1000);
 			} else {
 				try {
