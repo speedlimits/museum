@@ -181,15 +181,15 @@ ul#topbar-critique {
 	bottom: 28px;
 
 	left: 328px;
-	width: 700px;
+	width: 765px;
 	height: 80px;
 	z-index: 6103;
 	color: #FFF;
 	background: url(../images/flythrough.png);
 	text-align: center; 
 	vertical-align:middle;
-	margin-left: 20px;
-	margin-right: 20px;
+	padding-left: 20px;
+	padding-right: 20px;
 	/*line-height: 80px;*/
 }
 
