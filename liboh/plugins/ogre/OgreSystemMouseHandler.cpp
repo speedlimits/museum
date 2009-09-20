@@ -83,6 +83,9 @@ using namespace std;
 #define SDL_SCANCODE_PAGEDOWN 0x5b
 #endif // _WIN32
 
+/// developer mode?
+#define DEV false
+
 //------------------------------------------------------------------------------
 
 bool compareEntity (const Entity* one, const Entity* two) {
@@ -939,8 +942,6 @@ private:
     //--------------------------------------------------------------------------
     void rotateAction(Vector3f about, float amount) {
 
-        float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
-
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
         Time now(SpaceTimeOffsetManager::getSingleton().now(cam->getObjectReference().space()));
@@ -949,15 +950,13 @@ private:
 
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(about);
-        rloc.set_angular_speed(amount);
+        rloc.set_angular_speed(amount*sqrt(mCamSpeed));
         cam->requestLocation(now, rloc);
     }
 
 
     //--------------------------------------------------------------------------
     void stableRotateAction(float dir, float amount) {
-
-//        float WORLD_SCALE = mParent->mInputManager->mWorldScale->as<float>();
 
         ProxyObjectPtr cam = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!cam) return;
