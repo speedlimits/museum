@@ -188,7 +188,8 @@ ul#topbar-critique {
 	background: url(../images/flythrough.png);
 	text-align: center; 
 	vertical-align:middle;
-	
+	margin-left: 20px;
+	margin-right: 20px;
 	/*line-height: 80px;*/
 }
 
