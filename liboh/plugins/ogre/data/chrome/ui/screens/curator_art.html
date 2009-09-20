@@ -97,7 +97,7 @@
 					stop: function (event, ui) {$("#drop-screen").hide(); },
 	 			});*/
 				$("ul.magnifyme li").draggable({ 
-					 
+					 distance: 8,
 					start: function () {debug('drag start');$("#drop-screen").show(); },		  
 					stop: function (event, ui) {$("#drop-screen").hide(); debug('drag stop'); },
 					revert: true,
