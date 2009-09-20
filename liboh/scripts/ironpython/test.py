@@ -197,8 +197,8 @@ class exampleclass:
                             self.saveStateArt[uid]={"name":art}
                             self.getPosition(objid=uid, position=1, orientation=1)
                     self.saveStateFile=filename
-                    if DEBUG_OUTPUT:
-                        description += " TIMESTAMP:" + str(time.ctime())
+                    #if DEBUG_OUTPUT:
+                    #    description += " TIMESTAMP:" + str(time.ctime())
                     self.saveStateDesc=description
                     self.saveStateMood = moodstring
 
