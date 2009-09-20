@@ -98,7 +98,7 @@ ul#topbar-critique {
 	height: 568px;
 	width: 1216px;
 	background:url(../images/_0000s_0001_Fullscreen-Modal.png) no-repeat;
-	padding: 200px 200px 200px 210px;
+	padding: 100px 70px 100px 80px;
 	overflow: hidden;
 	z-index: 7001;
 	font-size: 20px;
@@ -122,11 +122,16 @@ ul#topbar-critique {
 	color: #fff;
 	
 }
+#modal-screen p, #help-screen p {
+	margin-top: 150px;
+	padding-left: 50px;
+	padding-right: 50px;
+}
 
 #modal-screen-buttons {
 	position: absolute;
 	list-style: none;
-	left: 670px;
+	left: 540px;
 	top: 400px;
 }
 
