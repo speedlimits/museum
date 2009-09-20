@@ -860,8 +860,9 @@ static int InputButtonToAwesomiumButton(int32 input_button) {
         return LeftMouseButton;
       case 2:
         return MiddleMouseButton;
-      case 3:
-        return RightMouseButton;
+/// disable all right-click stuff
+//      case 3:
+//        return RightMouseButton;
       default:
         return UnknownMouseButton;
     }
