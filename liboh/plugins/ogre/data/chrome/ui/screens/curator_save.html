@@ -1,9 +1,9 @@
 
-<div style="position:absolute; left: 35px; top: 52px; width: 417px;">
+<div style="position:absolute; left: 35px; top: 52px; width: 492px;">
 <table width="444" border="0" >
   <tr>
-    <td width="164" style="color: #FFF;">Hvad skal dit galleri hedde? </td>
-    <td width="270"><input id="title" type="text" size="33" maxlength="30" /></td>
+    <td width="194" style="color: #FFF;">Hvad skal dit galleri hedde? </td>
+    <td width="240"><input id="title" type="text" size="33" maxlength="30" /></td>
   </tr>
   <tr>
     <td style="color:#FFF;">Beskriv hvad du har lavet </td>
@@ -11,7 +11,7 @@
   </tr>
 </table>
 </div>
-<div style="position:absolute; left: 456px; top: 118px;"><a href='javascript:saveGallery();'> <img src="images/save.png" /> </a> </div>
+<div style="position:absolute; left: 498px; top: 110px;"><a href='javascript:saveGallery();'> <img src="images/save.png" /> </a> </div>
 
 <script type="text/javascript">
         function saveGallery() {
@@ -21,7 +21,7 @@
                 try { 
                         Client.event("navcommand", command );
                 } catch (err) {debug('load save failed' + command);}
-                $("#detail-screen").html("<p>&nbsp;</p><p> Your gallery has been saved! </p><a href='javascript:reset()'>Start Over</a>");
+                $("#detail-screen").html("<p>&nbsp;</p><p> Your gallery has been saved! </p><a href='javascript:reset()'><img src='images/continue.png' /></a>");
                 setTimeout('reset(); ', 10000);
         }
 
