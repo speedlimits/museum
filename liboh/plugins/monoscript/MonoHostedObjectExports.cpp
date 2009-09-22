@@ -62,20 +62,28 @@ static void Mono_Context_CallFunctionCallback(const std::tr1::weak_ptr<HostedObj
         delete sentMessage;
     }
 }
-static MonoObject* InternalMono_Context_CallFunction(MonoObject *message, MonoObject*callback, const Duration&duration){
+static MonoObject* InternalMono_Context_CallFunction(MonoObject *message, MonoObject*callback, const Sirikata::Duration&duration){
     std::tr1::shared_ptr<HostedObject> ho=MonoContext::getSingleton().getVWObject();
     MemoryBuffer buf;
-    
+    using std::tr1::placeholders::_1;
+    using std::tr1::placeholders::_2;
+    using std::tr1::placeholders::_3;
     Mono::Array(message).unboxInPlaceByteArray(buf);
     if (ho&&!buf.empty()) {
         RoutableMessageHeader hdr;
         MemoryReference body=hdr.ParseFromArray(&buf[0],buf.size());
-        SentMessage*sm=hdr.has_id()?new SentMessage(hdr.id(),ho->getTracker()):new SentMessage(ho->getTracker());
-        sm->setCallback(std::tr1::bind(&Mono_Context_CallFunctionCallback,
-                                       ho->getWeakPtr(),
-                                       MonoContext::getSingleton().getDomain(),
-                                       Mono::Delegate(Mono::Object(callback)),
-                                       _1,_2,_3));
+        SentMessage*sm=hdr.has_id()
+            ? new SentMessage(hdr.id(),ho->getTracker(),std::tr1::bind(&Mono_Context_CallFunctionCallback,
+                                                                       ho->getWeakPtr(),
+                                                                       MonoContext::getSingleton().getDomain(),
+                                                                       Mono::Delegate(Mono::Object(callback)),
+                                       _1,_2,_3))
+            :new SentMessage(ho->getTracker(),std::tr1::bind(&Mono_Context_CallFunctionCallback,
+                                                             ho->getWeakPtr(),
+                                                             MonoContext::getSingleton().getDomain(),
+                                                             Mono::Delegate(Mono::Object(callback)),
+                                                             _1,_2,_3));
+        
         sm->setTimeout(duration);
         sm->header()=hdr;
         sm->send(body);
@@ -88,7 +96,7 @@ static MonoObject* Mono_Context_CallFunctionWithTimeout(MonoObject *message, Mon
     return InternalMono_Context_CallFunction(message,callback,Mono::Object(duration).unboxTime()-Time::epoch());
 }
 static MonoObject* Mono_Context_CallFunction(MonoObject *message, MonoObject*callback){
-    return InternalMono_Context_CallFunction(message,callback,Duration::seconds(4.0));
+    return InternalMono_Context_CallFunction(message,callback,Sirikata::Duration::seconds(4.0));
 }
 static MonoObject* Mono_Context_SendMessage(MonoObject *message){
     std::tr1::shared_ptr<HostedObject> ho=MonoContext::getSingleton().getVWObject();
@@ -109,7 +117,7 @@ static MonoObject* Mono_Context_SendMessage(MonoObject *message){
 static void Mono_Context_TickDelay(MonoObject*duration) {
     std::tr1::shared_ptr<HostedObject> ho=MonoContext::getSingleton().getVWObject();
     if (ho) {
-        Duration period(Mono::Object(duration).unboxTime()-Time::epoch());
+        Sirikata::Duration period(Mono::Object(duration).unboxTime()-Time::epoch());
         NOT_IMPLEMENTED(mono);
         //ho->tickDelay(period)
     }
@@ -136,7 +144,7 @@ static void Mono_Context_GetTime(MonoObject*space_id,MonoObject *timeRetval) {
 
 
 static void Mono_Context_GetLocalTime(MonoObject *timeRetval) {
-    Time cur=Time::now(Duration::zero());
+    Time cur=Time::now(Sirikata::Duration::zero());
     //SILOG(monoscript,warning,"Time should be "<<cur.raw());
     Mono_Context_setTime(timeRetval,cur);
 }
@@ -159,7 +167,7 @@ static void Mono_Context_GetTimeString(MonoObject*space_id, MonoObject* timeRetv
         SpaceID sid=SpaceID(UUID(ss,UUID::HumanReadable()));
         Time cur = SpaceTimeOffsetManager::getSingleton().now(sid);
         Mono_Context_setTime(timeRetval,cur);
-    }catch (std::invalid_argument&ia){
+    }catch (std::invalid_argument&){
          Mono_Context_GetLocalTime(timeRetval);
     }
 }

@@ -31,6 +31,7 @@
  */
 #ifndef _OGRE_DEFS_HPP_
 #define _OGRE_DEFS_HPP_
+#include "../OgreHeaders.hpp"
 
 #ifdef HAVE_OGRE
 
@@ -38,7 +39,7 @@
 // that we want compatibility for
 
 // OgrePrerequisites does this for us....
-#include <OgrePrerequisites.h>
+
 
 #endif //HAVE_OGRE
 

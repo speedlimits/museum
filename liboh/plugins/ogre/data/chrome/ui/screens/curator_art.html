@@ -1,0 +1,203 @@
+
+    <style type="text/css" media="screen"> 
+			
+			ul.magnifyme {
+				height: 80px;
+				padding: 30px;
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				width: 2000px;
+				list-style: none;
+			}
+			
+			div.wrapper {
+				margin: 5px auto;
+				height: 170px;
+				/*border: 2px solid #999;
+				
+				overflow: hidden;*/
+				width: 600px;
+				max-width: 600px;
+				position: relative;
+			}
+			
+			div.slider {
+				position: absolute;
+				bottom: 0px;
+				left: 30px;
+				width: 542px;
+				height: 19px;
+				background: url(images/productbrowser_scrollbar_20070622.png) no-repeat;
+			}
+			
+			div.ui-slider-handle {
+				position: absolute;
+				cursor: pointer;
+				cursor: hand;
+				top: 0px;
+				left: 0px;
+				height: 100%;
+				width: 181px;
+            	background: url(images/handle.png) no-repeat ;
+				
+			}
+		
+			ul.magnifyme li {
+				width: 64px;
+				height: 64px;
+				float: left;
+				margin: 5px;
+				position: relative;
+				border: 1px solid #999;
+			}
+		</style> 
+<!-- 
+<script type="text/javascript" src="js/old/jquery-1.2.6.min.js"></script> 
+<script type="text/javascript" src="js/old/jquery-ui-1.6.custom.min.js"></script> 
+
+
+
+<script type="text/javascript" src="js/jquery-1.2.6.js"></script> 
+
+
+<script type="text/javascript" src="js/ui.core.js"></script> 
+ 
+<script type="text/javascript" src="js/ui.draggable.js"></script> 
+<script type="text/javascript" src="js/ui.sortable.js"></script>
+<script type="text/javascript" src="js/ui.slider.js"></script> 
+<script type="text/javascript" src="js/effects.core.js"></script> 
+-->
+<script type="text/javascript" src="js/ui.coverflow.custom.js"></script> 
+
+
+<script type="text/javascript" src="js/sylvester.js"></script> 
+<script type="text/javascript" src="js/pb.transformie.js"></script> 
+ 
+<script type="text/javascript"> 
+	globalcoverflow = null;
+	
+	
+	function altDebug(msg) {
+		$("#debug").append("<br>" + msg );
+
+	}
+	
+	if (typeof debug != "function") {
+		debug = altDebug;
+		
+	}
+	
+	$("ul.magnifyme").ready(function() {
+	  //$(document).ready(function() {
+				debug('make sortable');
+/*				$("ul.magnifyme").sortable({ 
+					distance: 10, 
+					start: function () {$("#drop-screen").show();},									  
+					stop: function (event, ui) {$("#drop-screen").hide(); },
+	 			});*/
+				$("ul.magnifyme li").draggable({ 
+					 
+					start: function () {debug('drag start');$("#drop-screen").show(); },		  
+					stop: function (event, ui) {$("#drop-screen").hide(); debug('drag stop'); },
+					revert: true,
+					revertDuration:1
+					
+	 			});
+
+				$("ul.magnifyme").coverflow();
+				
+				debug('done');
+//				$("div.magnifyme").bind('itemselect',  function(e, data) {debug(' item select clicked : ' + data.position ); return false;} );
+
+	$(".magnifyme").bind('mousedown' , function() {
+		debug('mousedown');
+	});
+	$(".magnifyme li").bind('mouseup' , function() {
+		debug('mouseup');
+	});
+	$(".magnifyme li").bind('mouseout' , function() {
+		debug('mouseout');
+	});
+
+				
+				debug('disable selection');
+				$(".wrapper").disableSelection();
+				$(".magnifyme li").disableSelection();
+				$(".magnifyme img").disableSelection();
+				$(".slider").disableSelection();
+				$(".ui-slider-handle").disableSelection();
+				debug('done');
+				
+
+
+			});
+	
+	
+	
+    
+</script> 
+ 
+								
+<div style="text-align:center; position:absolute; width: 100%; top: 15px;">
+V&aelig;lg et billede og tr&aelig;k det ind i galleriet: </div>	
+		
+<div class="wrapper"> 
+	<ul class="magnifyme">
+	  <!--<div class="cover-icon"><img src="icons/1.png" /> </div>
+		<div class="cover-icon"><img src="icons/2.png" /> </div>
+		<div class="cover-icon"><img src="icons/3.png" /> </div>
+		<div class="cover-icon"><img src="icons/4.png" /> </div>
+		<div class="cover-icon"><img src="icons/5.png" /> </div>
+		<div class="cover-icon"><img src="icons/6.png" /> </div> -->
+		<li><img id="artwork_01" src="images/art/01.png" /></li> 
+		<li><img id="artwork_02" src="images/art/02.png" /></li> 
+		<li><img id="artwork_03" src="images/art/03.png" /></li> 
+		<li><img id="artwork_04" src="images/art/04.png" /></li> 
+		<li><img id="artwork_05" src="images/art/05.png" /></li> 
+		<li><img id="artwork_06" src="images/art/06.png" /></li> 
+		<li><img id="artwork_07" src="images/art/07.png" /></li> 
+		<li><img id="artwork_08" src="images/art/08.png" /></li> 
+		<li><img id="artwork_09" src="images/art/09.png" /></li> 
+		<li><img id="artwork_10" src="images/art/10.png" /></li> 
+		<li><img id="artwork_11" src="images/art/11.png" /></li> 
+		<li><img id="artwork_12" src="images/art/12.png" /></li> 
+		<li><img id="artwork_13" src="images/art/13.png" /></li> 
+		<li><img id="artwork_14" src="images/art/14.png" /></li> 
+		<li><img id="artwork_15" src="images/art/15.png" /></li> 
+		<li><img id="artwork_16" src="images/art/16.png" /></li> 
+		<li><img id="artwork_17" src="images/art/17.png" /></li> 
+		<li><img id="artwork_18" src="images/art/18.png" /></li> 
+		<li><img id="artwork_19" src="images/art/19.png" /></li> 
+		<li><img id="artwork_20" src="images/art/20.png" /></li>
+		<li><img id="artwork_21" src="images/art/21.png" /></li> 
+		<li><img id="artwork_22" src="images/art/22.png" /></li> 
+		<li><img id="artwork_23" src="images/art/23.png" /></li> 
+		<li><img id="artwork_24" src="images/art/24.png" /></li> 
+		<li><img id="artwork_25" src="images/art/25.png" /></li> 
+		<li><img id="artwork_26" src="images/art/26.png" /></li> 
+		<li><img id="artwork_27" src="images/art/27.png" /></li> 
+		<li><img id="artwork_28" src="images/art/28.png" /></li> 
+		<li><img id="artwork_29" src="images/art/29.png" /></li> 
+		<li><img id="artwork_30" src="images/art/30.png" /></li>
+		<li><img id="artwork_31" src="images/art/31.png" /></li> 
+		<li><img id="artwork_32" src="images/art/32.png" /></li> 
+		<li><img id="artwork_33" src="images/art/33.png" /></li> 
+		<li><img id="artwork_34" src="images/art/34.png" /></li> 
+		<li><img id="artwork_35" src="images/art/35.png" /></li> 
+		<li><img id="artwork_36" src="images/art/36.png" /></li> 
+		<li><img id="artwork_37" src="images/art/37.png" /></li> 
+		<li><img id="artwork_38" src="images/art/38.png" /></li> 
+		<li><img id="artwork_39" src="images/art/39.png" /></li> 
+
+        
+	</ul> 
+    <div class="slider"> 
+        <!--<div class="ui-slider-handle"></div> -->
+    </div> 
+<div>
+
+
+
+
+        

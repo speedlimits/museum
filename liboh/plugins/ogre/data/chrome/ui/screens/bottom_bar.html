@@ -1,0 +1,23 @@
+<ul id="topbar-critique">
+        <li class="topbarbutton" style="background-position-y: 0px;" onClick="help();" />&nbsp;</li>
+        <li class="topbarbutton" style="background-position-y: -35px;" onClick="reset();" />&nbsp;</li>
+</ul>
+
+<script type="text/javascript">
+
+$('#topbar-critique').ready( function () {
+
+	
+	$("#topbar-critique li.topbarbutton").bind('mouseover', function(event){
+		$(this).css('background-position-x', '-38px');	
+					
+	});
+	$("#topbar-critique li.topbarbutton").bind('mouseout', function(event){
+		$(this).css('background-position-x', '0px');						
+	});
+	$("#topbar-critique li.topbarbutton").mousedown( function(event){
+		$(this).css('background-position-x', '-76px');						
+	});
+});
+
+</script>

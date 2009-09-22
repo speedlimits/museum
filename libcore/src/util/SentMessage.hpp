@@ -68,6 +68,9 @@ private:
 
     QueryCallback mResponseCallback; ///< Callback, or null if not yet set.
     QueryTracker *const mTracker;
+
+    ///asserts that these requests are all happening on the same thread
+    void * mDebugThreadId;
     /// Manages timeout, cancelled when response received or SentMessage deleted.
     std::tr1::shared_ptr<Network::TimerHandle> mTimerHandle;
 
@@ -75,8 +78,6 @@ public:
     /// Destructor: Caution: NOT VIRTUAL!!! Make sure to downcast if necessary!!
     ~SentMessage();
 
-    /// Constructor allocates a new queryId. Caller is expected to keep track of a map.
-    SentMessage(QueryTracker *sender);
     /// Constructor allocates a new queryId. Caller is expected to keep track of a map.
     SentMessage(QueryTracker *sender, const QueryCallback& cb);
 
@@ -125,11 +126,6 @@ public:
         return mTracker;
     }
 
-    /// sets the callback handler. Must be called at least once.
-    void setCallback(const QueryCallback &cb) {
-        mResponseCallback = cb;
-    }
-
     /** Unsets any pending timeout. This will happen automatically upon
         receiving a callback. */
     void unsetTimeout();
@@ -163,11 +159,11 @@ public:
 private:
     Body mBody;
 public:
-    SentMessageBody(QueryTracker *tracker)
-        : SentMessage(tracker) {
+    SentMessageBody(QueryTracker *tracker, const QueryCallback& cb)
+        : SentMessage(tracker, cb) {
     }
-    SentMessageBody(int64 id, QueryTracker *tracker)
-        : SentMessage(id, tracker) {
+    SentMessageBody(int64 id, QueryTracker *tracker, const QueryCallback& cb)
+        : SentMessage(id, tracker, cb) {
     }
     /// Note: Not virtual, make sure to downcast!!! Template + Virtual = :-(
     ~SentMessageBody() {

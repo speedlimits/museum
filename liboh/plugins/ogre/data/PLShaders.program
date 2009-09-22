@@ -1,0 +1,110 @@
+vertex_program DecompressDepthShaderCg cg
+{
+	source DepthShader.cg
+	entry_point main
+	profiles arbvp1
+	compile_arguments -DBLENDINDICES=ATTR7 -DBLENDWEIGHT=ATTR1
+}
+vertex_program DecompressDepthShaderHLSL cg
+{
+	source DepthShader.cg
+	entry_point main
+	profiles vs_1_1
+}
+vertex_program DecompressDepthShader unified
+{
+	delegate DecompressDepthShaderHLSL
+	delegate DecompressDepthShaderCg
+}
+vertex_program DepthShaderVP cg
+{
+	source DepthShader.cg
+	entry_point main_vp
+	profiles vs_1_1 arbvp1
+}
+fragment_program DepthShaderFP cg
+{
+	source DepthShader.cg
+	entry_point main_fp
+	profiles arbfp1 ps_2_0
+}
+
+vertex_program PLAmbientVP cg
+{
+	source PLAmbient.cg
+	entry_point main_vp
+	profiles vs_1_1 arbvp1
+}
+vertex_program PLDecompressAmbientVPCg cg
+{
+	source PLAmbient.cg
+	entry_point main_decompress_vp
+	profiles arbvp1
+	compile_arguments -DBLENDINDICES=ATTR7 -DBLENDWEIGHT=ATTR1
+}
+vertex_program PLDecompressAmbientVPHLSL cg
+{
+	source PLAmbient.cg
+	entry_point main_decompress_vp
+	profiles vs_1_1
+}
+vertex_program PLDecompressAmbientVP unified
+{
+	delegate PLDecompressAmbientVPCg
+	delegate PLDecompressAmbientVPHLSL
+}
+
+
+
+fragment_program PLAmbientFP cg
+{
+	source PLAmbient.cg
+	entry_point main_fp
+	profiles arbfp1 ps_2_0
+}
+
+vertex_program PLDecompressPointVP2HighCGCg cg
+{
+  source PLPointLight.cg
+  entry_point main_decompress_vp
+  profiles arbvp1
+  compile_arguments -DBLENDINDICES=ATTR7 -DBLENDWEIGHT=ATTR1
+}
+vertex_program PLDecompressPointVP2HighCGHLSL cg
+{
+  source PLPointLight.cg
+  entry_point main_decompress_vp
+  profiles vs_1_1
+}
+vertex_program PLDecompressPointVP2HighCG unified
+{
+  delegate PLDecompressPointVP2HighCGCg
+  delegate PLDecompressPointVP2HighCGHLSL
+}
+vertex_program PLPointVP2HighCG cg
+{
+  source PLPointLight.cg
+  entry_point main_vp
+  profiles vs_3_0 vs_2_0 arbvp1
+}
+
+
+fragment_program PLSplatPointFP2HighCG  cg
+{
+  source PLPointLight.cg
+  entry_point main_fp
+  profiles ps_3_0 arbfp1
+}
+
+fragment_program PLSplatPointFP2HighHLSL  hlsl
+{
+  source PLPointLight.cg
+  entry_point main_fp
+  target ps_2_0
+}
+
+fragment_program PLSplatPointFP2High unified
+{
+  delegate PLSplatPointFP2HighCG
+  delegate PLSplatPointFP2HighHLSL
+}

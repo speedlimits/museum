@@ -52,6 +52,8 @@ static int core_plugin_refcount = 0;
 //#define DEBUG_OUTPUT(x) x
 #define DEBUG_OUTPUT(x)
 
+#define DEBUG_ALWAYS(x) x
+
 SIRIKATA_PLUGIN_EXPORT_C void init() {
     using namespace Sirikata;
     DEBUG_OUTPUT(cout << "dbm: plugin init" << endl;)
@@ -162,7 +164,7 @@ positionOrientation BulletObj::getBulletState() {
     return positionOrientation(system, trans.getOrigin(),trans.getRotation());
 }
 
-void BulletObj::setBulletState(positionOrientation po) {
+void BulletObj::setBulletState(positionOrientation po, Vector3f linVel, Vector3f angVel) {
     btTransform trans;
     mBulletBodyPtr->getMotionState()->getWorldTransform(trans);
     trans.setOrigin(btVector3(po.p.x, po.p.y, po.p.z));
@@ -170,6 +172,8 @@ void BulletObj::setBulletState(positionOrientation po) {
     /// more Bullet mojo: dynamic vs kinematic
     if (mDynamic) {
         mBulletBodyPtr->proceedToTransform(trans);           /// how to move dynamic objects
+        mBulletBodyPtr->setLinearVelocity(btVector3(linVel.x, linVel.y, linVel.z));
+        mBulletBodyPtr->setAngularVelocity(btVector3(angVel.x, angVel.y, angVel.z));
     }
     else {
         mBulletBodyPtr->getMotionState()->setWorldTransform(trans);   /// how to move 'kinematic' objects (animated)
@@ -418,7 +422,7 @@ void BulletSystem::removePhysicalObject(BulletObj* obj) {
     }
 }
 
-float btMagSq(btVector3 v) {
+float btMagSq(const btVector3& v) {
     return v.x() * v.x()
            + v.y() * v.y()
            + v.z() * v.z();
@@ -427,7 +431,8 @@ float btMagSq(btVector3 v) {
 bool BulletSystem::tick() {
     static Task::LocalTime lasttime = mStartTime;
     static Task::DeltaTime waittime = Task::DeltaTime::seconds(0.02);
-    static int mode = 0;
+    //static int mode = 0;
+    static BulletObj* avatar_id=0;
     Task::LocalTime now = Task::LocalTime::now();
     Task::DeltaTime delta;
     positionOrientation po;
@@ -437,32 +442,41 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > Duration::seconds(20.0)) {
+        if ((now-mStartTime) > Duration::seconds(30.0)) {
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
-
+                    Location loc=objects[i]->mMeshptr->getLastLocation();
+                    
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
-                        DEBUG_OUTPUT(cout << "    dbm: object, " << objects[i]->mName << " moved by user!"
-                                     << " meshpos: " << objects[i]->mMeshptr->getPosition()
-                                     << " bulletpos before reset: " << objects[i]->getBulletState().p;)
+                        DEBUG_OUTPUT(cout << "dbm debug: object, " << objects[i]->mName << " moved" << endl
+                                          << "    debug meshpos: " << objects[i]->mMeshptr->getPosition() << endl
+                                          << "    debug bulletpos before reset: " << objects[i]->getBulletState().p << endl
+                                          << "    debug set vel " << loc.getVelocity() << endl);
                         objects[i]->setBulletState(
                             positionOrientation (
-                                objects[i]->mMeshptr->getPosition(),
-                                objects[i]->mMeshptr->getOrientation()
-                            ));
-                        DEBUG_OUTPUT(cout << "bulletpos after reset: " << objects[i]->getBulletState().p << endl;)
+                                loc.getPosition(),
+                                loc.getOrientation()),
+                                loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
+                            );
+                        DEBUG_OUTPUT(cout << "    debug new pos: " << objects[i]->getBulletState().p << endl);
                     }
 
                     /// if object under PID control, control it
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
+                        DEBUG_OUTPUT(cout << "dbm debug PID vel: " << 
+                                objects[i]->mDesiredLinearVelocity.x() <<
+                                objects[i]->mDesiredLinearVelocity.y() <<
+                                objects[i]->mDesiredLinearVelocity.z()
+                                << endl);
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
+                        objects[i]->mBulletBodyPtr->activate(true);
 
                         /// bit of a hack: if both linear & angular vel are zero, release control (so gravity & inertia can have fun)
                         if ( (btMagSq(objects[i]->mDesiredLinearVelocity) < 0.001f) &&
@@ -470,10 +484,14 @@ bool BulletSystem::tick() {
                             objects[i]->mPIDControlEnabled=false;
                         }
                     }
+                    if (objects[i]->mName=="Avatar_fun") {
+                        avatar_id = objects[i];
+                    }
                 }
             }
-            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
-
+//            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
+            dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/300.0);
+            
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     po = objects[i]->getBulletState();
@@ -481,12 +499,26 @@ bool BulletSystem::tick() {
                                  << delta.toSeconds() << ", newpos, " << po.p << "obj: " << objects[i] << endl);
                     Time remoteNow=Time::convertFrom(now,SpaceTimeOffsetManager::getSingleton().getSpaceTimeOffset(objects[i]->mMeshptr->getObjectReference().space()));
                     Location loc (objects[i]->mMeshptr->globalLocation(remoteNow));
+                    if (    (po.p.x <= 100000. && po.p.x >= -100000.)==false ||
+                            (po.p.y <= 100000. && po.p.y >= -100000.)==false ||
+                            (po.p.z <= 100000. && po.p.z >= -100000.)==false ) {
+                        cout << "dbm debug BAD POSITION!" << objects[i]->mName << " pos: " << po.p << endl;
+                        Location lastKnown=objects[i]->mMeshptr->extrapolateLocation(remoteNow);
+                        po.p.x=lastKnown.getPosition().x+.1*(rand()/(float)RAND_MAX);
+                        po.p.y=lastKnown.getPosition().y+.1*(rand()/(float)RAND_MAX);
+                        po.p.z=lastKnown.getPosition().z+.1*(rand()/(float)RAND_MAX);
+                        po.o=lastKnown.getOrientation();
+                        cout << "dbm debug POSITION FIX:" << objects[i]->mName << " pos: " << po.p << endl;
+                        loc.setVelocity(lastKnown.getVelocity());
+                        loc.setAxisOfRotation(lastKnown.getAxisOfRotation());
+                        loc.setAngularSpeed(lastKnown.getAngularSpeed());
+                    }
                     loc.setPosition(po.p);
                     loc.setOrientation(po.o);
                     objects[i]->mMeshptr->setLocation(remoteNow, loc);
                 }
             }
-
+            
             /// test queryRay
             /*
             ProxyMeshObjectPtr bugObj;
@@ -580,7 +612,13 @@ bool BulletSystem::tick() {
                 for (std::map<ObjectReference,RoutableMessageBody>*whichMessages=&mBeginCollisionMessagesToSend;true;whichMessages=&mEndCollisionMessagesToSend) {//send all items from map 1, then all items from map 2 (for loop of size 2)
                     for (std::map<ObjectReference,RoutableMessageBody>::iterator iter=whichMessages->begin(),iterend=whichMessages->end();iter!=iterend;++iter) {
                         RoutableMessageHeader hdr;
-                        hdr.set_destination_object(iter->first);
+                        if (avatar_id) {
+                            /// for fun mode, send all collision msgs to avatar
+                            hdr.set_destination_object(avatar_id->getObjectReference());
+                        }
+                        else {
+                            hdr.set_destination_object(iter->first);
+                        }
                         hdr.set_destination_space(anExampleCollidingMesh->getSpaceID());
                         hdr.set_source_object(ObjectReference::spaceServiceID());
                         hdr.set_source_port(Services::PHYSICS);
@@ -676,7 +714,7 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     Transfer::TransferManager* tm = (Transfer::TransferManager*)mTempTferManager->as<void*>();
     this->transferManager = tm;
 
-    groundlevel = 0.0;
+    groundlevel = -100.0;
     btTransform groundTransform;
     btDefaultMotionState* mMotionState;
     btVector3 worldAabbMin(-10000,-10000,-10000);
@@ -702,7 +740,8 @@ bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, con
     mMotionState = new btDefaultMotionState(groundTransform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(0.0f,mMotionState,groundShape,localInertia);
     groundBody = new btRigidBody(rbInfo);
-    groundBody->setRestitution(0.5);                 /// bouncy for fun & profit
+    groundBody->setRestitution(0.2);
+    groundBody->setFriction(0.1);
     dynamicsWorld->addRigidBody(groundBody);
     proxyManager->addListener(this);
     DEBUG_OUTPUT(cout << "dbm: BulletSystem::initialized, including test bullet object" << endl);

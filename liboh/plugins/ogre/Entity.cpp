@@ -179,6 +179,7 @@ void Entity::unsetParent(Time ti, const Location &newLocation) {
 void Entity::destroyed() {
     delete this;
 }
+
 void Entity::extrapolateLocation(TemporalValue<Location>::Time current) {
     Location loc (getProxy().extrapolateLocation(current));
     setOgrePosition(loc.getPosition());
@@ -186,5 +187,6 @@ void Entity::extrapolateLocation(TemporalValue<Location>::Time current) {
     setStatic(getProxy().isStatic(current));
 }
 
-}
-}
+} // namespace Graphics
+} // namespace Sirikata
+

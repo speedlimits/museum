@@ -46,7 +46,7 @@ class Location: public Transform {
         addAngularRotation(reference.getAxisOfRotation(), reference.getAngularSpeed());
         setVelocity(getVelocity() +
                     reference.getAngularSpeed() * (
-                        reference.getAxisOfRotation().cross(Vector3<float32>(getPosition()))));
+                        reference.getAxisOfRotation().cross(getPosition().downCast<float32>())));
 
         Transform temp = Transform::toWorld(reference);
         setPosition(temp.getPosition());
@@ -59,13 +59,17 @@ class Location: public Transform {
 
         setVelocity(getVelocity() -
                     reference.getAngularSpeed() * (
-                        reference.getAxisOfRotation().cross(Vector3<float32>(getPosition()))));
+                        reference.getAxisOfRotation().cross(getPosition().downCast<float32>())));
         addAngularRotation(reference.getAxisOfRotation(), -reference.getAngularSpeed());
         Quaternion inverseOtherOrientation (reference.getOrientation().inverse());
         setVelocity(inverseOtherOrientation * (getVelocity() - reference.getVelocity()));
     }
 public:
-    Location(){}
+    Location() {
+        mVelocity.set(0, 0, 0);
+        mAxisOfRotation.set(0, 1, 0);
+        mAngularSpeed = 0;
+    }
     Location(const Vector3<float64>&position,
              const Quaternion&orientation,
              const Vector3<float32> &velocity,
@@ -133,7 +137,7 @@ public:
         return Location(getPosition()+Vector3<float64>(getVelocity())*dt.toSeconds(),
                         getAngularSpeed()
                          ? getOrientation()*Quaternion(getAxisOfRotation(),
-                             getAngularSpeed()*dt.toSeconds())
+                                                       (float)(getAngularSpeed()*dt.toSeconds()))
                          : getOrientation(),
                         getVelocity(),
                         getAxisOfRotation(),

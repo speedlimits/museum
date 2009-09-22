@@ -1,0 +1,17 @@
+
+<iframe id="myframe"  style="border: none;  width:1150px; height:550px;"  src="http://www.dennisschaaf.com/bornholm/?cat=3&embedded=true" ></iframe>
+
+
+
+
+<ul id="modal-screen-buttons">
+    
+</ul>
+
+<script type="text/javascript">
+	$('#modal-screen-buttons').ready( function () {
+		//alert(top.myframe.contentDocument);
+		top.window.addEventListener('message', loadGallery); 
+	});
+
+</script>
