@@ -30,9 +30,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-import sys
+import math, sys
+noisy=False
 try:
-    import sqlite3
+    try:
+        import sqlite3
+    except:
+        from pysqlite2 import dbapi2 as sqlite3
     import os
     import csv
     import math
@@ -90,12 +94,30 @@ def veclen(fltarray):
             fltarray[1]*fltarray[1] +
             fltarray[2]*fltarray[2])
 
+DEG2RAD = 0.0174532925
+
+def Euler2Quat(yaw, pitch, roll):
+    k = DEG2RAD*.5
+    yawcos = math.cos(yaw*k)
+    yawsin = math.sin(yaw*k)
+    pitchcos = math.cos(pitch*k)
+    pitchsin = math.sin(pitch*k)
+    rollcos = math.cos(roll*k)
+    rollsin = math.sin(roll*k)
+
+    return (rollcos * pitchsin * yawcos + rollsin * pitchcos * yawsin,
+            rollcos * pitchcos * yawsin - rollsin * pitchsin * yawcos,
+            rollsin * pitchcos * yawcos - rollcos * pitchsin * yawsin,
+            rollcos * pitchcos * yawcos + rollsin * pitchsin * yawsin)
+
 class CsvToSql:
     def __init__(self, conn):
         self.conn = conn
         self.name_to_uuid = {}
         self.uuid_objects = {}
         self.table_name = 'persistence'
+        self.camera_count=0
+        self.max_cameras=1
 
     def getTableName(self, uuid):
         return uuid.get_bytes()
@@ -118,8 +140,8 @@ class CsvToSql:
         return myid
 
     def addTable(self, curs):
-        table_create = "CREATE TABLE IF NOT EXISTS ";
-        table_create += "\""+self.table_name+"\"";
+        table_create = "CREATE TABLE IF NOT EXISTS "
+        table_create += "\""+self.table_name+"\""
         table_create += "(object TEXT, key TEXT, value TEXT, PRIMARY KEY(object, key))"
         curs.execute(table_create)
 
@@ -136,35 +158,42 @@ class CsvToSql:
         value = "".join(chr(c) for c in value);
         curs.execute(table_insert, (buffer(object_name), key_name, buffer(value)))
 
-    def go(self, openfile, **csvargs):
+    def go(self, filelist, **csvargs):
         cursor = self.conn.cursor()
         self.addTable(cursor)
 
         uuidlist = Sirikata.UUIDListProperty()
 
-        reader = csv.DictReader(openfile, **csvargs)
-        for row in reader:
-            try:
-                if row['objtype'] not in ALLOWED_TYPES:
-                    return # blank or bad row
+        for openfile in filelist:
+            reader = csv.DictReader(openfile, **csvargs)
+            for row in reader:
+                try:
+                    if row['objtype'] not in ALLOWED_TYPES:
+                        continue # blank or bad row
 
-                u = self.addUUID(row)
-                self.processRow(u, row, cursor)
-                uuidlist.value.append(u.get_bytes())
-            except:
-                print row
-                raise
+                    u = self.addUUID(row)
+                    self.processRow(u, row, cursor)
+                    uuidlist.value.append(u.get_bytes())
+                except:
+                    print row
+                    raise
         nulluuid = uuid.UUID(int=0)
         self.set(cursor, nulluuid, 'ObjectList', uuidlist.SerializeToString())
         self.conn.commit()
         cursor.close()
 
     def processRow(self, uuid, row, cursor):
+        if row['objtype']=='camera':
+            self.camera_count += 1
+            if self.camera_count > self.max_cameras:
+                print "not a good idea to have too many cameras -- not adding this one"
+                return
         location = Sirikata.ObjLoc()
         self.protovec(location.position, row, 'pos')
-        if (row['orient_w']):
+        if (row.get('orient_w','')):
             self.protovec(location.orientation, row, 'orient')
         else:
+            """
             # Convert from angle
             phi = float(row['orient_x'])*math.pi/180.
             theta = float(row['orient_y'])*math.pi/180.
@@ -176,8 +205,14 @@ class CsvToSql:
             location.orientation.append(math.cos(phi/2)*math.cos(theta/2)*math.sin(psi/2)
                                       + math.sin(phi/2)*math.sin(theta/2)*math.cos(psi/2)) #z
             # w is not stored to save space, since quaternions are normalized
-            #location.orientation.append(math.cos(phi/2)*math.cos(theta/2)*math.cos(psi/2)
-            #                          + math.sin(phi/2)*math.sin(theta/2)*math.sin(psi/2)) #w
+            location.orientation.append(math.cos(phi/2)*math.cos(theta/2)*math.cos(psi/2)
+                                      + math.sin(phi/2)*math.sin(theta/2)*math.sin(psi/2)) #w
+            """
+            qx, qy, qz, qw = Euler2Quat(float(row['orient_y']), float(row['orient_x']), float(row['orient_z']))
+            location.orientation.append(qx)
+            location.orientation.append(qy)
+            location.orientation.append(qz)
+            location.orientation.append(qw)
         if row.get('vel_x',''):
             self.protovec(location.velocity, row, 'vel')
         if row.get('rot_axis_x',''):
@@ -190,13 +225,15 @@ class CsvToSql:
             scrprop = Sirikata.StringProperty()
             scrprop.value = row['script']
             self.set(cursor, uuid, '_Script', scrprop.SerializeToString())
-            print row['script']
+            if noisy:
+                print row['script']
             scrprop = Sirikata.StringMapProperty()
             for kv in row['scriptparams'].split('&'):
                 key, value = kv.split('=',1)
                 scrprop.keys.append(unquote_plus(key))
                 scrprop.values.append(unquote_plus(value))
-                print 'param',key,'=',value
+                if noisy:
+                    print 'param',key,'=',value
             self.set(cursor, uuid, '_ScriptParams', scrprop.SerializeToString())
 
         if row.get('parent',''):
@@ -217,7 +254,7 @@ class CsvToSql:
                 physical.bounce = float(row['bounce'])
                 physical.collide_mask = int(row['colMask'])
                 physical.collide_msg = int(row['colMsg'])
-                if not row['gravity'] == "":
+                if row.get('gravity',''):
                     physical.gravity = float(row['gravity'])
                 else:
                     physical.gravity = 1.0
@@ -231,10 +268,14 @@ class CsvToSql:
                 meshuri = Sirikata.StringProperty()
                 meshuri.value = row['name']
                 self.set(cursor, uuid, 'Name', meshuri.SerializeToString())
-            print "** Adding a Mesh ",uuid,"named",row.get('name',''),"with",row['meshURI']
+            if noisy:
+                print "** Adding a Mesh ",uuid,"named",row.get('name',''),"with",row['meshURI']
         elif row['objtype']=='light':
-            print "** Adding a Light ",uuid
+            if noisy:
+                print "** Adding a Light ",uuid
             lightinfo = Sirikata.LightInfoProperty()
+            if row.get('subtype',''):
+                lightinfo.type = LIGHT_TYPES[row['subtype']]
             self.protovec(lightinfo.diffuse_color, row, 'diffuse')
             self.protovec(lightinfo.specular_color, row, 'specular')
             lightinfo.power = float(row['power'])
@@ -264,33 +305,47 @@ class CsvToSql:
                 lightinfo.constant_falloff = float(row['constantfall'])
             elif 'constfall' in row:
                 lightinfo.constant_falloff = float(row['constfall'])
+                if lightinfo.constant_falloff < 0.01:
+                    lightinfo.constant_falloff = 1.0                #bug in artist exporter -- 0 makes no sense, make it 1
             lightinfo.linear_falloff = float(row['linearfall'])
             lightinfo.quadratic_falloff = float(row['quadfall'])
             lightinfo.cone_inner_radians = float(row['cone_in'])
             lightinfo.cone_outer_radians = float(row['cone_out'])
             lightinfo.cone_falloff = float(row['cone_fall'])
             lightinfo.casts_shadow = bool(row['shadow'])
-            print lightinfo
+            if noisy:
+                print lightinfo
             self.set(cursor, uuid, 'LightInfo', lightinfo.SerializeToString())
         elif row['objtype']=='camera':
-            print "** Adding a Camera ",uuid
+            if noisy:
+                print "** Adding a Camera ",uuid
             self.set(cursor, uuid, 'IsCamera', '')
 
 if __name__=='__main__':
+    sqlfile = 'scene.db'
     if len(sys.argv) > 1:
-        csvfile = sys.argv[1]
+        if len(sys.argv) == 2:
+            csvfiles = [sys.argv[1]]
+        else:
+            csvfiles = []
+            for i in sys.argv[1:-1]:
+                csvfiles.append(i)
+            sqlfile = sys.argv[-1]
     else:
-        csvfile = 'scene.csv'
-    if len(sys.argv) > 2:
-        sqlfile = sys.argv[2]
-    else:
-        sqlfile = 'scene.db'
+        csvfiles = ['scene.csv']
+
     try:
         os.rename(sqlfile, sqlfile+'.bak')
     except OSError:
         pass
 
+    print "converting:", csvfiles, "to:", sqlfile
     conn = sqlite3.connect(sqlfile)
     converter = CsvToSql(conn)
-    converter.go(open(csvfile))
-    print "SUCCESS!"
+    handles = []
+    for fname in csvfiles:
+        handles.append(open(fname))
+    converter.go(handles)
+    for han in handles:
+        han.close()
+    print "Generating scene: SUCCESS!"

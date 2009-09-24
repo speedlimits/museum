@@ -1,0 +1,26 @@
+<script type="text/javascript">
+    function setGlobalPower() {
+        Client.event("navcommand", "light setpower " + curLightForm.power.value * 0.01);
+    }
+    function receivePower(powStr) {
+        curLightForm.power.value = powStr * 100.0;
+    }
+    $(document).ready( function () {
+          Client.event("navcommand", "light getpower average");                                                       
+    });
+</script>
+<p> V&aelig;lg hvilken belysning dit galleri skal have: </p>
+<p>Select Mood:&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 0"); javascript:Client.event("navcommand", "light getpower average");'>0</a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 1"); javascript:Client.event("navcommand", "light getpower average");'>1</a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 2"); javascript:Client.event("navcommand", "light getpower average");'>2</a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 3"); javascript:Client.event("navcommand", "light getpower average");'>3</a>&nbsp;
+    |&nbsp;
+    <a href="javascript:Client.event('navcommand', 'light selected');">Light Selected</a>&nbsp;
+    |&nbsp;
+    <a href="javascript:location.reload();">Reload</a>
+</p>
+<form id="curLightForm">
+    Power <input name="power" id="power" type="text" value="100" size="5" />%
+    <input type="button" onclick="setGlobalPower()" value="Set Power" />
+</form>

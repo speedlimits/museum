@@ -83,7 +83,7 @@ public:
         }else{
             return mValuePast.extrapolate(t)
                 .blend(mValuePresent.extrapolate(t),
-                       timeSinceUpdate/mFadeTime);
+                       (float32)(timeSinceUpdate/mFadeTime));
         }
     }
     const Value& lastValue() const {
@@ -121,6 +121,28 @@ public:
     TimedWeightedExtrapolator(const Duration&fadeTime, const Time&t, const Value&actualValue, const UpdatePredicate&needsUpdate)
      : TimedWeightedExtrapolatorBase<Value, UpdatePredicate, Time, Duration>(fadeTime, t, actualValue, needsUpdate)
     {}
+    virtual bool needsUpdate(const Time&now, const Value&actualValue) const {
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::needsUpdate(now,actualValue);
+    }
+    virtual ExtrapolatorBase<Value, Time>& updateValue(const Time&t, const Value&l) {
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::updateValue(t,l);
+    }
+    virtual ExtrapolatorBase<Value, Time>& resetValue(const Time&t, const Value&l) {
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::resetValue(t,l);
+    }
+    const Value& lastValue() const {
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::lastValue();
+    }
+    virtual bool propertyHolds(const Time&time, const std::tr1::function<bool(const Value&)>&f)const{
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::propertyHolds(time,f);
+    }
+    virtual Value extrapolate(const Time&t) const {
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::extrapolate(t);
+    }
+    virtual Time lastUpdateTime()const{
+        return this->Sirikata::TimedWeightedExtrapolatorBase<Value,UpdatePredicate,Time,Duration>::lastUpdateTime();
+    }
+
 };
 
 }

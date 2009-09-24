@@ -33,6 +33,7 @@
 #define SIRIKATA_GRAPHICS_CAMERA_HPP__
 #include "Entity.hpp"
 #include <oh/CameraListener.hpp>
+#include "OgreHeaders.hpp"
 #include <OgreMovableObject.h>
 #include <OgreRenderable.h>
 #include <OgreRenderTarget.h>
@@ -66,6 +67,7 @@ public:
     Ogre::Viewport* getViewport(){
         return mViewport;
     }
+    void setCompositors(const String &allCompositors);
     static std::string ogreCameraName(const SpaceObjectReference&ref);
     virtual std::string ogreMovableName() const;
 

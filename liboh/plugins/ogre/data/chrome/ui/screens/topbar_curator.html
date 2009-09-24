@@ -1,0 +1,53 @@
+<ul id="topbar-curator">
+        <li id="curatorArt" class="topbarbutton" onClick="curatorMode(1);" />&nbsp;</li>
+      <!--  <li class="topbarbutton" style="background-position-x: -235px;" onClick="curatorMode(2);" />&nbsp;</li> -->
+        <li id="curatorLight" class="topbarbutton"  onClick="curatorMode(4);" />&nbsp;</li>
+<!--        <li class="topbarbutton" style="background-position-x: -469px;" onClick="curatorMode(4);" />&nbsp;</li> -->
+        <li id="curatorSave" class="topbarbutton"  onClick="curatorMode(5);" />&nbsp;</li>
+</ul>
+
+
+<style type="text/css" media="screen"> 
+	
+	#topbar-curator li.select{
+		background-position-y: -114px;
+		background-color:#099;
+	}
+	li#curatorArt {
+		background-position-x: -118px;
+	}
+	li#curatorLight {
+		background-position-x: -235px;
+	}
+	li#curatorSave {
+		background-position-x: -352px;
+	}
+	#topbar-curator li:hover{
+		background-position-y: -38px;
+	}
+	
+	li.topbarbutton{
+		background-position-y: 0px;
+	}
+	
+	
+</style>
+
+<script type="text/javascript">
+
+$('#topbar-curator').ready( function () {
+
+	
+	/*$("#topbar-curator li.topbarbutton").bind('mouseover', function(event){
+		$(this).css('background-position-y', '-38px');	
+					
+	});
+	$("#topbar-curator li.topbarbutton").bind('mouseout', function(event){
+		$(this).css('background-position-y', '0px');						
+	});*/
+	$("#topbar-curator li.topbarbutton").mousedown( function(event){
+		$(this).css('background-position-y', '-76px');						
+	});
+});
+
+</script>

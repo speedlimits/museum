@@ -1,0 +1,25 @@
+<script type="text/javascript">
+    function setGlobalPower() {
+        Client.event("navcommand", "light setpower " + curLightForm.power.value * 0.01);
+    }
+    function receivePower(powStr) {
+        curLightForm.power.value = powStr * 100.0;
+    }
+    $(document).ready( function () {
+		 try {
+          Client.event("navcommand", "light getpower average");    
+		 } catch (err) {}
+    });
+</script>
+
+<style type="text/css" media="screen"> 
+	img.light:hover{opacity: 0.5}
+</style>
+
+
+<p> V&aelig;lg hvilken belysning dit galleri skal have: </p>
+<p>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 0"); javascript:Client.event("navcommand", "light getpower average");'><img class="light" src="images/light1.png" /></a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 1"); javascript:Client.event("navcommand", "light getpower average");'><img  class="light" src="images/light2.png" /></a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 2"); javascript:Client.event("navcommand", "light getpower average");'><img  class="light" src="images/light3.png" /></a>&nbsp;
+    <a href='javascript:Client.event("navcommand", "light selectmood 3"); javascript:Client.event("navcommand", "light getpower average");'><img  class="light" src="images/light4.png" /></a>&nbsp;</p>

@@ -208,7 +208,11 @@ public:
     }
 
     void mouseMoved(MouseDragEventPtr ev) {
-        std::cout << "MOVE: mX = "<<ev->mX<<"; mY = "<<ev->mY<<". mXStart = "<< ev->mXStart<<"; mYStart = "<<ev->mYStart<<std::endl;
+        SILOG(input, insane,    "MOVE: mX = " << ev->mX
+                            <<      "; mY = " << ev->mY
+                            << ". mXStart = " << ev->mXStart
+                            << "; mYStart = " << ev->mYStart
+        );
         if (mSelectedObjects.empty()) {
             SILOG(input,insane,"moveSelection: Found no selected objects");
             return;
@@ -294,7 +298,7 @@ public:
                 mOriginalPosition.push_back(currentLoc.getPosition());
             } else {
                 mOriginalRotation.push_back(Quaternion::identity());
-                mOriginalPosition.push_back(Vector3d::nil());
+                mOriginalPosition.push_back(Vector3d::zero());
             }
         }
     }
@@ -415,7 +419,10 @@ public:
                 Location loc (ent->extrapolateLocation(now));
                 Vector3d localTrans = mOriginalPosition[i] - avgPos;
                 loc.setPosition(avgPos + localTrans*mTotalScale);
-                std::cout << "debug avgPos: " << avgPos << " localTrans" << localTrans << " scale: " << mTotalScale << std::endl;
+                SILOG(input, insane,   "debug avgPos: " << avgPos
+                                    << ", localTrans: " << localTrans
+                                    <<      ", scale: " << mTotalScale
+                );
                 ent->resetLocation(now, loc);
                 std::tr1::shared_ptr<ProxyMeshObject> meshptr (
                     std::tr1::dynamic_pointer_cast<ProxyMeshObject>(ent));
@@ -501,7 +508,8 @@ public:
         }
     }
 };
-DragActionRegistry::RegisterClass<PanCameraDrag> pancamera("panCamera");
+/// no right-click camera movement, conflicts with avatar:
+//DragActionRegistry::RegisterClass<PanCameraDrag> pancamera("panCamera");
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -520,9 +528,11 @@ void zoomInOut(Input::AxisValue value, const Input::InputDevicePtr &dev, CameraE
 
 void zoomInOut(float value, const Vector2f& axes, CameraEntity *camera, const std::set<ProxyObjectWPtr>& objects, OgreSystem *parent) {
     SILOG(input,debug,"zoom "<<value);
-
+    if (!camera)
+        return;
     Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
-    Location cameraLoc = camera->getProxy().globalLocation(now);
+    Location cameraLoc = camera->getProxy().extrapolateLocation(now);
+    Location cameraGlobalLoc = camera->getProxy().globalLocation(now);
     Vector3d toMove;
 
     toMove = Vector3d(pixelToDirection(camera, cameraLoc.getOrientation(), axes.x, axes.y));
@@ -534,12 +544,12 @@ void zoomInOut(float value, const Vector2f& axes, CameraEntity *camera, const st
     if (!parent->getInputManager()->isModifierDown(Input::MOD_CTRL) &&
         !parent->getInputManager()->isModifierDown(Input::MOD_SHIFT)) {
         toMove *= WORLD_SCALE;
-    } else if (parent->rayTrace(cameraLoc.getPosition(), direction(cameraLoc.getOrientation()), hitCount, distance, normal) &&
+    } else if (parent->rayTrace(cameraGlobalLoc.getPosition(), direction(cameraGlobalLoc.getOrientation()), hitCount, distance, normal) &&
                (distance*.75 < WORLD_SCALE || parent->getInputManager()->isModifierDown(Input::MOD_SHIFT))) {
         toMove *= distance*.75;
     } else if (!objects.empty()) {
         Vector3d totalPosition (averageSelectedPosition(now, objects.begin(), objects.end()));
-        toMove *= (totalPosition - cameraLoc.getPosition()).length() * .75;
+        toMove *= (totalPosition - cameraGlobalLoc.getPosition()).length() * .75;
     } else {
         toMove *= WORLD_SCALE;
     }
@@ -613,7 +623,6 @@ public:
         camera = info.camera;
     }
     void mouseMoved(MouseDragEventPtr ev) {
-        double distance;
         Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
         Location cameraLoc = camera->getProxy().globalLocation(now);
         Vector3d amount (ev->deltaX(), ev->deltaY(), 0);
@@ -708,6 +717,9 @@ public:
     // Dragger
     void mouseMoved(MouseDragEventPtr ev);
 
+    // Set the height quantum.
+    void setHeightQuantum(float heightQuantum) { mHeightQuantum = heightQuantum; }
+
 private:
     // Return the plane of the wall, in the direction of the camera.
     // If no wall is found, return false.
@@ -716,31 +728,39 @@ private:
     // Check to see if this object is in the list of those to be moved.
     bool isObjectToBeMoved(const Entity *obj) const;
     
+    // Find the height of the floor underneath the camera
+    double getFloorHeight() const;
+
+    // Constrain the height to multiples of the height quantum.
+    bool constrainPictureHeight(Vector3d *position) const;
+    
     std::vector<ProxyObjectWPtr> mSelectedObjects;
     std::vector<Vector3d> mPositions;
     std::vector<Quaternion> mOrientations;
-    CameraEntity *camera;
+    CameraEntity *mCamera;
     OgreSystem *mParent;
     Vector3d mVectorToObject;   // Vector from the camera to the object
     Location mCameraLocation;
     float mDistanceFrontOfWall;  // The distance of the object from the wall.
     Vector3d mStartPosition;
     Quaternion mStartOrientation;
+    float mHeightQuantum;
 };
 
 
 MoveObjectOnWallDrag::MoveObjectOnWallDrag(const DragStartInfo &info)
     : mSelectedObjects(info.objects.begin(), info.objects.end())
 {
-    camera = info.camera;
+    mHeightQuantum = 0.1;   //0;
+    mCamera = info.camera;
     mParent = info.sys;
-    Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
+    Time now = SpaceTimeOffsetManager::getSingleton().now(mCamera->getProxy().getObjectReference().space());
     float distanceToObject = 0.f; // Will be reset on first foundObject
     bool foundObject = false;
-    const float kDistanceFromWall = 10.e-2f;   // 10 cm
+    const float kDistanceFromWall = 5.e-2f;   // 5 cm
     mDistanceFrontOfWall = kDistanceFromWall;
     
-    mCameraLocation = camera->getProxy().globalLocation(now);
+    mCameraLocation = mCamera->getProxy().globalLocation(now);
     Vector3f cameraAxis = -mCameraLocation.getOrientation().zAxis();
     mVectorToObject = Vector3d(0,0,0);
 
@@ -769,17 +789,48 @@ MoveObjectOnWallDrag::MoveObjectOnWallDrag(const DragStartInfo &info)
 }
 
 
+double MoveObjectOnWallDrag::getFloorHeight() const {
+    Vector3d cameraPosition = mCamera->getOgrePosition();
+    double distance;
+    Vector3f normal;
+    int numHits = 1, i;
+    const Entity *floorObj = mParent->rayTrace(cameraPosition, Vector3f(0, -1, 0), numHits, distance, normal, 0);
+    double floorY = 0;
+    if (floorObj != NULL)    // No floor
+        floorY = cameraPosition.y - distance;
+    return floorY;
+}
+
+
+bool MoveObjectOnWallDrag::constrainPictureHeight(Vector3d *position) const {
+    if (mHeightQuantum <= 0 || mParent->getInputManager()->isModifierDown(Input::MOD_CTRL))
+        return true;
+    double floorHeight = getFloorHeight();
+    double height = position->y - floorHeight;      // Guaranteed to be positive???
+    double bump = fmod(height + mHeightQuantum * 0.5, mHeightQuantum) - mHeightQuantum * 0.5;
+#if SNAP_WHEN_CLOSE
+    // Snap when you get close to one of the height quanta.
+    double hysteresis = mHeightQuantum * 0.125;     // 1/8 of the quantum
+    if (fabs(bump) > hysteresis)                    // Not close enough
+        return true;                                // Don't constrain
+#endif // SNAP_WHEN_CLOSE
+    height -= bump;                                 // Quantize
+    position->y = floorHeight + height;
+    return true;
+    // FIXME: Return false if the painting would be pushed off the edge.
+}
+
+
 void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
     if (mSelectedObjects.empty()) {
         SILOG(input,insane,"moveSelection: Found no selected objects");
         return;
     }
-
-    Time now = SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space());
-    mCameraLocation = camera->getProxy().globalLocation(now); // Camera doesn't move
+    Time now = SpaceTimeOffsetManager::getSingleton().now(mCamera->getProxy().getObjectReference().space());
+    mCameraLocation = mCamera->getProxy().globalLocation(now); // Camera doesn't move
     Vector3f cameraAxis = -mCameraLocation.getOrientation().zAxis();
-    Vector3d startVec(pixelToDirection(camera, mCameraLocation.getOrientation(), ev->mXStart, ev->mYStart));
-    Vector3d   endVec(pixelToDirection(camera, mCameraLocation.getOrientation(), ev->mX,      ev->mY));
+    Vector3d startVec(pixelToDirection(mCamera, mCameraLocation.getOrientation(), ev->mXStart, ev->mYStart));
+    Vector3d   endVec(pixelToDirection(mCamera, mCameraLocation.getOrientation(), ev->mX,      ev->mY));
     Plane startPlane, endPlane;
     if (!getPlaneOfWall(startVec, &startPlane)) {
         SILOG(input, error, "MoveObjectOnWall: no start wall");
@@ -788,14 +839,18 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
 
     // Compute end location
     if (!getPlaneOfWall(endVec, &endPlane)) {
-        SILOG(input, warning, "MoveObjectOnWall: no end wall");
+        SILOG(input, insane, "MoveObjectOnWall: no end wall");
         return;
     }
-    endPlane.parallelTransport(mDistanceFrontOfWall);       // Plane where picture should lie, offset a given distance from the wall
     Vector3d endPosition;
     if (!endPlane.intersectRay(mCameraLocation.getPosition(), endVec, &endPosition))
         return; // Ray is parallel to plane
 
+    if (fabs((fabs(endPlane.y) - 1)) > 1e-4) // Not horizontal
+        constrainPictureHeight(&endPosition);
+    
+    endPosition += (double)mDistanceFrontOfWall * ((const Plane&)endPlane).normal();
+    
     // Compute translation
     Vector3d translation = endPosition - mStartPosition;
     
@@ -803,19 +858,22 @@ void MoveObjectOnWallDrag::mouseMoved(MouseDragEventPtr ev) {
     Vector3f xAxis, yAxis, zAxis;
     endPlane.getNormal(&zAxis);
     xAxis = Vector3f::unitY().cross(zAxis);
+    if (xAxis.normalizeThis() == 0) {       // Oops: hit a horizontal surface
+        xAxis.set(-endVec.z, 0, endVec.x);  // endVec.cross(Vector3f::unitY()); // Face the viewer
+        if (xAxis.normalizeThis() == 0)     // Oops: looking straight up or down
+            xAxis = Vector3f::unitX();      // Align to the world's coordinate axes, since the normal and view are pathological
+    }
     yAxis = zAxis.cross(xAxis);
     Quaternion rotation(xAxis, yAxis, zAxis);
     rotation = mStartOrientation.inverse() * rotation;
 
-#ifdef DEBUG // FIXME: Can we do this with SILOG?
-    std::cout   <<  "MOVE: mX = " << ev->mX
-                <<      "; mY = " << ev->mY
-                << ". mXStart = " << ev->mXStart
-                << "; mYStart = " << ev->mYStart
-                <<   ". trans = " << translation
-                <<     ". rot = " << rotation
-                << std::endl;
-#endif
+    SILOG(input, insane,    "MOVE: mX = " << ev->mX
+                        <<      ", mY = " << ev->mY
+                        << "; mXStart = " << ev->mXStart
+                        << ", mYStart = " << ev->mYStart
+                        <<   "; trans = " << translation
+                        <<     ", rot = " << rotation
+    );
 
     // Apply the translation and rotation to each object
     for (size_t i = 0; i < mSelectedObjects.size(); ++i) {

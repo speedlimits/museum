@@ -1,6 +1,16 @@
 #!/usr/bin/python
 import sys, os, time
 
+if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru"):
+    cmd = "./run scenes/" + sys.argv[1] + ".csv scenes/" + sys.argv[1] + "_env.csv"
+    if sys.argv[1] in ("curator", "funmode", "critic"):
+        cmd += " scenes/" + sys.argv[1] + "_art.csv"
+    f = open("build/cmake/mode.txt", "w")
+    f.write(sys.argv[1] + "\n")
+    f.close()
+    os.system(cmd)
+    exit()
+
 def check_for_proc(proc):
     sin, sout = os.popen2("ps -af")
     s = sout.read()
@@ -21,12 +31,12 @@ def check_for_proc(proc):
 if os.path.exists("build/cmake/cppoh_d"):
     spaceserver = "space_d"
     proxserver = "proximity_d"
-    executable = "cppoh_d"
+    executable = "cppoh_wrapper.sh"
 else:
     if os.path.exists("build/cmake/cppoh"):
         spaceserver = "space"
         proxserver = "proximity"
-        executable = "cppoh"
+        executable = "cppoh_wrapper.sh cppoh"
     else:
         print "can't find executable"
         exit()
@@ -35,25 +45,29 @@ else:
 # Run prox & space daemons (if not already running)
 #
 
-for p in [proxserver, "WAIT", spaceserver]:
+for proc, delay in (proxserver, 4.5), (spaceserver, .5):
 
-    if p=="WAIT":
-        time.sleep(1)
-    else:
-        if not check_for_proc("./"+p):
-            cmd = 'xterm -e "cd build/cmake; ./' + p + '" &'
-            print cmd
-            os.system(cmd)
+    if not check_for_proc("./"+proc):
+        cmd = 'xterm -e "cd build/cmake; ./' + proc + '" &'
+        print cmd
+        os.system(cmd)
+        time.sleep(delay)
 
 #
 # Convert .csv files into sqlite .db files
 #
 
 if len(sys.argv) > 1:
-    fin = sys.argv[1]
+    if len(sys.argv) == 2:
+        fin = sys.argv[1]
+    else:
+        fin = ""
+        for i in sys.argv[1:]:
+            fin += i + " "
 else:
     fin = "scene.csv"
-fout = fin[:-4] + ".db"
+
+fout = "scene.db"
 cmd = "python csv_converter.py " + fin +" "+ fout
 print cmd
 sin, sout = os.popen2(cmd)
@@ -67,6 +81,6 @@ if not "SUCCESS" in s:
 # Run our object host
 #
 
-cmd = "cd build/cmake; " + executable + " --db ../../" + fout
+cmd = "cd build/cmake; ./" + executable + " --db ../../" + fout
 print cmd
 os.system(cmd)

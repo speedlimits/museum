@@ -53,7 +53,7 @@ using namespace Sirikata::Input;
 
 std::string getCurrentWorkingDirectory()
 {
-	return "";
+    return "";
 }
 
 
@@ -68,139 +68,168 @@ static int InputModifiersToAwesomiumModifiers(Modifier mod, bool numpad);
 
 
 WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* inputMgr, const std::string &baseDirectory)
-	: webCore(0), focusedWebView(0), tooltipParent(0),
+    : webCore(0), focusedWebView(0), tooltipParent(0),
           chromeWebView(NULL), focusedNonChromeWebView(NULL),
-	  defaultViewport(defaultViewport), mouseXPos(0), mouseYPos(0),
-	  isDragging(false), isResizing(false),
+      defaultViewport(defaultViewport), mouseXPos(0), mouseYPos(0),
+      isDragging(false), isResizing(false),
           zOrderCounter(5),
-	  lastTooltip(0), tooltipShowTime(0), isDraggingFocusedWebView(0),
+      lastTooltip(0), tooltipShowTime(0), isDraggingFocusedWebView(0),
           mInputManager(inputMgr)
 {
+    FILE* f=fopen("mode.txt", "r");
+    char mode[20];
+    if(f) {
+        int siz=fread(mode, 1, 19, f);
+        mode[siz]=0;
+    }
+    else {
+        strcpy(mode, "dev");
+    }
     tooltipWebView = 0;
 #ifdef HAVE_AWESOMIUM
-	webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
-	webCore->setBaseDirectory(getCurrentWorkingDirectory() + baseDirectory + "\\");
+    webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
+    webCore->setBaseDirectory(getCurrentWorkingDirectory() + baseDirectory + "\\");
 
-	tooltipWebView = createWebView("__tooltip", 250, 50, OverlayPosition(0, 0), false, 70, TIER_FRONT);
-	tooltipWebView->hide();
-	tooltipWebView->setTransparent(false);
-	tooltipWebView->loadFile("tooltip.html");
-	tooltipWebView->bind("resizeTooltip", std::tr1::bind(&WebViewManager::onResizeTooltip, this, _1, _2));
-	//tooltipWebView->setIgnoresMouse();
+    
+    tooltipWebView = createWebView("__tooltip", 250, 50, OverlayPosition(0, 0), false, 70, TIER_FRONT);
+    tooltipWebView->hide();
+    tooltipWebView->setTransparent(false);
+    tooltipWebView->loadFile("tooltip.html");
+    tooltipWebView->bind("resizeTooltip", std::tr1::bind(&WebViewManager::onResizeTooltip, this, _1, _2));
+    //tooltipWebView->setIgnoresMouse();
 
-    chromeWebView = createWebView("__chrome", 540, 36, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
-    chromeWebView->loadFile("navbar.html");
+        chromeWebView = createWebView("__chrome", 1336, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
+        /*
+        if (access("mode_flythru", F_OK)==0) {
+            chromeWebView->loadFile("application/sirikata_flythru.html");
+        }
+        else {
+        */
+//        std::ostringstream ss;
+  //      ss << "ui/index.html?mode=" << mode << std::endl;
+    //    std::cout << "dbm debug calling chromeWebView:" << ss.str() << std::endl;
+        char s[100];
+        sprintf(s, "ui/index.html?mode=%s", mode);
+        std::cout << "dbm debug calling chromeWebView:" << s << std::endl;
+//        chromeWebView->loadFile(ss.str());
+        chromeWebView->loadFile(s);
+//        }
         chromeWebView->setTransparent(true);
+
+/*  WebView* chromeUI = createWebView("ui", 1336, 768, OverlayPosition(RP_TOPCENTER), false, 70, TIER_MIDDLE);
+    chromeUI -> loadURL("http://dennisschaaf.com/sirikataui/sirikata.html");
+    chromeUI -> setTransparent(true);
+*/
 #endif
 }
 
 WebViewManager::~WebViewManager()
 {
-	WebViewMap::iterator iter;
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end();)
-	{
-		WebView* toDelete = iter->second;
-		delete toDelete;
-	}
+    WebViewMap::iterator iter;
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end();)
+    {
+        WebView* toDelete = iter->second;
+        delete toDelete;
+    }
 #ifdef HAVE_AWESOMIUM
-	if(webCore)
-		delete webCore;
+    if(webCore)
+        delete webCore;
 #endif
 }
 
 WebViewManager& WebViewManager::getSingleton()
 {
-	if(!ms_Singleton)
-		OGRE_EXCEPT(Ogre::Exception::ERR_RT_ASSERTION_FAILED,
-			"An attempt was made to retrieve the WebViewManager Singleton before it has been instantiated! Did you forget to do 'new WebViewManager(renderWin)'?",
-			"WebViewManager::Get");
+    if(!ms_Singleton)
+        OGRE_EXCEPT(Ogre::Exception::ERR_RT_ASSERTION_FAILED,
+            "An attempt was made to retrieve the WebViewManager Singleton before it has been instantiated! Did you forget to do 'new WebViewManager(renderWin)'?",
+            "WebViewManager::Get");
 
-	return *ms_Singleton;
+    return *ms_Singleton;
 }
 
 WebViewManager* WebViewManager::getSingletonPtr()
 {
-	return ms_Singleton;
+    return ms_Singleton;
 }
 
 void WebViewManager::Update()
 {
 #ifdef HAVE_AWESOMIUM
-	webCore->update();
+    webCore->update();
 #endif
-	WebViewMap::iterator end, iter;
-	end = activeWebViews.end();
-	iter = activeWebViews.begin();
+    WebViewMap::iterator end, iter;
+    end = activeWebViews.end();
+    iter = activeWebViews.begin();
 
-	while(iter != end)
-	{
-		if(iter->second->okayToDelete)
-		{
-			WebView* webViewToDelete = iter->second;
-			// erase does not invalidate other iterators.
-			activeWebViews.erase(iter++);
-			if(focusedWebView == webViewToDelete)
-			{
-				focusedWebView = NULL;
-				focusedNonChromeWebView = NULL;
-				isDraggingFocusedWebView = false;
-			}
+    while(iter != end)
+    {
+        if(iter->second->okayToDelete)
+        {
+            WebView* webViewToDelete = iter->second;
+            // erase does not invalidate other iterators.
+            activeWebViews.erase(iter++);
+            if(focusedWebView == webViewToDelete)
+            {
+                focusedWebView = NULL;
+                focusedNonChromeWebView = NULL;
+                isDraggingFocusedWebView = false;
+            }
 
-			delete webViewToDelete;
-		}
-		else
-		{
-			iter->second->update();
-			++iter;
-		}
-	}
+            delete webViewToDelete;
+        }
+        else
+        {
+            iter->second->update();
+            ++iter;
+        }
+    }
 
-	if(tooltipShowTime)
-	{
-		if(tooltipShowTime < tooltipTimer.getMilliseconds())
-		{
-			tooltipWebView->show(true);
-			tooltipShowTime = 0;
-			lastTooltip = tooltipTimer.getMilliseconds();
-		}
-	}
+    if(tooltipShowTime)
+    {
+        if(tooltipShowTime < tooltipTimer.getMilliseconds())
+        {
+            tooltipWebView->show(true);
+            tooltipShowTime = 0;
+            lastTooltip = tooltipTimer.getMilliseconds();
+        }
+    }
 }
 
 WebView* WebViewManager::createWebView(const std::string &webViewName, unsigned short width, unsigned short height, const OverlayPosition &webViewPosition,
-			bool asyncRender, int maxAsyncRenderRate, Tier tier, Ogre::Viewport* viewport)
+            bool asyncRender, int maxAsyncRenderRate, Tier tier, Ogre::Viewport* viewport)
 {
-	if(activeWebViews.find(webViewName) != activeWebViews.end())
-		OGRE_EXCEPT(Ogre::Exception::ERR_RT_ASSERTION_FAILED,
-			"An attempt was made to create a WebView named '" + webViewName + "' when a WebView by the same name already exists!",
-			"WebViewManager::createWebView");
+    if(activeWebViews.find(webViewName) != activeWebViews.end())
+        OGRE_EXCEPT(Ogre::Exception::ERR_RT_ASSERTION_FAILED,
+            "An attempt was made to create a WebView named '" + webViewName + "' when a WebView by the same name already exists!",
+            "WebViewManager::createWebView");
 
-	int highestZOrder = -1;
-	int zOrder = 0;
+    int highestZOrder = -1;
+    int zOrder = 0;
 
-	WebViewMap::iterator iter;
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
-		if(iter->second->overlay)
-			if(iter->second->overlay->getTier() == tier)
-				if(iter->second->overlay->getZOrder() > highestZOrder)
-					highestZOrder = iter->second->overlay->getZOrder();
+    WebViewMap::iterator iter;
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+        if(iter->second->overlay)
+            if(iter->second->overlay->getTier() == tier)
+                if(iter->second->overlay->getZOrder() > highestZOrder)
+                    highestZOrder = iter->second->overlay->getZOrder();
 
-	if(highestZOrder != -1)
-		zOrder = highestZOrder + 1;
+    if(highestZOrder != -1)
+        zOrder = highestZOrder + 1;
 
         WebView* newWebView = new WebView(webViewName, width, height, webViewPosition, asyncRender, maxAsyncRenderRate, (Ogre::uchar)zOrder, tier,
             viewport? viewport : defaultViewport);
-	activeWebViews[webViewName] = newWebView;
+    activeWebViews[webViewName] = newWebView;
         newWebView->bind("event", std::tr1::bind(&WebViewManager::onRaiseWebViewEvent, this, _1, _2));
         return newWebView;
 }
 
 WebView* WebViewManager::createWebViewMaterial(const std::string &webViewName, unsigned short width, unsigned short height,
-			bool asyncRender, int maxAsyncRenderRate, Ogre::FilterOptions texFiltering)
+            bool asyncRender, int maxAsyncRenderRate, Ogre::FilterOptions texFiltering)
 {
-	if(activeWebViews.find(webViewName) != activeWebViews.end())
-		OGRE_EXCEPT(Ogre::Exception::ERR_RT_ASSERTION_FAILED,
-			"An attempt was made to create a WebView named '" + webViewName + "' when a WebView by the same name already exists!",
-			"WebViewManager::createWebViewMaterial");
+    if(activeWebViews.find(webViewName) != activeWebViews.end())
+        OGRE_EXCEPT(Ogre::Exception::ERR_RT_ASSERTION_FAILED,
+            "An attempt was made to create a WebView named '" + webViewName + "' when a WebView by the same name already exists!",
+            "WebViewManager::createWebViewMaterial");
 
         WebView* newWebView = new WebView(webViewName, width, height, asyncRender, maxAsyncRenderRate, texFiltering);
         activeWebViews[webViewName] = newWebView;
@@ -210,58 +239,58 @@ WebView* WebViewManager::createWebViewMaterial(const std::string &webViewName, u
 
 WebView* WebViewManager::getWebView(const std::string &webViewName)
 {
-	WebViewMap::iterator iter = activeWebViews.find(webViewName);
-	if(iter != activeWebViews.end())
-		return iter->second;
+    WebViewMap::iterator iter = activeWebViews.find(webViewName);
+    if(iter != activeWebViews.end())
+        return iter->second;
 
-	return 0;
+    return 0;
 }
 
 void WebViewManager::destroyWebView(const std::string &webViewName)
 {
-	WebViewMap::iterator iter = activeWebViews.find(webViewName);
-	if(iter != activeWebViews.end())
-		iter->second->okayToDelete = true;
+    WebViewMap::iterator iter = activeWebViews.find(webViewName);
+    if(iter != activeWebViews.end())
+        iter->second->okayToDelete = true;
 }
 
 void WebViewManager::destroyWebView(WebView* webViewToDestroy)
 {
-	if(webViewToDestroy)
-		webViewToDestroy->okayToDelete = true;
+    if(webViewToDestroy)
+        webViewToDestroy->okayToDelete = true;
 }
 
 void WebViewManager::resetAllPositions()
 {
-	WebViewMap::iterator iter;
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
-		if(!iter->second->isMaterialOnly())
-			iter->second->resetPosition();
+    WebViewMap::iterator iter;
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+        if(!iter->second->isMaterialOnly())
+            iter->second->resetPosition();
 }
 
 bool WebViewManager::isAnyWebViewFocused()
 {
-	if(focusedWebView)
-		return true;
+    if(focusedWebView)
+        return true;
 
-	return false;
+    return false;
 }
 
 WebView* WebViewManager::getFocusedWebView()
 {
-	return focusedWebView;
+    return focusedWebView;
 }
 
 bool WebViewManager::injectMouseMove(const WebViewCoord& coord)
 {
-	bool eventHandled = false;
+    bool eventHandled = false;
 
-	if((focusedWebView && isDraggingFocusedWebView) || (focusedWebView && isDragging))
-	{
-		if(focusedWebView->movable)
-			focusedWebView->move(coord.x-mouseXPos, coord.y-mouseYPos);
+    if((focusedWebView && isDraggingFocusedWebView) || (focusedWebView && isDragging))
+    {
+        if(focusedWebView->movable)
+            focusedWebView->move(coord.x-mouseXPos, coord.y-mouseYPos);
 
-		eventHandled = true;
-	}
+        eventHandled = true;
+    }
         else if (focusedWebView && isResizing) {
             unsigned short w,h;
             focusedWebView->getExtents(w,h);
@@ -271,112 +300,112 @@ bool WebViewManager::injectMouseMove(const WebViewCoord& coord)
             focusedWebView->resize(new_w, new_h);
             eventHandled = true;
         }
-	else
-	{
+    else
+    {
         if (focusedWebView) {
             focusedWebView->injectMouseMove(
                 focusedWebView->getRelativeX(coord.x),
                 focusedWebView->getRelativeY(coord.y));
         }
 
-		WebView* top = getTopWebView(coord.x, coord.y);
+        WebView* top = getTopWebView(coord.x, coord.y);
 
-		if(top)
-		{
-			if (top != focusedWebView) {
-				top->injectMouseMove(top->getRelativeX(coord.x), top->getRelativeY(coord.y));
-			}
-			eventHandled = true;
+        if(top)
+        {
+            if (top != focusedWebView) {
+                top->injectMouseMove(top->getRelativeX(coord.x), top->getRelativeY(coord.y));
+            }
+            eventHandled = true;
 
-			WebViewMap::iterator iter;
-			for(iter = activeWebViews.begin(); iter != activeWebViews.end(); ++iter) {
-				if(iter->second->ignoringBounds) {
-					if(!(iter->second->isPointOverMe(coord.x, coord.y) && iter->second->overlay->panel->getZOrder() < top->overlay->panel->getZOrder())) {
-						if (iter->second != top && iter->second != focusedWebView) {
-							iter->second->injectMouseMove(iter->second->getRelativeX(coord.x), iter->second->getRelativeY(coord.y));
-						}
-					}
-				}
-			}
-		}
+            WebViewMap::iterator iter;
+            for(iter = activeWebViews.begin(); iter != activeWebViews.end(); ++iter) {
+                if(iter->second->ignoringBounds) {
+                    if(!(iter->second->isPointOverMe(coord.x, coord.y) && iter->second->overlay->panel->getZOrder() < top->overlay->panel->getZOrder())) {
+                        if (iter->second != top && iter->second != focusedWebView) {
+                            iter->second->injectMouseMove(iter->second->getRelativeX(coord.x), iter->second->getRelativeY(coord.y));
+                        }
+                    }
+                }
+            }
+        }
 
-		if(tooltipParent)
-		{
-			if(!tooltipParent->isPointOverMe(coord.x, coord.y))
-				handleTooltip(0, L"");
-		}
+        if(tooltipParent)
+        {
+            if(!tooltipParent->isPointOverMe(coord.x, coord.y))
+                handleTooltip(0, L"");
+        }
 
-		if(tooltipWebView && tooltipWebView->getNonStrictVisibility())
-			tooltipWebView->setPosition(OverlayPosition(coord.x, coord.y + 15));
-	}
+        if(tooltipWebView && tooltipWebView->getNonStrictVisibility())
+            tooltipWebView->setPosition(OverlayPosition(coord.x, coord.y + 15));
+    }
 
-	mouseXPos = coord.x;
-	mouseYPos = coord.y;
+    mouseXPos = coord.x;
+    mouseYPos = coord.y;
 
-	return eventHandled;
+    return eventHandled;
 }
 
 bool WebViewManager::injectMouseWheel(const WebViewCoord& relScroll)
 {
-	if(focusedWebView)
-	{
-		focusedWebView->injectMouseWheel(relScroll.x, relScroll.y);
-		return true;
-	}
+    if(focusedWebView)
+    {
+        focusedWebView->injectMouseWheel(relScroll.x, relScroll.y);
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 bool WebViewManager::injectMouseDown(int buttonID)
 {
-	if(buttonID == LeftMouseButton)
-	{
-		if(focusWebView(mouseXPos, mouseYPos))
-		{
-			int relX = focusedWebView->getRelativeX(mouseXPos);
-			int relY = focusedWebView->getRelativeY(mouseYPos);
+    if(buttonID == LeftMouseButton)
+    {
+        if(focusWebView(mouseXPos, mouseYPos))
+        {
+            int relX = focusedWebView->getRelativeX(mouseXPos);
+            int relY = focusedWebView->getRelativeY(mouseYPos);
 
-			focusedWebView->injectMouseDown(relX, relY);
-		}
-	}
-	else if(buttonID == RightMouseButton)
-	{
-		isDragging = true;
-		focusWebView(mouseXPos, mouseYPos);
-	}
-	else if(buttonID == MiddleMouseButton) {
+            focusedWebView->injectMouseDown(relX, relY);
+        }
+    }
+    else if(buttonID == RightMouseButton)
+    {
+        isDragging = true;
+        focusWebView(mouseXPos, mouseYPos);
+    }
+    else if(buttonID == MiddleMouseButton) {
             isResizing = true;
             focusWebView(mouseXPos, mouseYPos);
-	}
+    }
 
-	if(focusedWebView)
-		return true;
+    if(focusedWebView)
+        return true;
 
-	return false;
+    return false;
 }
 
 bool WebViewManager::injectMouseUp(int buttonID)
 {
-	isDraggingFocusedWebView = false;
+    isDraggingFocusedWebView = false;
 
-	if(buttonID == LeftMouseButton && focusedWebView) {
-		int relX = focusedWebView->getRelativeX(mouseXPos);
-		int relY = focusedWebView->getRelativeY(mouseYPos);
+    if(buttonID == LeftMouseButton && focusedWebView) {
+        int relX = focusedWebView->getRelativeX(mouseXPos);
+        int relY = focusedWebView->getRelativeY(mouseYPos);
 
-		focusedWebView->injectMouseUp(relX, relY);
-	}
-	else if(buttonID == RightMouseButton)
-	{
-		isDragging = false;
-	}
-	else if(buttonID == MiddleMouseButton) {
+        focusedWebView->injectMouseUp(relX, relY);
+    }
+    else if(buttonID == RightMouseButton)
+    {
+        isDragging = false;
+    }
+    else if(buttonID == MiddleMouseButton) {
             isResizing = false;
-	}
+    }
 
-	if(focusedWebView)
-		return true;
+    if(focusedWebView)
+        return true;
 
-	return false;
+    return false;
 }
 
 bool WebViewManager::injectKeyEvent(KeyEvent type, Modifier mods, KeyButton button) {
@@ -393,11 +422,11 @@ bool WebViewManager::injectKeyEvent(KeyEvent type, Modifier mods, KeyButton butt
 }
 
 bool WebViewManager::injectTextEvent(std::string utf8text) {
-	if (focusedWebView) {
-		focusedWebView->injectTextEvent(utf8text);
-		return true;
-	}
-	return false;
+    if (focusedWebView) {
+        focusedWebView->injectTextEvent(utf8text);
+        return true;
+    }
+    return false;
 }
 
 namespace {
@@ -406,152 +435,152 @@ struct compare { bool operator()(WebView* a, WebView* b){ return(a->getOverlay()
 
 bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 {
-	deFocusAllWebViews();
-	WebView* webViewToFocus = selection? selection : getTopWebView(x, y);
+    deFocusAllWebViews();
+    WebView* webViewToFocus = selection? selection : getTopWebView(x, y);
 
-	if(!webViewToFocus) {
+    if(!webViewToFocus) {
             focusedNonChromeWebView = NULL;
             return false;
         }
 
-	std::vector<WebView*> sortedWebViews;
-	WebViewMap::iterator iter;
+    std::vector<WebView*> sortedWebViews;
+    WebViewMap::iterator iter;
 
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
-		if(iter->second->overlay)
-			if(iter->second->overlay->getTier() == webViewToFocus->overlay->getTier())
-				sortedWebViews.push_back(iter->second);
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+        if(iter->second->overlay)
+            if(iter->second->overlay->getTier() == webViewToFocus->overlay->getTier())
+                sortedWebViews.push_back(iter->second);
 
-	std::sort(sortedWebViews.begin(), sortedWebViews.end(), compare());
+    std::sort(sortedWebViews.begin(), sortedWebViews.end(), compare());
 
-	if(sortedWebViews.size())
-	{
-		if(sortedWebViews.at(0) != webViewToFocus)
-		{
-			unsigned int popIdx = 0;
-			for(; popIdx < sortedWebViews.size(); popIdx++)
-				if(sortedWebViews.at(popIdx) == webViewToFocus)
-					break;
+    if(sortedWebViews.size())
+    {
+        if(sortedWebViews.at(0) != webViewToFocus)
+        {
+            unsigned int popIdx = 0;
+            for(; popIdx < sortedWebViews.size(); popIdx++)
+                if(sortedWebViews.at(popIdx) == webViewToFocus)
+                    break;
 
-			unsigned short highestZ = sortedWebViews.at(0)->overlay->getZOrder();
-			for(unsigned int i = 0; i < popIdx; i++)
-				sortedWebViews.at(i)->overlay->setZOrder(sortedWebViews.at(i+1)->overlay->getZOrder());
+            unsigned short highestZ = sortedWebViews.at(0)->overlay->getZOrder();
+            for(unsigned int i = 0; i < popIdx; i++)
+                sortedWebViews.at(i)->overlay->setZOrder(sortedWebViews.at(i+1)->overlay->getZOrder());
 
-			sortedWebViews.at(popIdx)->overlay->setZOrder(highestZ);
-		}
-	}
+            sortedWebViews.at(popIdx)->overlay->setZOrder(highestZ);
+        }
+    }
 
-	focusedWebView = webViewToFocus;
+    focusedWebView = webViewToFocus;
 #ifdef HAVE_AWESOMIUM
-	focusedWebView->webView->focus();
+    focusedWebView->webView->focus();
 #endif
 
         if (focusedWebView != chromeWebView)
             focusedNonChromeWebView = focusedWebView;
 
-	isDraggingFocusedWebView = false;
+    isDraggingFocusedWebView = false;
 
-	return true;
+    return true;
 }
 
 WebView* WebViewManager::getTopWebView(int x, int y)
 {
-	WebView* top = 0;
+    WebView* top = 0;
 
-	WebViewMap::iterator iter;
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
-	{
-		if(!iter->second->isPointOverMe(x, y))
-			continue;
+    WebViewMap::iterator iter;
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+    {
+        if(!iter->second->isPointOverMe(x, y))
+            continue;
 
-		if(!top)
-			top = iter->second;
-		else
-			top = top->overlay->panel->getZOrder() > iter->second->overlay->panel->getZOrder()? top : iter->second;
-	}
+        if(!top)
+            top = iter->second;
+        else
+            top = top->overlay->panel->getZOrder() > iter->second->overlay->panel->getZOrder()? top : iter->second;
+    }
 
-	return top;
+    return top;
 }
 
 void WebViewManager::deFocusAllWebViews()
 {
-	WebViewMap::iterator iter;
+    WebViewMap::iterator iter;
 #ifdef HAVE_AWESOMIUM
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
-		iter->second->webView->unfocus();
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+        iter->second->webView->unfocus();
 #endif
-	/*
-	astralMgr->defocusAll();
+    /*
+    astralMgr->defocusAll();
 
-	hiddenWin->focus();
-	hiddenWin->injectMouseMove(50, 50);
-	hiddenWin->injectMouseDown(50, 50);
-	hiddenWin->injectMouseUp(50, 50);
+    hiddenWin->focus();
+    hiddenWin->injectMouseMove(50, 50);
+    hiddenWin->injectMouseDown(50, 50);
+    hiddenWin->injectMouseUp(50, 50);
 
-	focusedWebView = 0;
-	*/
+    focusedWebView = 0;
+    */
 
-	focusedWebView = NULL;
-	isDraggingFocusedWebView = false;
+    focusedWebView = NULL;
+    isDraggingFocusedWebView = false;
 }
 
 void WebViewManager::setDefaultViewport(Ogre::Viewport* newViewport)
 {
-	WebViewMap::iterator iter;
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
-	{
-		if(iter->second->overlay)
-			if(iter->second->overlay->viewport == defaultViewport)
-				iter->second->overlay->setViewport(newViewport);
-	}
+    WebViewMap::iterator iter;
+    for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+    {
+        if(iter->second->overlay)
+            if(iter->second->overlay->viewport == defaultViewport)
+                iter->second->overlay->setViewport(newViewport);
+    }
 
-	defaultViewport = newViewport;
+    defaultViewport = newViewport;
 }
 
 void WebViewManager::onResizeTooltip(WebView* WebView, const Awesomium::JSArguments& args)
 {
 #ifdef HAVE_AWESOMIUM
     if(args.size() != 2 || !args[0].isInteger() || !args[1].isInteger())
-		return;
+        return;
 
-	tooltipWebView->resize(args[0].toInteger(), args[1].toInteger());
-	tooltipWebView->setPosition(OverlayPosition(mouseXPos, mouseYPos + 15));
-	//popViewToFront(view);
+    tooltipWebView->resize(args[0].toInteger(), args[1].toInteger());
+    tooltipWebView->setPosition(OverlayPosition(mouseXPos, mouseYPos + 15));
+    //popViewToFront(view);
 
-	if(lastTooltip + TIP_ENTRY_DELAY > tooltipTimer.getMilliseconds())
-	{
-		tooltipWebView->show(true);
-		lastTooltip = tooltipTimer.getMilliseconds();
-	}
-	else
-	{
-		tooltipShowTime = tooltipTimer.getMilliseconds() + TIP_SHOW_DELAY;
-	}
+    if(lastTooltip + TIP_ENTRY_DELAY > tooltipTimer.getMilliseconds())
+    {
+        tooltipWebView->show(true);
+        lastTooltip = tooltipTimer.getMilliseconds();
+    }
+    else
+    {
+        tooltipShowTime = tooltipTimer.getMilliseconds() + TIP_SHOW_DELAY;
+    }
 #endif
 }
 
 void WebViewManager::handleTooltip(WebView* tooltipParent, const std::wstring& tipText)
 {
-	if(tipText.length())
-	{
-		this->tooltipParent = tooltipParent;
-		tooltipShowTime = 0;
-		tooltipWebView->hide(true);
+    if(tipText.length())
+    {
+        this->tooltipParent = tooltipParent;
+        tooltipShowTime = 0;
+        tooltipWebView->hide(true);
                 tooltipWebView->resize(512, 256); // Large enough that it should hold anything we put in there.
-		std::string tipStr(tipText.begin(), tipText.end());
-		tooltipWebView->evaluateJS("setTooltip('" + tipStr + "')");
-	}
-	else
-	{
-		tooltipParent = 0;
-		tooltipWebView->hide(true);
-	}
+        std::string tipStr(tipText.begin(), tipText.end());
+        tooltipWebView->evaluateJS("setTooltip('" + tipStr + "')");
+    }
+    else
+    {
+        tooltipParent = 0;
+        tooltipWebView->hide(true);
+    }
 }
 
 void WebViewManager::handleRequestDrag(WebView* caller)
 {
-	focusWebView(0, 0, caller);
-	isDraggingFocusedWebView = true;
+    focusWebView(0, 0, caller);
+    isDraggingFocusedWebView = true;
 }
 
 
@@ -565,9 +594,11 @@ void WebViewManager::navigate(NavigationAction action) {
         char buffer[256];
         sprintf(buffer, "spawned_%d", unique_id++);
         String unique_name(buffer);
-        WebView* newwebview = createWebView(unique_name, 250, 250, OverlayPosition(RP_CENTER), false, 70, TIER_MIDDLE);
+        WebView* newwebview = createWebView(unique_name, 1024, 768, OverlayPosition(RP_CENTER), false, 70, TIER_MIDDLE);
         newwebview->setTransparent(true);
         focusedNonChromeWebView = newwebview;
+        newwebview -> setTransparent(true);
+
         return;
     }
 
@@ -599,6 +630,14 @@ void WebViewManager::navigate(NavigationAction action) {
         break;
     }
 #endif //HAVE_AWESOMIUM
+}
+
+
+void WebViewManager::evaluateJavaScript(const std::string &webViewName, const String& javascript) {
+    WebView *wv = getWebView(webViewName);
+    if (!wv)
+        SILOG(ogre, error, "Cannot find webView \"" << webViewName << "\" for javascript: " << javascript);
+    wv->evaluateJS(javascript);
 }
 
 
@@ -644,7 +683,7 @@ static void NavigateCommandDispatcher(const String& str) {
     const char *ccommand = command.c_str();
     const NavigateDispatch *p;
     for (p = dispatchTable; p->name != NULL; ++p)
-        if (strcasecmp(ccommand, p->name) == 0)
+        if (strcmp(ccommand, p->name) == 0)
             break;
 
     // Invoke the handler
@@ -742,11 +781,11 @@ Sirikata::Task::EventResponse WebViewManager::onMousePressed(Sirikata::Task::Eve
 
     bool success = this->injectMouseDown(awebutton);
 
-	if (success) {
-		return Sirikata::Task::EventResponse::cancel();
-	} else {
-		return Sirikata::Task::EventResponse::nop();
-	}
+    if (success) {
+        return Sirikata::Task::EventResponse::cancel();
+    } else {
+        return Sirikata::Task::EventResponse::nop();
+    }
 }
 
 Sirikata::Task::EventResponse WebViewManager::onMouseDrag(Sirikata::Task::EventPtr evt)
@@ -785,33 +824,33 @@ Sirikata::Task::EventResponse WebViewManager::onMouseDrag(Sirikata::Task::EventP
 Sirikata::Task::EventResponse WebViewManager::onButton(Sirikata::Task::EventPtr evt)
 {
     ButtonEventPtr e = std::tr1::dynamic_pointer_cast<ButtonEvent>(evt);
-	if (!e) {
-		return Sirikata::Task::EventResponse::nop();
-	}
+    if (!e) {
+        return Sirikata::Task::EventResponse::nop();
+    }
 
-	bool success = true;
-	if(e->getDevice()->isKeyboard()) {
+    bool success = true;
+    if(e->getDevice()->isKeyboard()) {
             success = this->injectKeyEvent(e->mEvent, e->mModifier, e->mButton);
-	}
-	if (success) {
-		return Sirikata::Task::EventResponse::cancel();
-	} else {
-		return Sirikata::Task::EventResponse::nop();
-	}
+    }
+    if (success) {
+        return Sirikata::Task::EventResponse::cancel();
+    } else {
+        return Sirikata::Task::EventResponse::nop();
+    }
 }
 
 Sirikata::Task::EventResponse WebViewManager::onKeyTextInput(Sirikata::Task::EventPtr evt)
 {
     TextInputEventPtr e = std::tr1::dynamic_pointer_cast<TextInputEvent>(evt);
-	if (!e) {
-		return Sirikata::Task::EventResponse::nop();
-	}
+    if (!e) {
+        return Sirikata::Task::EventResponse::nop();
+    }
 
-	if (injectTextEvent(e->mText)) {
-		return Sirikata::Task::EventResponse::cancel();
-	} else {
-		return Sirikata::Task::EventResponse::nop();
-	}
+    if (injectTextEvent(e->mText)) {
+        return Sirikata::Task::EventResponse::cancel();
+    } else {
+        return Sirikata::Task::EventResponse::nop();
+    }
 }
 
 
@@ -901,17 +940,17 @@ WIN_VK_LCONTROL = 0xA2,
 WIN_VK_RCONTROL = 0xA3,
 WIN_VK_LMENU = 0xA4,
 WIN_VK_RMENU = 0xA5,
-WIN_VK_OEM_1 = 0xBA,	// ';:' for US
-WIN_VK_OEM_PLUS = 0xBB,	// '+' any country
-WIN_VK_OEM_COMMA = 0xBC,	// ',' any country
-WIN_VK_OEM_MINUS = 0xBD,	// '-' any country
-WIN_VK_OEM_PERIOD = 0xBE,	// '.' any country
-WIN_VK_OEM_2 = 0xBF,	// '/?' for US
-WIN_VK_OEM_3 = 0xC0,	// '`~' for US
-WIN_VK_OEM_4 = 0xDB,	//  '[{' for US
-WIN_VK_OEM_5 = 0xDC,	//  '\|' for US
-WIN_VK_OEM_6 = 0xDD,	//  ']}' for US
-WIN_VK_OEM_7 = 0xDE,	//  ''"' for US
+WIN_VK_OEM_1 = 0xBA,    // ';:' for US
+WIN_VK_OEM_PLUS = 0xBB, // '+' any country
+WIN_VK_OEM_COMMA = 0xBC,    // ',' any country
+WIN_VK_OEM_MINUS = 0xBD,    // '-' any country
+WIN_VK_OEM_PERIOD = 0xBE,   // '.' any country
+WIN_VK_OEM_2 = 0xBF,    // '/?' for US
+WIN_VK_OEM_3 = 0xC0,    // '`~' for US
+WIN_VK_OEM_4 = 0xDB,    //  '[{' for US
+WIN_VK_OEM_5 = 0xDC,    //  '\|' for US
+WIN_VK_OEM_6 = 0xDD,    //  ']}' for US
+WIN_VK_OEM_7 = 0xDE,    //  ''"' for US
 WIN_VK_OEM_8 = 0xDF,
 WIN_VK_PLAY = 0xFA,
 WIN_VK_ZOOM = 0xFB
@@ -923,57 +962,57 @@ WIN_VK_ZOOM = 0xFB
 
 static unsigned int InputKeyToAwesomiumKey(SDL_scancode scancode, bool& numpad)
 {
-	numpad = false;
-	switch(scancode)
-	{
-	MAP_CHAR(A); MAP_CHAR(B); MAP_CHAR(C);
-	MAP_CHAR(D); MAP_CHAR(E); MAP_CHAR(F);
-	MAP_CHAR(G); MAP_CHAR(H); MAP_CHAR(I);
-	MAP_CHAR(J); MAP_CHAR(K); MAP_CHAR(L);
-	MAP_CHAR(M); MAP_CHAR(N); MAP_CHAR(O);
-	MAP_CHAR(P); MAP_CHAR(Q); MAP_CHAR(R);
-	MAP_CHAR(S); MAP_CHAR(T); MAP_CHAR(U);
-	MAP_CHAR(V); MAP_CHAR(W); MAP_CHAR(X);
-	MAP_CHAR(Y); MAP_CHAR(Z); MAP_CHAR(0);
-	MAP_CHAR(1); MAP_CHAR(2); MAP_CHAR(3);
-	MAP_CHAR(4); MAP_CHAR(5); MAP_CHAR(6);
-	MAP_CHAR(7); MAP_CHAR(8); MAP_CHAR(9);
-	MAP_VK(LSHIFT, LSHIFT);
-	MAP_VK(RSHIFT, RSHIFT);
-	MAP_VK(LCTRL, LCONTROL);
-	MAP_VK(RCTRL, RCONTROL);
-	MAP_VK(LALT, LMENU);
-	MAP_VK(RALT, RMENU);
-	MAP_VK(LGUI, LWINDOWS);
-	MAP_VK(RGUI, RWINDOWS);
-	MAP_VK(RETURN, RETURN);			MAP_VK(ESCAPE, ESCAPE);
-	MAP_VK(BACKSPACE, BACK);		MAP_VK(TAB, TAB);
-	MAP_VK(SPACE, SPACE);			MAP_VK(MINUS, OEM_MINUS);
-	MAP_VK(EQUALS, OEM_PLUS);		MAP_VK(LEFTBRACKET, OEM_4);
-	MAP_VK(RIGHTBRACKET, OEM_6);	MAP_VK(BACKSLASH, OEM_5);
-	MAP_VK(SEMICOLON, OEM_1);		MAP_VK(APOSTROPHE, OEM_7);
-	MAP_VK(GRAVE, OEM_3);			MAP_VK(COMMA, OEM_COMMA);
-	MAP_VK(PERIOD, OEM_PERIOD);		MAP_VK(SLASH, OEM_2);
-	MAP_VK(CAPSLOCK, CAPITAL);		MAP_VK(F1, F1);
-	MAP_VK(F2, F2);					MAP_VK(F3, F3);
-	MAP_VK(F4, F4);					MAP_VK(F5, F5);
-	MAP_VK(F6, F6);					MAP_VK(F7, F7);
-	MAP_VK(F8, F8);					MAP_VK(F9, F9);
-	MAP_VK(F10, F10);				MAP_VK(F11, F11);
-	MAP_VK(F12, F12);				MAP_VK(PRINTSCREEN, PRINT);
-	MAP_VK(SCROLLLOCK, SCROLL);		MAP_VK(PAUSE, PAUSE);
-	MAP_VK(INSERT, INSERT);			MAP_VK(HOME, HOME);
-	MAP_VK(PAGEUP, PRIOR);			MAP_VK(DELETE, DELETE);
-	MAP_VK(END, END);				MAP_VK(PAGEDOWN, NEXT);
-	MAP_VK(RIGHT, RIGHT);			MAP_VK(LEFT, LEFT);
-	MAP_VK(DOWN, DOWN);				MAP_VK(UP, UP);
-	MAP_NUMPAD_VK(KP_0, INSERT);	MAP_NUMPAD_VK(KP_1, END);
-	MAP_NUMPAD_VK(KP_2, DOWN);		MAP_NUMPAD_VK(KP_3, NEXT);
-	MAP_NUMPAD_VK(KP_4, LEFT);		MAP_NUMPAD_VK(KP_6, RIGHT);
-	MAP_NUMPAD_VK(KP_7, HOME);		MAP_NUMPAD_VK(KP_8, UP);
-	MAP_NUMPAD_VK(KP_9, PRIOR);
-	default: return 0;
-	}
+    numpad = false;
+    switch(scancode)
+    {
+    MAP_CHAR(A); MAP_CHAR(B); MAP_CHAR(C);
+    MAP_CHAR(D); MAP_CHAR(E); MAP_CHAR(F);
+    MAP_CHAR(G); MAP_CHAR(H); MAP_CHAR(I);
+    MAP_CHAR(J); MAP_CHAR(K); MAP_CHAR(L);
+    MAP_CHAR(M); MAP_CHAR(N); MAP_CHAR(O);
+    MAP_CHAR(P); MAP_CHAR(Q); MAP_CHAR(R);
+    MAP_CHAR(S); MAP_CHAR(T); MAP_CHAR(U);
+    MAP_CHAR(V); MAP_CHAR(W); MAP_CHAR(X);
+    MAP_CHAR(Y); MAP_CHAR(Z); MAP_CHAR(0);
+    MAP_CHAR(1); MAP_CHAR(2); MAP_CHAR(3);
+    MAP_CHAR(4); MAP_CHAR(5); MAP_CHAR(6);
+    MAP_CHAR(7); MAP_CHAR(8); MAP_CHAR(9);
+    MAP_VK(LSHIFT, LSHIFT);
+    MAP_VK(RSHIFT, RSHIFT);
+    MAP_VK(LCTRL, LCONTROL);
+    MAP_VK(RCTRL, RCONTROL);
+    MAP_VK(LALT, LMENU);
+    MAP_VK(RALT, RMENU);
+    MAP_VK(LGUI, LWINDOWS);
+    MAP_VK(RGUI, RWINDOWS);
+    MAP_VK(RETURN, RETURN);         MAP_VK(ESCAPE, ESCAPE);
+    MAP_VK(BACKSPACE, BACK);        MAP_VK(TAB, TAB);
+    MAP_VK(SPACE, SPACE);           MAP_VK(MINUS, OEM_MINUS);
+    MAP_VK(EQUALS, OEM_PLUS);       MAP_VK(LEFTBRACKET, OEM_4);
+    MAP_VK(RIGHTBRACKET, OEM_6);    MAP_VK(BACKSLASH, OEM_5);
+    MAP_VK(SEMICOLON, OEM_1);       MAP_VK(APOSTROPHE, OEM_7);
+    MAP_VK(GRAVE, OEM_3);           MAP_VK(COMMA, OEM_COMMA);
+    MAP_VK(PERIOD, OEM_PERIOD);     MAP_VK(SLASH, OEM_2);
+    MAP_VK(CAPSLOCK, CAPITAL);      MAP_VK(F1, F1);
+    MAP_VK(F2, F2);                 MAP_VK(F3, F3);
+    MAP_VK(F4, F4);                 MAP_VK(F5, F5);
+    MAP_VK(F6, F6);                 MAP_VK(F7, F7);
+    MAP_VK(F8, F8);                 MAP_VK(F9, F9);
+    MAP_VK(F10, F10);               MAP_VK(F11, F11);
+    MAP_VK(F12, F12);               MAP_VK(PRINTSCREEN, PRINT);
+    MAP_VK(SCROLLLOCK, SCROLL);     MAP_VK(PAUSE, PAUSE);
+    MAP_VK(INSERT, INSERT);         MAP_VK(HOME, HOME);
+    MAP_VK(PAGEUP, PRIOR);          MAP_VK(DELETE, DELETE);
+    MAP_VK(END, END);               MAP_VK(PAGEDOWN, NEXT);
+    MAP_VK(RIGHT, RIGHT);           MAP_VK(LEFT, LEFT);
+    MAP_VK(DOWN, DOWN);             MAP_VK(UP, UP);
+    MAP_NUMPAD_VK(KP_0, INSERT);    MAP_NUMPAD_VK(KP_1, END);
+    MAP_NUMPAD_VK(KP_2, DOWN);      MAP_NUMPAD_VK(KP_3, NEXT);
+    MAP_NUMPAD_VK(KP_4, LEFT);      MAP_NUMPAD_VK(KP_6, RIGHT);
+    MAP_NUMPAD_VK(KP_7, HOME);      MAP_NUMPAD_VK(KP_8, UP);
+    MAP_NUMPAD_VK(KP_9, PRIOR);
+    default: return 0;
+    }
 }
 
 static int InputModifiersToAwesomiumModifiers(Modifier modifiers, bool numpad) {

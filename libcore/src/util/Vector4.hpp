@@ -63,12 +63,22 @@ public:
     template<class T>T convert(const T*ptr=NULL) const{
         return T(x,y,z,w);
     }
+    template<class T> Vector4<T> downCast() const{
+        return Vector4<T>((T)x,(T)y,(T)z,(T)w);
+    }
+
     template <class V> static Vector4 fromArray(const V&other){
         return Vector4(other[0],other[1],other[2],other[3]);
     }
 
     template <class V> static Vector4 fromSSE(const V&other){
         return Vector4(other.x(),other.y(),other.z(),other.w());
+    }
+    void set(scalar x, scalar y, scalar z, scalar w) {
+        this->x=x;
+        this->y=y;
+        this->z=z;
+        this->w=w;
     }
     scalar&operator[](const unsigned int i) {
         assert(i<4);
@@ -85,7 +95,7 @@ public:
         w=other;
         return *this;
     }
-    static Vector4 nil() {
+    static Vector4 zero() {
         return Vector4(0,0,0,0);
     }
     static Vector4 unitX() {
@@ -179,7 +189,7 @@ public:
     bool operator!=(const Vector4&other)const {
         return x!=other.x||y!=other.y||z!=other.z||w!=other.w;
     }
-    Vector4 normal()const {
+    Vector4 normal()const {     // FIXME: Change this to normalized()
         scalar len=length();
         if (len>1e-08)
             return *this/len;
@@ -188,7 +198,7 @@ public:
     scalar normalizeThis() {
         scalar len=length();
         if (len>1e-08)
-            this/=len;
+            *this/=len;
         return len;
     }
     std::string toString()const {

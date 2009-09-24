@@ -1,0 +1,21 @@
+
+// Vertex program for automatic terrain texture generation
+void main_vp
+(
+    float4             iPosition           : POSITION,
+    out float4         oPosition           : POSITION,
+    uniform float4x4   worldViewProj)
+{
+    oPosition  = mul(worldViewProj, iPosition);
+
+}
+
+// Fragment program for automatic terrain texture generation
+void main_fp
+(
+    out float4          oColor      : COLOR
+)
+{
+    oColor = 0;
+}
+

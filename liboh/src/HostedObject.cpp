@@ -53,6 +53,7 @@
 #include "oh/ObjectScript.hpp"
 #include "oh/ObjectScriptManagerFactory.hpp"
 #include <util/KnownServices.hpp>
+//#include "WebViewManager.hpp"
 
 namespace Sirikata {
 
@@ -65,7 +66,7 @@ public:
     ProxyObject::Extrapolator mUpdatedLocation;
 
     void locationWasReset(Time timestamp, Location loc) {
-        loc.setVelocity(Vector3f::nil());
+        loc.setVelocity(Vector3f::zero());
         loc.setAngularSpeed(0);
         mUpdatedLocation.resetValue(timestamp, loc);
     }
@@ -73,7 +74,7 @@ public:
         Time timestamp = msg.timestamp();
         Location loc = mUpdatedLocation.extrapolate(timestamp);
         ProxyObject::updateLocationWithObjLoc(loc, msg);
-        loc.setVelocity(Vector3f::nil());
+        loc.setVelocity(Vector3f::zero());
         loc.setAngularSpeed(0);
         mUpdatedLocation.updateValue(timestamp, loc);
     }
@@ -171,7 +172,7 @@ struct HostedObject::PrivateCallbacks {
         }
         String scriptName;
         std::map<String,String> scriptParams;
-        Location location(Vector3d::nil(),Quaternion::identity(),Vector3f::nil(),Vector3f(1,0,0),0);
+        Location location(Vector3d::zero(),Quaternion::identity(),Vector3f::zero(),Vector3f(1,0,0),0);
         for (int i = 0; i < msg->body().reads_size(); i++) {
             String name = msg->body().reads(i).field_name();
             if (msg->body().reads(i).has_return_status() || !msg->body().reads(i).has_data()) {
@@ -222,7 +223,7 @@ struct HostedObject::PrivateCallbacks {
             }
         }
         // Temporary Hack because we do not have access to the CDN here.
-        BoundingSphere3f sphere(Vector3f::nil(),1);
+        BoundingSphere3f sphere(Vector3f::zero(),1);
         realThis->sendNewObj(location, sphere, spaceID);
         delete msg;
         if (!scriptName.empty()) {
@@ -294,7 +295,7 @@ struct HostedObject::PrivateCallbacks {
         Response immedResponse;
         int immedIndex = 0;
 
-        SentMessageBody<ReadWriteSet> *persistenceMsg = new SentMessageBody<ReadWriteSet>(&realThis->mTracker);
+        SentMessageBody<ReadWriteSet> *persistenceMsg = new SentMessageBody<ReadWriteSet>(&realThis->mTracker,std::tr1::bind(&handlePersistenceResponse, realThis, header, _1, _2, _3));
         int outIndex = 0;
         ReadWriteSet &outMessage = persistenceMsg->body();
         if (rws.has_options()) {
@@ -407,7 +408,7 @@ struct HostedObject::PrivateCallbacks {
             persistenceMsg->header().set_destination_space(SpaceID::null());
             persistenceMsg->header().set_destination_object(ObjectReference::spaceServiceID());
             persistenceMsg->header().set_destination_port(Services::PERSISTENCE);
-            persistenceMsg->setCallback(std::tr1::bind(&handlePersistenceResponse, realThis, header, _1, _2, _3));
+
             persistenceMsg->serializeSend();
         } else {
             delete persistenceMsg;
@@ -487,7 +488,7 @@ struct HostedObject::PrivateCallbacks {
         request->setPersistenceCallback(std::tr1::bind(&PrivateCallbacks::receivedProxObjectProperties,
                                             weakThis, _1, _2, _3,
                                             queryId, objLoc));
-        request->setTimeout(Duration::seconds(5.0));
+        request->setTimeout(Duration::seconds(40.0));
         request->serializeSend();
     }
     static void receivedProxObjectProperties(
@@ -579,12 +580,11 @@ struct HostedObject::PrivateCallbacks {
             realThis->receivedPropertyUpdate(proxyObj, sentMessage->body().reads(i).field_name(), sentMessage->body().reads(i).data());
         }
         {
-            RPCMessage *request = new RPCMessage(&realThis->mTracker);
+            RPCMessage *request = new RPCMessage(&realThis->mTracker,std::tr1::bind(&receivedPositionUpdateResponse, weakThis, _1, _2, _3));
             request->header().set_destination_space(proximateObjectId.space());
             request->header().set_destination_object(proximateObjectId.object());
             Protocol::LocRequest loc;
             loc.SerializeToString(request->body().add_message("LocRequest"));
-            request->setCallback(std::tr1::bind(&receivedPositionUpdateResponse, weakThis, _1, _2, _3));
             request->serializeSend();
         }
         return;
@@ -845,7 +845,7 @@ void HostedObject::processRoutableMessage(const RoutableMessageHeader &header, M
         SILOG(cppoh,debug,os.str());
     }
     /// Handle Return values to queries we sent to someone:
-    if (header.has_reply_id()) {
+    if (header.has_reply_id() && header.reply_id()!=12345) {            /// magic # means Python script
         mTracker.processMessage(header, bodyData);
         return; // Not a message for us to process.
     }
@@ -1057,7 +1057,7 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
                     query_id++;
                     Protocol::NewProxQuery proxQuery;
                     proxQuery.set_query_id(my_query_id);
-                    proxQuery.set_max_radius(1.0e+30);
+                    proxQuery.set_max_radius(1.0e+30f);
                     String proxQueryStr;
                     proxQuery.SerializeToString(&proxQueryStr);
                     RoutableMessageBody body;
@@ -1127,16 +1127,16 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
                 printstr<<" (Requesting information...)";
 
                 {
-                    RPCMessage *locRequest = new RPCMessage(&mTracker);
+                    RPCMessage *locRequest = new RPCMessage(&mTracker,std::tr1::bind(&PrivateCallbacks::receivedProxObjectLocation,
+                                                                                     getWeakPtr(), _1, _2, _3,
+                                                        proxCall.query_id()));
                     locRequest->header().set_destination_space(proximateObjectId.space());
                     locRequest->header().set_destination_object(proximateObjectId.object());
                     LocRequest loc;
                     loc.SerializeToString(locRequest->body().add_message("LocRequest"));
 
-                    locRequest->setCallback(std::tr1::bind(&PrivateCallbacks::receivedProxObjectLocation,
-                                                        getWeakPtr(), _1, _2, _3,
-                                                        proxCall.query_id()));
-                    locRequest->setTimeout(Duration::seconds(5.0));
+                  
+                    locRequest->setTimeout(Duration::seconds(40.0));
                     locRequest->serializeSend();
                 }
             } else {
@@ -1149,7 +1149,13 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
             // Do not create a proxy object in this case: This message is for one-time queries
             break;
         }
-    } else {
+    }
+    else if (name == "EvaluateJavascript") {
+        printstr << "Message from Python to Javascript: " << (char*)args.data();
+        mObjectHost->mDumbMsg = (char*)args.data();
+//        WebViewManager::getSingleton().evaluateJavaScript("__chrome", (char*)args.data());
+    } 
+    else {
         printstr<<"Message to be handled in script: "<<name;
     }
     SILOG(cppoh,debug,printstr.str());
@@ -1162,6 +1168,8 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
                       std::insert_iterator<std::string>(*response, response->begin()));
         }
     }
+    else
+        std::cout << "dbm debug: Message to be handled has no script!" << std::endl;
 }
 const Duration&HostedObject::getSpaceTimeOffset(const SpaceID&space) {
     static Duration nil(Duration::seconds(0));

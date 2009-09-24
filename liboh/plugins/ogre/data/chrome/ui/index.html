@@ -1,0 +1,268 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript" src="js/jquery-1.2.6.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.6.custom.min.js"></script>
+    <script type="text/javascript" src="js/ui.coverflow.custom.js"></script> 
+    <script type="text/javascript" src="js/sylvester.js"></script> 
+    <script type="text/javascript" src="js/pb.transformie.js"></script>
+    <script type="text/javascript" src="js/sirikata.main.js"></script>
+ 	<script type="text/javascript" src="js/sirikata.ui.js"></script>
+    <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
+	<script type="text/javascript" src="js/jquery.geturlparam.js"></script>
+	<script type="text/javascript" src="js/jquery-timedLogout.js"></script>
+	<script type="text/javascript" src="js/jquery-animatecolor.js"></script>
+<script type="text/javascript">
+
+
+		function loadScreen(screen, page) { $(screen).load(page).fadeIn("slow"); }
+		function hideScreen(screen) {$(screen).fadeOut(); }
+		
+		
+		function setup () {
+			loadScreen("#navigation-screen", "screens/navigation.html");	
+			
+		}
+		
+		function timedReset() {
+		        $(document).timedLogout({
+		                inactivity: 10*60*1000, 
+                     		noconfirm: 10000, 
+             		        sessionAlive: false,
+             		        redirect_url: ''
+		        });
+		}
+		
+		function curatorMode(mode) {
+			setup();
+			var mode = (mode == null) ? 0 : mode;
+		        
+		    help = function () { loadScreen("#help-screen", "screens/help_curator.html") } ;     
+		        	
+			if (mode == 0) {
+				loadScreen("#modal-screen", "screens/curator_welcome.html");
+			} else {
+			    timedReset(); 
+				hideScreen("#modal-screen");
+				loadScreen("#top-bar", "screens/topbar_curator.html");	
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 
+				
+				//$("li.topbarbutton").removeClass('select');
+				
+				if (mode == 1) { // art 
+					loadScreen("#detail-screen", "screens/curator_art.html");	
+					//alert($("#curatorArt").addClass("topbarbuttonsel").removeClass('topbarbutton').length);
+				
+				} else if (mode == 2) { // frames 
+					loadScreen("#detail-screen", "screens/curator_frames.html");	
+				} else if (mode == 3) { // walls 
+					loadScreen("#detail-screen", "screens/curator_walls.html");	
+					$("#curatorLight").class('select');
+				} else if (mode == 4) { // lights 
+					loadScreen("#detail-screen", "screens/curator_lights.html");	
+				} else if (mode == 5) { // save 
+					loadScreen("#detail-screen", "screens/curator_save.html");
+					$("#curatorSave").addClass('topbarbuttonsel').removeClass('topbarbutton');
+				}
+			}
+		}
+		
+		function critiqueMode(mode, c2) {
+			var mode = (mode == null) ? 0 : mode;
+			
+			setup();
+			help = function () {loadScreen("#help-screen", "screens/help_critic.html");  } ;  
+			
+			try {
+				$("body").unbind('sirikata_item_select', pictureSelectedEvent);
+				$("body").unbind('sirikata_item_deselect', pictureDeSelectedEvent);
+			} catch (err) {}
+
+			if (mode == 0) {
+				loadScreen("#modal-screen", "screens/critique_welcome.html");
+			} else if (mode == 1) { // load
+			        timedReset(); 
+				loadScreen("#modal-screen", "screens/critique_load_gallery.html");	
+			} else {
+				hideScreen("#modal-screen");
+				loadScreen("#top-bar", "screens/topbar_critique.html");	
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 
+				$("body").bind('sirikata_item_select', pictureSelectedEvent);
+				$("body").bind('sirikata_item_deselect', pictureDeSelectedEvent);
+			
+				if (mode == 2) { // walk 
+					//loadScreen("#detail-screen", "screens/detail_coverflow.html");	
+					hideScreen("#detail-screen");
+					
+					
+				} else if (mode == 3) { // picture 
+					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
+				} else if (mode == 4) { // discuss 
+					$("#modal-screen").fadeIn("slow");
+					
+				}
+			}
+		}
+		
+		function flythruMode(mode) {
+		        var mode = (mode == null) ? 0 : mode;
+		       
+		        if (mode == 0) {
+				loadScreen("#modal-screen", "screens/flythru_welcome.html");
+			} else {
+				hideScreen("#modal-screen");
+				
+			}
+		}
+		
+		function funMode(mode) {
+			
+			var mode = (mode == null) ? 0 : mode;
+			help = function () { loadScreen("#help-screen", "screens/help_fun.html") } ;  
+			
+			if (mode == 0) {
+				loadScreen("#modal-screen", "screens/fun_welcome.html");
+			} else {
+//			        timedReset(); 
+				hideScreen("#modal-screen");
+				loadScreen("#bottom-bar", "screens/bottombar.html"); 
+			}
+		}
+		
+		function developmentMode() {
+			hideScreen("#modal-screen");
+			loadScreen("#development-screen", "screens/development.html");	
+		}
+	
+		
+
+		function popUpMessage(text,x,y) {
+			//$('#popup-message').fadeIn("slow");
+			//$('#popup-message').html(text);
+			//$('#popup-message').css('left', x);
+			//$('#popup-message').css('top', y);
+			if(text==" ") {
+				$('#flythru-screen').fadeOut('fast');
+				
+				$('#modal-screen').fadeOut('fast');
+			} else if (text == "credits"){
+				$('#flythru-screen').fadeOut('fast');
+				hideScreen('#flythru-screen');
+				loadScreen('#modal-screen', 'screens/credits.html')
+				// show credits	
+			} else if (text == "done") {
+				reset();	
+			} else {
+			$("#flythru-screen").html('<p style="padding-top: 0px; top: 25%;">' + text + "</div>").fadeIn("fast");
+			}
+			
+		}
+		function hidePopUpMessage() {$('#popup-message').fadeOut("slow");};
+		
+		
+		function debug(msg) {
+			$("#development-console").prepend("<br>" + msg );
+		}
+		
+		function pictureSelected(id) {
+			if (id != null) {
+				$("body").trigger('sirikata_item_select', {item: id});	
+			} else {
+				$("body").trigger('sirikata_item_deselect');
+			}
+		}
+		
+		function pictureSelectedEvent(event, data) {
+			debug("selected " + data.item);
+			critiqueMode(3, data.item);
+				
+		}
+		function pictureDeSelectedEvent(event) {
+			debug("items deselected");
+			critiqueMode(2);
+		}
+	
+		$(document).ready( function () {
+									 
+			try {
+				Client.event("navcommand", "reset " + $.getURLParam('mode'));
+			} catch (err) {debug('set mode failed');}
+			
+			if ($.getURLParam('mode') == "curator") {
+//				Client.event("navcommand", "reset curator");
+				setTimeout('curatorMode(); ', 1000);
+			} else if ($.getURLParam('mode') == "critic") {
+				setTimeout('critiqueMode() ', 1000);
+			} else if ($.getURLParam('mode') == "flythru") {
+				setTimeout('flythruMode() ', 1000);
+			} else if ($.getURLParam('mode') == "funmode") {
+				setTimeout('funMode() ', 1000);
+			} else {
+				setTimeout('loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
+			}
+			 
+									 
+		});
+		
+		var galleryWasLoaded = false;
+		function loadGallery(event) {
+				if(!galleryWasLoaded) {
+					
+					debug('load data: ' + event.data);
+					try {
+						Client.event("navcommand", "inventory loadState " + event.data);
+					} catch (err) {debug('load data failed');}
+					
+					galleryWasLoaded = true;
+					
+					critiqueMode(2);
+				} else {
+					debug('load data, already loaded');	
+				}
+				
+		}
+		
+		
+		var reset = function (){
+		
+		        try {
+	        		Client.event("navcommand", "reset");
+			} catch (err) {debug('reset failed');}
+		        location.reload();
+		}
+		
+		var help = function () { alert('not reset') };
+		
+	</script>
+
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+<link href="css/ui.all.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body id="body">
+
+<div id="modal-screen" ></div>
+
+<div id="help-screen" ></div>
+
+<div id="detail-screen"></div>
+
+<div id="flythru-screen"></div>
+
+
+<div id="top-bar"></div>
+
+<div id="bottom-bar"></div>
+
+<div id="navigation-screen"></div>
+
+<div id="development-screen"></div>
+
+<div id="popup-message"></div>
+
+<div id="drop-screen"></div>
+
+</body>
+</html>
+    

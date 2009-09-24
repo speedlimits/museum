@@ -31,6 +31,10 @@
  */
 #ifndef _SIRIKATA_PROXY_CREATION_LISTENER_HPP_
 #define _SIRIKATA_PROXY_CREATION_LISTENER_HPP_
+
+#include "boost/shared_ptr.hpp"
+#include "Platform.hpp"
+
 namespace Sirikata {
 class ProxyObject;
 

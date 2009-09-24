@@ -1,0 +1,23 @@
+<ul id="bottombar">
+        <li class="topbarbutton" style="background-position-y: 0px;" onClick="help()" /></li>
+        <li class="topbarbutton" style="background-position-y: -34px;" onClick="reset(); " /></li>
+</ul>
+
+<script type="text/javascript">
+
+$('#bottombar').ready( function () {
+
+	
+	$("#bottombar li").bind('mouseover', function(event){
+		$(this).css('background-position-x', '-150px');	
+					
+	});
+	$("#bottombar li").bind('mouseout', function(event){
+		$(this).css('background-position-x', '0px');						
+	});
+	$("#bottombar li").mousedown( function(event){
+		$(this).css('background-position-x', '-300px');						
+	});
+});
+
+</script>

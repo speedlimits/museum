@@ -51,7 +51,7 @@ inline Ogre::Vector3 toOgre(const Sirikata::Vector3f &pos) {
 
 // Ogre uses floating points internally. Base should be equal to the translation of the scene.
 inline Ogre::Vector3 toOgre(const Sirikata::Vector3d &pos, const Sirikata::Vector3d &base) {
-    return (pos - base).convert<Ogre::Vector3>();
+    return (pos - base).downCast<Ogre::Real>().convert<Ogre::Vector3>();
 }
 
 inline Ogre::Vector4 toOgre(const Sirikata::Vector4f &pos) {
@@ -69,6 +69,7 @@ inline Ogre::ColourValue toOgreRGB(const Sirikata::Color &rgb) {
 inline Ogre::ColourValue toOgreRGBA(const Sirikata::Color &rgb, float32 alpha) {
     return rgb.convert<Ogre::ColourValue>();
 }
+
 
 inline Sirikata::Quaternion fromOgre(const Ogre::Quaternion &quat) {
     return Sirikata::Quaternion(quat.x,quat.y,quat.z,quat.w,Quaternion::XYZW());
@@ -93,6 +94,23 @@ inline Sirikata::ColorAlpha fromOgreRGBA(const Ogre::ColourValue &rgba) {
 inline Sirikata::Color fromOgreRGB(const Ogre::ColourValue &rgba) {
     return Sirikata::Color(rgba.r,rgba.g,rgba.b);
 }
+
+template<typename real>
+inline Sirikata::BoundingBox<real> fromOgre(const Ogre::AxisAlignedBox &obox) {
+    return Sirikata::BoundingBox<real>(
+        Vector3<real>(obox.getMinimum().x, obox.getMinimum().y, obox.getMinimum().z),
+        Vector3<real>(obox.getMaximum().x, obox.getMaximum().y, obox.getMaximum().z)
+    );
 }
+
+template<typename real>
+inline Sirikata::BoundingSphere<real> fromOgre(const Ogre::Sphere &osph) {
+    return Sirikata::BoundingSphere<real>(
+        Vector3<real>(osph.getCenter().x, osph.getCenter().y, osph.getCenter().z),
+        osph.getRadius()
+    );
 }
+
+} // namespace Graphics
+} // namespace Sirikata
 #endif

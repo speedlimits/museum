@@ -37,9 +37,10 @@
 #include <util/ListenerProvider.hpp>
 #include <oh/TimeSteppedQueryableSimulation.hpp>
 #include <oh/ProxyObject.hpp>
-#include <OgrePrerequisites.h>
+#include "OgreHeaders.hpp"
 #include <OgreResourceManager.h>
 #include <OgrePixelFormat.h>
+#include "WebViewManager.hpp"
 //Thank you Apple:
 // /System/Library/Frameworks/CoreServices.framework/Headers/../Frameworks/CarbonCore.framework/Headers/MacTypes.h
 #ifdef nil
@@ -97,6 +98,7 @@ class OgreSystem: public TimeSteppedQueryableSimulation {
     friend class Entity; //Entity will insert/delete itself from these arrays.
     friend class CameraEntity; //CameraEntity will insert/delete itself from the scene cameras array.
     OptionValue*mWindowWidth;
+    OptionValue*mCompositors;
     OptionValue*mWindowHeight;
     OptionValue*mWindowDepth;
     OptionValue*mFullScreen;
@@ -130,6 +132,9 @@ class OgreSystem: public TimeSteppedQueryableSimulation {
                      Vector3f &returnNormal,
                      int which=0) const;
 public:
+    String getCompositors() {
+        return mCompositors->as<String>();
+    }
     bool forwardMessagesTo(MessageService*){return false;}
     bool endForwardingMessagesTo(MessageService*){return false;}
     /**
@@ -215,6 +220,17 @@ public:
     Ogre::SceneManager* getSceneManager();
     virtual void createProxy(ProxyObjectPtr p);
     virtual void destroyProxy(ProxyObjectPtr p);
+    //String mDumbMsg;
+    String oldMsg;
+    virtual void exchangeDumbMsg(String& s) {
+//        String temp = s;
+        if (s != "" && s != oldMsg) {
+//        mDumbMsg=temp;
+            std::cout << "dumbMsg Ogre: " << s << std::endl;
+            WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
+            oldMsg=s;
+        }
+    };
     ~OgreSystem();
 };
 

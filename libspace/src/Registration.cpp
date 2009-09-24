@@ -84,26 +84,7 @@ void Registration::asyncRegister(const RoutableMessageHeader&header,const Routab
                 newObj.requested_object_loc().SerializeToString(&obj_loc_string);
                 retObj.mutable_location().ParseFromString(obj_loc_string);
                 retObj.set_bounding_sphere(newObj.bounding_sphere());
-                if (private_object_evidence.getArray()[0]==private_object_evidence.getArray()[1]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[2]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[3]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[4]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[5]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[6]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[7]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[8]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[9]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[10]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[11]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[12]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[13]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[14]&&
-                    private_object_evidence.getArray()[1]==private_object_evidence.getArray()[15]&&
-                    private_object_evidence.getArray()[0]!=0) {
-                    retObj.set_object_reference(private_object_evidence);                    
-                }else {
-                    retObj.set_object_reference(UUID(SHA256::computeDigest(evidence,sizeof(evidence)).rawData().begin(),UUID::static_size));
-                }
+                retObj.set_object_reference(private_object_evidence);                    
                 destination_header.set_destination_object(header.source_object());
                 destination_header.set_destination_port(header.source_port());
                 destination_header.set_source_object(ObjectReference::spaceServiceID());

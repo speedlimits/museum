@@ -47,6 +47,7 @@ namespace Transfer {
 // should really be a config option.
 //#define NUM_WORKER_THREADS 10
 
+
 /// Disk Cache keeps track of what files are on disk, and manages a helper thread to retrieve it.
 class SIRIKATA_EXPORT DiskCacheLayer : public CacheLayer {
 public:
@@ -67,7 +68,7 @@ private:
 
 	struct DiskRequest;
 	ThreadSafeQueue<std::tr1::shared_ptr<DiskRequest> > mRequestQueue; // must be initialized before the thread.
-	boost::thread mWorkerThread;
+	boost::thread *mWorkerThread;
 
 	CacheMap mFiles;
 
@@ -168,11 +169,11 @@ public:
 
 	DiskCacheLayer(CachePolicy *policy, const std::string &prefix, CacheLayer *tryNext)
 			: CacheLayer(tryNext),
-			mWorkerThread(std::tr1::bind(&DiskCacheLayer::workerThread, this)),
-			mFiles(this, policy),
+			mFiles(NULL, policy),
 			mPrefix(prefix+"/"),
 			mCleaningUp(false) {
-
+		mFiles.setOwner(this);
+		mWorkerThread=new boost::thread(std::tr1::bind(&DiskCacheLayer::workerThread, this));
 		try {
 			unserialize();
 		} catch (...) {
@@ -189,7 +190,7 @@ public:
 		destroyCV.wait(sleep_cv); // we know the thread has terminated.
 
 		mCleaningUp = true; // don't allow destroyCacheEntry to delete files.
-
+		delete mWorkerThread;
 	}
 
 	virtual void purgeFromCache(const Fingerprint &fileId) {
@@ -225,5 +226,6 @@ public:
 
 }
 }
+
 
 #endif /* SIRIKATA_DiskCache_HPP__ */
