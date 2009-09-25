@@ -12,7 +12,7 @@
     <script type="text/javascript" src="js/jquery.selectboxes.min.js"></script>
 	<script type="text/javascript" src="js/jquery.geturlparam.js"></script>
 	<script type="text/javascript" src="js/jquery-timedLogout.js"></script>
-
+	<script type="text/javascript" src="js/jquery-animatecolor.js"></script>
 <script type="text/javascript">
 
 
@@ -27,7 +27,7 @@
 		
 		function timedReset() {
 		        $(document).timedLogout({
-		                inactivity: 120000, 
+		                inactivity: 10*60*1000, 
                      		noconfirm: 10000, 
              		        sessionAlive: false,
              		        redirect_url: ''
@@ -48,21 +48,22 @@
 				loadScreen("#top-bar", "screens/topbar_curator.html");	
 				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 				
-				$("li.topbarbutton").removeClass('sel');
+				//$("li.topbarbutton").removeClass('select');
 				
 				if (mode == 1) { // art 
 					loadScreen("#detail-screen", "screens/curator_art.html");	
-					$("#curatorArt").addClass('sel');
+					//alert($("#curatorArt").addClass("topbarbuttonsel").removeClass('topbarbutton').length);
+				
 				} else if (mode == 2) { // frames 
 					loadScreen("#detail-screen", "screens/curator_frames.html");	
 				} else if (mode == 3) { // walls 
 					loadScreen("#detail-screen", "screens/curator_walls.html");	
-					$("#curatorLight").addClass('sel');
+					$("#curatorLight").class('select');
 				} else if (mode == 4) { // lights 
 					loadScreen("#detail-screen", "screens/curator_lights.html");	
 				} else if (mode == 5) { // save 
 					loadScreen("#detail-screen", "screens/curator_save.html");
-					$("#curatorSave").addClass('sel');
+					$("#curatorSave").addClass('topbarbuttonsel').removeClass('topbarbutton');
 				}
 			}
 		}
@@ -98,7 +99,7 @@
 				} else if (mode == 3) { // picture 
 					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
 				} else if (mode == 4) { // discuss 
-					$("#modal-screen").fadeIn("slow");
+					$("#modal-screen").toggle();
 					
 				}
 			}

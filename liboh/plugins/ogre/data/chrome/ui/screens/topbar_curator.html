@@ -1,24 +1,35 @@
 <ul id="topbar-curator">
-        <li id="curatorArt" class="topbarbutton" style="background-position-x: -118px;" onClick="curatorMode(1);" />&nbsp;</li>
+        <li id="curatorArt" class="topbarbutton" onClick="curatorMode(1);" />&nbsp;</li>
       <!--  <li class="topbarbutton" style="background-position-x: -235px;" onClick="curatorMode(2);" />&nbsp;</li> -->
-        <li id="curatorLight" class="topbarbutton" style="background-position-x: -235px;" onClick="curatorMode(4);" />&nbsp;</li>
+        <li id="curatorLight" class="topbarbutton"  onClick="curatorMode(4);" />&nbsp;</li>
 <!--        <li class="topbarbutton" style="background-position-x: -469px;" onClick="curatorMode(4);" />&nbsp;</li> -->
-        <li id="curatorSave" class="topbarbutton" style="background-position-x: -352px;" onClick="curatorMode(5);" />&nbsp;</li>
+        <li id="curatorSave" class="topbarbutton"  onClick="curatorMode(5);" />&nbsp;</li>
 </ul>
 
 
 <style type="text/css" media="screen"> 
-	#topbar-curator li.topbarbutton:hover{
+	
+	#topbar-curator li.select{
+		background-position-y: -114px;
+		background-color:#099;
+	}
+	li#curatorArt {
+		background-position-x: -118px;
+	}
+	li#curatorLight {
+		background-position-x: -235px;
+	}
+	li#curatorSave {
+		background-position-x: -352px;
+	}
+	#topbar-curator li:hover{
 		background-position-y: -38px;
 	}
 	
-	#topbar-curator li.topbarbutton{
+	li.topbarbutton{
 		background-position-y: 0px;
 	}
 	
-	#topbar-curator li.topbarbutton.sel{
-		background-position-y: -114px;
-	}
 	
 </style>
 
