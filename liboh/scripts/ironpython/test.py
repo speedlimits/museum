@@ -305,6 +305,10 @@ class exampleclass:
                     if DEBUG_OUTPUT: print "PY: curator reset"
                     self.reset_curator()
 
+                if self.mode=="critic":
+                    if DEBUG_OUTPUT: print "PY: curator reset"
+                    self.reset_critic()
+
             else:
                 print "PY: unknown JavascriptMessage:", tok
 
