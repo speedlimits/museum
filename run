@@ -12,7 +12,7 @@ if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru
     exit()
 
 def check_for_proc(proc):
-    sin, sout = os.popen2("ps -af")
+    sin, sout = os.popen2("ps ax")
     s = sout.read()
 ##    print s
     procs = s.split("\n")
@@ -20,9 +20,16 @@ def check_for_proc(proc):
     for p in procs:
         w = p.split()
         if proc in w:
-            running=int(w[1])
+            running=int(w[0])
 ##    print "check_for_proc", proc, "returns:", running
     return running
+
+#
+# run local HTTP server
+#
+if not check_for_proc("http_server.py"):
+    cmd = 'cd cdn; xterm -e "python http_server.py -p 8000 ." &'
+    os.system(cmd)
 
 #
 # Check for executable version
