@@ -243,7 +243,7 @@ class exampleclass:
                     header.destination_object = util.tupleFromUUID(self.objid)
                     HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
-            elif tok[0]=="funmode":
+            elif tok[0]=="funmode" and self.mode=="funmode":
                 if tok[1]=="fire":
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s
                     ammo = tok[2] + "_" + str(self.ammoNum)
