@@ -1139,7 +1139,8 @@ private:
         double x,y,z;
         std::string w("");
         /// if feasible, use Eulers: (not feasible == potential gimbal confusion)
-        if (!quat2Euler(loc.getOrientation(), x, z, y)) {
+        /// forcing Quats for now because I need quaternions for initial condition reset
+        if (1) {//(!quat2Euler(loc.getOrientation(), x, z, y)) {
             x=loc.getOrientation().x;
             y=loc.getOrientation().y;
             z=loc.getOrientation().z;

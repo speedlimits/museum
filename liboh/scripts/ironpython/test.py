@@ -112,6 +112,10 @@ class exampleclass:
             self.reset_curator()
 
     def reset_funmode(self):
+        if DEBUG_OUTPUT: print "PY dbm debug: reset_funmode objects length:", len(self.objects)
+        #reposition avatar
+        self.setPosition(objid=self.objects["Avatar_fun"], position = (-13.16,-1.4,-4.22), orientation = (0,-.84,0.02,.54),
+                     velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
         #initialize Jscript
         body = pbSiri.MessageBody()
         body.message_names.append("EvaluateJavascript")
@@ -124,17 +128,24 @@ class exampleclass:
             HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def reset_curator(self):
-        print "PY dbm debug: reset_curator objects length:", len(self.objects)
+        if DEBUG_OUTPUT: print "PY dbm debug: reset_curator objects length:", len(self.objects)
+        if "Avatar" in self.objects:
+            self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.4,-4.22), orientation = (0,-.84,0.02,.54),
+                         velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
         for art, uid in self.objects.items():
             print "PY dbm debug reset_curator art, uid:", art, uid
             if art[:8]=="artwork_":
                 self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
-    pinstate = {
-        "pin_1": ((-24.3, -6.35, -16.91), Euler2QuatPYR(-0.01, -50.61, -0.01) ),
-        "pin_2": ((-23.66,-3.85,-17.3), Euler2QuatPYR(0,-46.63,-0.01)),
-        "pin_3": ((-23.36,-6.35,-18.02), Euler2QuatPYR(0,-50.91,0))
-        }
+    def reset_critic(self):
+        if DEBUG_OUTPUT: print "PY dbm debug: reset_critic objects length:", len(self.objects)
+        if "Avatar" in self.objects:
+            self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.4,-4.22), orientation = (0,-.84,0.02,.54),
+                         velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
+        for art, uid in self.objects.items():
+            print "PY dbm debug reset_curator art, uid:", art, uid
+            if art[:8]=="artwork_":
+                self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
         print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
@@ -283,8 +294,6 @@ class exampleclass:
                             self.setPosition(objid=uid, position = (i,-10,0), orientation = (0,0,0,1),
                                  velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
                             i+=1
-                    self.setPosition(objid=self.objects["Avatar_fun"], position = (-9,-1.4,2.5), orientation = (0,0,0,1),
-                                 velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
                     self.reset_funmode()
                 if self.mode=="curator":
                     if DEBUG_OUTPUT: print "PY: curator reset"
