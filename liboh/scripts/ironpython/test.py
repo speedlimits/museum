@@ -111,10 +111,14 @@ class exampleclass:
         if self.mode=="curator":
             self.reset_curator()
 
+    gamenum=0.0
     def reset_funmode(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_funmode objects length:", len(self.objects)
+        self.gamenum += 0.5     #please don't ask
         #reposition avatar
-        self.setPosition(objid=self.objects["Avatar_fun"], position = (-13.16,-1.4,-4.22), orientation = (0,-.84,0.02,.54),
+        if "Avatar_fun" in self.objects:
+            if DEBUG_OUTPUT: print "PY dbm debug reset_funmode Avatar_fun"
+            self.setPosition(objid=self.objects["Avatar_fun"], position = (-13.16,-1.4,-4.22), orientation = (0,-.86,0.0,.51),
                      velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
         #initialize Jscript
         body = pbSiri.MessageBody()
@@ -130,17 +134,19 @@ class exampleclass:
     def reset_curator(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_curator objects length:", len(self.objects)
         if "Avatar" in self.objects:
-            self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.4,-4.22), orientation = (0,-.84,0.02,.54),
+            if DEBUG_OUTPUT: print "PY dbm debug reset_curator Avatar"
+            self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.0,-4.22), orientation = (0,-.86,0.0,.51),
                          velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
         for art, uid in self.objects.items():
-            print "PY dbm debug reset_curator art, uid:", art, uid
             if art[:8]=="artwork_":
+                if DEBUG_OUTPUT: print "PY dbm debug reset_curator art, uid:", art, uid
                 self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
     def reset_critic(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_critic objects length:", len(self.objects)
         if "Avatar" in self.objects:
-            self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.4,-4.22), orientation = (0,-.84,0.02,.54),
+            if DEBUG_OUTPUT: print "PY dbm debug reset_critic Avatar"
+            self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.0,-4.22), orientation = (0,-.86,0.0,.51),
                          velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
         for art, uid in self.objects.items():
             print "PY dbm debug reset_curator art, uid:", art, uid
@@ -315,7 +321,7 @@ class exampleclass:
                         body = pbSiri.MessageBody()
                         body.message_names.append("EvaluateJavascript")
                         if len(self.arthits) > self.oldhits:
-                            msg = 'popUpMessage("score: ' + str(len(self.arthits)) + '", 10, 10);'
+                            msg = 'popUpMessage("game: ' + str(int(self.gamenum)) + ' score: ' + str(len(self.arthits)) + '", 10, 10);'
                             body.message_arguments.append(msg)
                             header = pbHead.Header()
                             header.destination_space = util.tupleFromUUID(self.spaceid)
