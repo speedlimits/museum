@@ -138,6 +138,7 @@ OgreSystem::OgreSystem():mLastFrameTime(Task::LocalTime::now()),mFloatingPointOf
     mRenderTarget=NULL;
     mMouseHandler=NULL;
     mRayQuery=NULL;
+    quitRequest=false;
 }
 namespace {
 class FrequencyType{public:
@@ -993,6 +994,7 @@ bool OgreSystem::tick(){
     Meru::SequentialWorkQueue::getSingleton().dequeuePoll();
     Meru::SequentialWorkQueue::getSingleton().dequeueUntil(finishTime);
 
+    if (quitRequest) continueRendering=false;
     return continueRendering;
 }
 void OgreSystem::preFrame(Task::LocalTime currentTime, Duration frameTime) {

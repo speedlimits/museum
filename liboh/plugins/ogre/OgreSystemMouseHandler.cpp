@@ -1637,6 +1637,10 @@ private:
             ss << "inventory placeObject artwork_0" << pic << " 400 300";
             inventoryHandler(act, ss.str());
         }
+        
+        if (num==-1) {
+            mParent->quitRequest=true;
+        }
     }
 
     /// WebView Actions
@@ -3142,6 +3146,7 @@ public:
         mInputResponses["debugAction1"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 1));
         mInputResponses["debugAction2"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 2));
         mInputResponses["debugAction3"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, 3));
+        mInputResponses["quitAction"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::debugAction, this, -1));
 
         mInputResponses["webNewTab"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateNewTab));
         mInputResponses["webBack"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateBack));
@@ -3225,6 +3230,7 @@ public:
         if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_MINUS), mInputResponses["debugAction1"]);
         if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_EQUALS), mInputResponses["debugAction2"]);
         if(DEV) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_F10), mInputResponses["debugAction3"]);
+        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Q, Input::MOD_CTRL|Input::MOD_SHIFT), mInputResponses["quitAction"]);
 
         // WebView Chrome
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
