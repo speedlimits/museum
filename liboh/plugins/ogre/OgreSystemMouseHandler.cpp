@@ -588,7 +588,6 @@ private:
             mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
 //            }
             if (mouseOver) {
-                std::cout << "dbm debug mode : " << getMode() << " != " << (getMode() != "funmode") << std::endl;
                 if (isArtWork(mouseOver) && (getMode() != "funmode")) {
                     mSelectedObjects.insert(mouseOver->getProxyPtr());
                     mouseOver->setSelected(true);
@@ -1010,7 +1009,6 @@ private:
 
     //--------------------------------------------------------------------------
     void setCameraSpeed(const float& speed) {
-        std::cout << "dbm debug setCameraSpeed " << speed << std::endl;
         mCamSpeed = speed;
     }
 
@@ -1356,7 +1354,6 @@ private:
         EventResponse browser_resp = WebViewManager::getSingleton().onMouseClick(mouseev);
 
         if (mWebViewActiveButtons.find(mouseev->mButton) != mWebViewActiveButtons.end()) {
-            std::cout << "dbm debug mouseClickHandler cancelled due to ActiveButtons" << std::endl;
             mWebViewActiveButtons.erase(mouseev->mButton);
             return EventResponse::cancel();
         }
@@ -1685,7 +1682,6 @@ private:
             orientation.x <<" "<< orientation.y <<" "<< orientation.z <<" "<< orientation.w;
         }
         else if (tok=="saveState") {
-            std::cout << "dbm debug inventoryHandler add mood" << std::endl;
             fullmsg << arg << " " << getMoodStringForSaving();
         }
         else if (tok=="loadState") {

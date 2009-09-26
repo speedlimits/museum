@@ -366,7 +366,7 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
                            mOgreRootDir=new OptionValue("ogretoplevel",".",OptionValueType<String>(),"Directory with ogre plugins"),
                            ogreSceneManager=new OptionValue("scenemanager","OctreeSceneManager",OptionValueType<String>(),"Which scene manager to use to arrange objects"),
                            mWindowWidth=new OptionValue("windowwidth","1336",OptionValueType<uint32>(),"Window width"),
-                           mFullScreen=new OptionValue("fullscreen","false",OptionValueType<bool>(),"Fullscreen"),
+                           mFullScreen=new OptionValue("fullscreen","true",OptionValueType<bool>(),"Fullscreen"),
                            mWindowHeight=new OptionValue("windowheight","768",OptionValueType<uint32>(),"Window height"),
                            mWindowDepth=new OptionValue("colordepth","8",OgrePixelFormatParser(),"Pixel color depth"),
                            renderBufferAutoMipmap=new OptionValue("rendertargetautomipmap","false",OptionValueType<bool>(),"If the render target needs auto mipmaps generated"),

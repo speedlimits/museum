@@ -17,7 +17,7 @@ import time
 
 import blog
 
-DEBUG_OUTPUT=True
+DEBUG_OUTPUT=False
 DEG2RAD = 0.0174532925
 
 #picture placement for fun mode (get it from critic output)
@@ -153,7 +153,6 @@ class exampleclass:
             self.setPosition(objid=self.objects["Avatar"], position = (-13.16,-1.0,-4.22), orientation = (0,-.86,0.0,.51),
                          velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
         for art, uid in self.objects.items():
-            print "PY dbm debug reset_curator art, uid:", art, uid
             if art[:8]=="artwork_":
                 self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
