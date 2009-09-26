@@ -1255,7 +1255,9 @@ private:
                 buttonev->mButton != SDL_SCANCODE_RIGHT &&
                 buttonev->mButton != SDL_SCANCODE_PAGEUP &&
                 buttonev->mButton != SDL_SCANCODE_PAGEDOWN &&
-                buttonev->mButton != SDL_SCANCODE_SPACE) {
+                buttonev->mButton != SDL_SCANCODE_SPACE &&
+                buttonev->mButton != SDL_SCANCODE_Q
+           ) {
             EventResponse browser_resp = WebViewManager::getSingleton().onButton(buttonev);
             if (browser_resp == EventResponse::cancel()) {
                 return EventResponse::cancel();
