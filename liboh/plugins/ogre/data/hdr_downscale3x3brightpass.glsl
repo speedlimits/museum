@@ -3,7 +3,7 @@ uniform sampler2D inLum;
 uniform vec2 texelSize;
 
 varying vec2 uv;
-const vec4 BRIGHT_LIMITER = vec4(0.6, 0.6, 0.6, 0.0);
+const vec4 BRIGHT_LIMITER = vec4(1.0, 1.0, 1.0, 0.0);
 
 // declare external function
 vec4 toneMap(in vec4 inColour, in float lum);

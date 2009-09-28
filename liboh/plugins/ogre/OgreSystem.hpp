@@ -131,6 +131,7 @@ class OgreSystem: public TimeSteppedQueryableSimulation {
                      double &returnResult,
                      Vector3f &returnNormal,
                      int which=0) const;
+    bool quitRequest;
 public:
     String getCompositors() {
         return mCompositors->as<String>();

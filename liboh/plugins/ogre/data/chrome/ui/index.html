@@ -112,6 +112,9 @@
 				loadScreen("#modal-screen", "screens/flythru_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				
 			}
 		}
@@ -125,6 +128,9 @@
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
 //			        timedReset(); 
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				hideScreen("#modal-screen");
 				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 			}
@@ -184,25 +190,27 @@
 		}
 	
 		$(document).ready( function () {
-									 
-			try {
-				Client.event("navcommand", "reset " + $.getURLParam('mode'));
-			} catch (err) {debug('set mode failed');}
-			
+									 			
 			if ($.getURLParam('mode') == "curator") {
-//				Client.event("navcommand", "reset curator");
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critic") {
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				setTimeout('critiqueMode() ', 1000);
 			} else if ($.getURLParam('mode') == "flythru") {
 				setTimeout('flythruMode() ', 1000);
 			} else if ($.getURLParam('mode') == "funmode") {
 				setTimeout('funMode() ', 1000);
 			} else {
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				setTimeout('loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
 			}
-			 
-									 
 		});
 		
 		var galleryWasLoaded = false;

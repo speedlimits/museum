@@ -110,7 +110,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     //    std::cout << "dbm debug calling chromeWebView:" << ss.str() << std::endl;
         char s[100];
         sprintf(s, "ui/index.html?mode=%s", mode);
-        std::cout << "dbm debug calling chromeWebView:" << s << std::endl;
+//        std::cout << "dbm debug calling chromeWebView:" << s << std::endl;
 //        chromeWebView->loadFile(ss.str());
         chromeWebView->loadFile(s);
 //        }
@@ -860,8 +860,9 @@ static int InputButtonToAwesomiumButton(int32 input_button) {
         return LeftMouseButton;
       case 2:
         return MiddleMouseButton;
-      case 3:
-        return RightMouseButton;
+/// disable all right-click stuff
+//      case 3:
+//        return RightMouseButton;
       default:
         return UnknownMouseButton;
     }
