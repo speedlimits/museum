@@ -191,7 +191,7 @@ ul#topbar-critique {
 	display: none;
 	position: absolute;
 	bottom: 48px;
-
+font-weight: bold;
 	left: 328px;
 	width: 765px;
 	height: 80px;

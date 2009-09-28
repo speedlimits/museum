@@ -9,10 +9,11 @@
 
 <style type="text/css" media="screen"> 
 	
-	#topbar-curator li.select{
+	li#curatorArt.select, li#curatorLight.select, li#curatorSave.select{
 		background-position-y: -114px;
-		background-color:#099;
+	
 	}
+	
 	li#curatorArt {
 		background-position-x: -118px;
 	}
@@ -48,6 +49,14 @@ $('#topbar-curator').ready( function () {
 	$("#topbar-curator li.topbarbutton").mousedown( function(event){
 		$(this).css('background-position-y', '-76px');						
 	});
+	
+	if (mode == 1) {
+		$("#curatorArt").addClass("select");
+	} else if (mode==4) {
+		$("#curatorLight").addClass("select");
+	} else if (mode==5) {
+		$("#curatorSave").addClass("select");
+	}
 });
 
 </script>
