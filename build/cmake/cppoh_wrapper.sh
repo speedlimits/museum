@@ -28,7 +28,7 @@ usage () {
 export CPPOH_D_WRAPPER=true
 want_valgrind=0
 want_debug=0
-want_interactive=1
+want_interactive=0
 while [ $# -gt 0 ]; do
   case "$1" in
     cppoh_d | cppoh | proximity_d | proximity | space | space_d )

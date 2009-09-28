@@ -88,6 +88,7 @@ if not "SUCCESS" in s:
 # Run our object host
 #
 
-cmd = "cd build/cmake; ./" + executable + " --db ../../" + fout
+cmd = "cd build/cmake; ./" + executable + " --db ../../" + fout + ' > "' + time.ctime() + '.log" 2>&1'
+
 print cmd
 os.system(cmd)
