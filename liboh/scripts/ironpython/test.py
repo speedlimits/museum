@@ -300,7 +300,7 @@ class exampleclass:
                                 uid = self.objects[nam]
                                 self.setPosition(objid=uid, position = pos, orientation = rot,
                                      velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
-                    print "PY debug: total artwork repositioned:", count
+                    if DEBUG_OUTPUT: print "PY debug: total artwork repositioned:", count
                     i=0
                     for ammo in self.objects:
                         print "PY checking for ammo:", ammo
