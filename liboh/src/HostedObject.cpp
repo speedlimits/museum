@@ -841,7 +841,7 @@ void HostedObject::processRoutableMessage(const RoutableMessageHeader &header, M
     }
     {
         std::ostringstream os;
-        os << "** Message from: " << header.source_object() << " port " << header.source_port() << " to "<<myself_name<<" port " << header.destination_port();
+//        os << "** Message from: " << header.source_object() << " port " << header.source_port() << " to "<<myself_name<<" port " << header.destination_port();
         SILOG(cppoh,debug,os.str());
     }
     /// Handle Return values to queries we sent to someone:
@@ -942,7 +942,7 @@ void HostedObject::receivedPositionUpdate(
         proxy->resetLocation(objLoc.timestamp(), currentLoc);
     } else {
         std::ostringstream os;
-        os << "Received position update to "<<currentLoc;
+//        os << "Received position update to "<<currentLoc;
         SILOG(cppoh,debug,os.str());
         proxy->setLocation(objLoc.timestamp(), currentLoc);
     }
@@ -992,7 +992,7 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
     }
     else if (name == "SetLoc") {
         ObjLoc setloc;
-        printstr<<"Someone wants to set my position: ";
+//        printstr<<"Someone wants to set my position: ";
         setloc.ParseFromArray(args.data(), args.length());
         if (thisObj) {
             printstr<<setloc.position();

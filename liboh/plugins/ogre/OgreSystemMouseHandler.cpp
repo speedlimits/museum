@@ -3038,7 +3038,10 @@ public:
        mLastCameraTime(Task::LocalTime::now()),
        mWhichRayObject(0)
     {
-        mCamSpeed = 1.0;
+        mCamSpeed = 0.3;
+        if (getMode()=="funmode") {
+            mCamSpeed = 1.0;
+        }
         mLastHitCount=0;
         mLastHitX=0;
         mLastHitY=0;
