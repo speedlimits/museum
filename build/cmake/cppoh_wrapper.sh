@@ -61,7 +61,7 @@ if [ $want_debug -eq 1 ] ; then
     exit 1
   fi
   tmpfile=`mktemp /tmp/cppoh_dargs.XXXXXX` || { echo "Cannot create temporary file" >&2; exit 1; }
-  trap " [ -f \"$tmpfile\" ] && /bin/rm -f -- \"$tmpfile\"" 0 1 2 3 13 15
+  #trap " [ -f \"$tmpfile\" ] && /bin/rm -f -- \"$tmpfile\"" 0 1 2 3 13 15
 
   # chromium was doing this, but it doesn't preserve quotes properly:
   #echo "set args ${1+"$@"}" > $tmpfile
@@ -79,11 +79,11 @@ if [ $want_debug -eq 1 ] ; then
   echo "run" >> $tmpfile
   if [ $want_interactive -ne 1 ] ; then
     echo "bt" >> $tmpfile
-    echo "thread apply all bt full no registers" >> $tmpfile
+    echo "thread apply all bt full" >> $tmpfile
     echo "quit" >> $tmpfile
   fi
-  echo "$GDB $APPDIR/$APPNAME -x $tmpfile -quiet"
-  $GDB "$APPDIR/$APPNAME" -x $tmpfile -quiet
+  echo "$GDB $APPDIR/$APPNAME -quiet < $tmpfile"
+  $GDB "$APPDIR/$APPNAME" -quiet < $tmpfile
   exit $?
 else
   if [ $want_valgrind -eq 1 ] ; then
