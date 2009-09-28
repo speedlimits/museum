@@ -42,14 +42,14 @@ ul#topbar-critique {
 	height: 37px;
 	padding: 0 118px;
 	margin:0 ;
-	background: url(../images/critique_menu.png) no-repeat;
+	background: url(../images/critique_menu2.png) no-repeat;
 	list-style: none;
 }
 #topbar-critique li {
 	float:left;
 	margin:0 ;/*15px;*/
 	padding:0;
-	background: url(../images/critique_menu.png);
+	background: url(../images/critique_menu2.png);
 	height: 37px;
 	width: 117px;
 	text-align: center;

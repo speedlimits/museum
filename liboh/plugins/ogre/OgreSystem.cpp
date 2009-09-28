@@ -138,6 +138,7 @@ OgreSystem::OgreSystem():mLastFrameTime(Task::LocalTime::now()),mFloatingPointOf
     mRenderTarget=NULL;
     mMouseHandler=NULL;
     mRayQuery=NULL;
+    quitRequest=false;
 }
 namespace {
 class FrequencyType{public:
@@ -354,7 +355,7 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
     OptionValue*transferManager,*workQueue,*eventManager;
     OptionValue*grabCursor;
     InitializeClassOptions("ogregraphics",this,
-                           mCompositors=new OptionValue("compositors","Bloom2",OptionValueType<String>(),"Set of active compositors"),
+                           mCompositors=new OptionValue("compositors","",OptionValueType<String>(),"Set of active compositors"),
                            pluginFile=new OptionValue("pluginfile","plugins.cfg",OptionValueType<String>(),"sets the file ogre should read options from."),
                            configFile=new OptionValue("configfile","ogre.cfg",OptionValueType<String>(),"sets the ogre config file for config options"),
                            ogreLogFile=new OptionValue("logfile","Ogre.log",OptionValueType<String>(),"sets the ogre log file"),
@@ -365,7 +366,7 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
                            mOgreRootDir=new OptionValue("ogretoplevel",".",OptionValueType<String>(),"Directory with ogre plugins"),
                            ogreSceneManager=new OptionValue("scenemanager","OctreeSceneManager",OptionValueType<String>(),"Which scene manager to use to arrange objects"),
                            mWindowWidth=new OptionValue("windowwidth","1336",OptionValueType<uint32>(),"Window width"),
-                           mFullScreen=new OptionValue("fullscreen","false",OptionValueType<bool>(),"Fullscreen"),
+                           mFullScreen=new OptionValue("fullscreen","true",OptionValueType<bool>(),"Fullscreen"),
                            mWindowHeight=new OptionValue("windowheight","768",OptionValueType<uint32>(),"Window height"),
                            mWindowDepth=new OptionValue("colordepth","8",OgrePixelFormatParser(),"Pixel color depth"),
                            renderBufferAutoMipmap=new OptionValue("rendertargetautomipmap","false",OptionValueType<bool>(),"If the render target needs auto mipmaps generated"),
@@ -993,6 +994,7 @@ bool OgreSystem::tick(){
     Meru::SequentialWorkQueue::getSingleton().dequeuePoll();
     Meru::SequentialWorkQueue::getSingleton().dequeueUntil(finishTime);
 
+    if (quitRequest) continueRendering=false;
     return continueRendering;
 }
 void OgreSystem::preFrame(Task::LocalTime currentTime, Duration frameTime) {

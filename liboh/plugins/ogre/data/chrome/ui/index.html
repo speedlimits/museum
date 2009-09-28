@@ -98,7 +98,7 @@
 				} else if (mode == 3) { // picture 
 					$("#detail-screen").html("<iframe width='90%' height='90%' style='border: none; margin: 16px;' src='http://www.dennisschaaf.com/bornholm/?" + c2 + "&embedded=true'></iframe>").fadeIn("slow");;
 				} else if (mode == 4) { // discuss 
-					$("#modal-screen").fadeIn("slow");
+					$("#modal-screen").toggle();
 					
 				}
 			}
@@ -111,6 +111,9 @@
 				loadScreen("#modal-screen", "screens/flythru_welcome.html");
 			} else {
 				hideScreen("#modal-screen");
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				
 			}
 		}
@@ -124,6 +127,9 @@
 				loadScreen("#modal-screen", "screens/fun_welcome.html");
 			} else {
 //			        timedReset(); 
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				hideScreen("#modal-screen");
 				loadScreen("#bottom-bar", "screens/bottombar.html"); 
 			}
@@ -183,25 +189,27 @@
 		}
 	
 		$(document).ready( function () {
-									 
-			try {
-				Client.event("navcommand", "reset " + $.getURLParam('mode'));
-			} catch (err) {debug('set mode failed');}
-			
+									 			
 			if ($.getURLParam('mode') == "curator") {
-//				Client.event("navcommand", "reset curator");
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				setTimeout('curatorMode(); ', 1000);
 			} else if ($.getURLParam('mode') == "critic") {
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				setTimeout('critiqueMode() ', 1000);
 			} else if ($.getURLParam('mode') == "flythru") {
 				setTimeout('flythruMode() ', 1000);
 			} else if ($.getURLParam('mode') == "funmode") {
 				setTimeout('funMode() ', 1000);
 			} else {
+				try {
+					Client.event("navcommand", "reset " + $.getURLParam('mode'));
+				} catch (err) {debug('set mode failed');}									 
 				setTimeout('loadScreen("#modal-screen", "screens/welcome.html"); ', 1000);
 			}
-			 
-									 
 		});
 		
 		var galleryWasLoaded = false;
