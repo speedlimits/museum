@@ -1,24 +1,50 @@
 <ul id="topbar-critique">
-        <li class="topbarbutton" style="background-position-x: -118px; width:234px;" onClick="critiqueMode(4);" />&nbsp;</li>
+        <li id="criticComment" class="topbarbutton" style="background-position-x: -118px; width:234px;" onClick="critiqueMode(4);" />&nbsp;</li>
         <!--<li class="topbarbutton" style="background-position-x: -235px;" onClick="critiqueMode(4);" />&nbsp;</li>
         <li class="topbarbutton" style="background-position-x: -352px;" onClick="critiqueMode();" />&nbsp;</li>-->
 </ul>
-
+<style type="text/css" media="screen"> 
+	
+	li#criticComment.select{
+		background-position-y: -114px;
+	
+	}
+	
+	li#criticComment {
+		background-position-x: -118px;
+	}
+	
+	#topbar-critic li:hover{
+		background-position-y: -38px;
+	}
+	
+	li.topbarbutton{
+		background-position-y: 0px;
+	}
+	
+	
+</style>
 <script type="text/javascript">
 
 $('#topbar-critique').ready( function () {
 
 	
-	$("#topbar-critique li.topbarbutton").bind('mouseover', function(event){
+	/*$("#topbar-critique li.topbarbutton").bind('mouseover', function(event){
 		$(this).css('background-position-y', '-38px');	
 					
 	});
 	$("#topbar-critique li.topbarbutton").bind('mouseout', function(event){
 		$(this).css('background-position-y', '0px');						
-	});
+	}); */
 	$("#topbar-critique li.topbarbutton").mousedown( function(event){
 		$(this).css('background-position-y', '-76px');						
 	});
+	
+	
+	if (!$("#modal-screen").is(":hidden") && mode == 4) {
+		$("#criticComment").addClass("select");
+
+	} 
 });
 
 </script>
