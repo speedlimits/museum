@@ -773,8 +773,10 @@ void WebView::injectTextEvent(std::string utf8) {
 #ifdef HAVE_AWESOMIUM
 	wchar_t *outchars = new wchar_t[utf8.size()+1];
 	size_t len = mbstowcs(outchars, utf8.c_str(), utf8.size());
-	std::wstring widestr(outchars, len);
-	webView->injectTextEvent(widestr);
+    if (len!=(size_t)-1) {
+        std::wstring widestr(outchars, len);
+        webView->injectTextEvent(widestr);
+    }
 #endif
 }
 
