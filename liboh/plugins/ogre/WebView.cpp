@@ -777,6 +777,7 @@ void WebView::injectTextEvent(std::string utf8) {
         std::wstring widestr(outchars, len);
         webView->injectTextEvent(widestr);
     }
+    delete []outchars;
 #endif
 }
 
