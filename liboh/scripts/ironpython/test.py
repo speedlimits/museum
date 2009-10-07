@@ -165,6 +165,13 @@ class exampleclass:
             if art[:8]=="artwork_":
                 self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
+    def reset_flythru(self):
+        if DEBUG_OUTPUT: print "PY dbm debug: reset_flythru objects length:", len(self.objects)
+        #close the doors
+        self.setPosition(objid=self.objects["b7_firedoor_door"], position = (-14.9, -1.16, -4.41))
+        self.setPosition(objid=self.objects["entry_door_01"], orientation = (0,0,0,1))
+        self.setPosition(objid=self.objects["entry_door_02"], orientation = (0,0,0,1))
+
     def reallyProcessRPC(self,serialheader,name,serialarg):
         if DEBUG_OUTPUT: print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
         header = pbHead.Header()
@@ -328,20 +335,37 @@ class exampleclass:
                     if DEBUG_OUTPUT: print "PY: curator reset"
                     self.reset_critic()
 
+                if self.mode=="flythru":
+                    if DEBUG_OUTPUT: print "PY: flythru reset"
+                    self.reset_flythru()
+
             elif tok[0]=="flythru":
                 if tok[1]=="animation":
                     door = "b7_firedoor_door"
-                    if tok[2]=="doors_open_start":
-                        print "PY: Doors open start"
+                    left = "entry_door_01"
+                    right = "entry_door_02"
+                    if tok[2]=="gallery_open_start":
+                        print "PY: Gallery doors open start"
                         if door in self.objects:
                             print "    -- got the door!", self.objects[door]
                             zmove = 1.0/float(tok[3])
                             xmove = zmove * -.08
                             self.setPosition(objid=self.objects[door], velocity = (xmove,0,zmove))
-                    elif tok[2]=="doors_open_finish":
+                    elif tok[2]=="gallery_open_finish":
                         if door in self.objects:
                             self.setPosition(objid=self.objects[door], velocity = (0,0,0))
-                        print "PY: Doors open finish"
+                        print "PY: Gallery doors open finish"
+                    elif tok[2]=="front_open_start":
+                        print "PY: front doors open start"
+                        if left in self.objects and right in self.objects:
+                            speed = 1.0/float(tok[3])
+                            self.setPosition(objid=self.objects[left], axis = (0,1,0), angular_speed=speed)
+                            self.setPosition(objid=self.objects[right], axis = (0,1,0), angular_speed=-speed)
+                    elif tok[2]=="front_open_finish":
+                        print "PY: front doors open finish"
+                        if left in self.objects and right in self.objects:
+                            self.setPosition(objid=self.objects[left], axis = (0,1,0), angular_speed=0)
+                            self.setPosition(objid=self.objects[right], axis = (0,1,0), angular_speed=0)
 
             else:
                 print "PY: unknown JavascriptMessage:", tok
