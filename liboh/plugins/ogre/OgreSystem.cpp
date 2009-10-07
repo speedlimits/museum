@@ -338,8 +338,46 @@ std::list<CameraEntity*>::iterator OgreSystem::detachCamera(std::list<CameraEnti
     }
     return mAttachedCameras.end();
 }
+
+String gWidth="1360";
+String gHeight="768";
+String gFullscreen="true";
+String gMode="";
+bool gDebug=false;
+
+void initBornholm() {
+    std::cout << "dbm debug INIT BORNHOLM!!!" << std::endl;
+    String temp;
+    if (gMode=="") {
+        std::ifstream ifs( "mode.txt" );
+        while (getline(ifs, temp)) {
+            int delim = temp.find("=");
+            String cmd = temp.substr(0,delim);
+            String val = temp.substr(delim+1,temp.size()-delim-1);
+            if (cmd=="mode") {
+                gMode=val;
+            }
+            if (cmd=="width") {
+                gWidth=val;
+            }
+            if (cmd=="height") {
+                gHeight=val;
+            }
+            if (cmd=="fullscreen") {
+                if (val=="False") gFullscreen="false";
+            }
+            if (cmd=="debug") {
+                if (val=="True") gDebug=true;
+            }
+        }
+        std::cout << "dbm debug getMode init width " << gWidth <<" height "<<gHeight<<
+                " full "<<gFullscreen<<" debug "<<gDebug<< " mode " << gMode<<std::endl;
+    }
+}
+
 bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const String&options) {
     ++sNumOgreSystems;
+    initBornholm();
     proxyManager->addListener(this);
     //add ogre system options here
     OptionValue*pluginFile;
@@ -365,9 +403,9 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
                            windowTitle=new OptionValue("windowtitle","Sirikata",OptionValueType<String>(),"Window title name"),
                            mOgreRootDir=new OptionValue("ogretoplevel",".",OptionValueType<String>(),"Directory with ogre plugins"),
                            ogreSceneManager=new OptionValue("scenemanager","OctreeSceneManager",OptionValueType<String>(),"Which scene manager to use to arrange objects"),
-                           mWindowWidth=new OptionValue("windowwidth","1360",OptionValueType<uint32>(),"Window width"),
-                           mFullScreen=new OptionValue("fullscreen","false",OptionValueType<bool>(),"Fullscreen"),
-                           mWindowHeight=new OptionValue("windowheight","768",OptionValueType<uint32>(),"Window height"),
+                           mWindowWidth=new OptionValue("windowwidth",gWidth,OptionValueType<uint32>(),"Window width"),
+                           mFullScreen=new OptionValue("fullscreen",gFullscreen,OptionValueType<bool>(),"Fullscreen"),
+                           mWindowHeight=new OptionValue("windowheight",gHeight,OptionValueType<uint32>(),"Window height"),
                            mWindowDepth=new OptionValue("colordepth","8",OgrePixelFormatParser(),"Pixel color depth"),
                            renderBufferAutoMipmap=new OptionValue("rendertargetautomipmap","false",OptionValueType<bool>(),"If the render target needs auto mipmaps generated"),
                            mFrameDuration=new OptionValue("fps","30",FrequencyType(),"Target framerate"),

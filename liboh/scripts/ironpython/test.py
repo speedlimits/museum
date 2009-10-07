@@ -17,7 +17,7 @@ import time
 
 import blog
 
-DEBUG_OUTPUT=True
+DEBUG_OUTPUT=False
 DEG2RAD = 0.0174532925
 
 #picture placement for fun mode (get it from critic output)
@@ -97,7 +97,7 @@ def hexify(s):
 example_singleton=None
 class exampleclass:
     def __init__(self):
-        global example_singleton
+        global example_singleton, DEBUG_OUTPUT
         if example_singleton:
             return example_singleton
         example_singleton=self
@@ -108,7 +108,16 @@ class exampleclass:
         self.arthits=set()
         self.oldhits=0
         f=open("mode.txt")
-        self.mode=f.read().strip()
+        while 1:
+            s = f.readline().strip()
+            if s=="":
+                break
+            w = s.split("=")
+            if w[0]=="mode":
+                self.mode = w[1]
+            if w[0]=="debug":
+                DEBUG_OUTPUT=True if w[1]=="True" else False
+        print "PY: mode=",self.mode
         f.close()
         if self.mode=="funmode":
             self.reset_funmode()
@@ -157,7 +166,7 @@ class exampleclass:
                 self.setPosition(objid=uid, position = (0, -10, 0), orientation = (0,0,0,1) )
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
-        print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
+        if DEBUG_OUTPUT: print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
         header = pbHead.Header()
         header.ParseFromString(util.fromByteArray(serialheader))
         if name == "RetObj":
@@ -303,9 +312,9 @@ class exampleclass:
                     if DEBUG_OUTPUT: print "PY debug: total artwork repositioned:", count
                     i=0
                     for ammo in self.objects:
-                        print "PY checking for ammo:", ammo
+                        if DEBUG_OUTPUT: print "PY checking for ammo:", ammo
                         if ammo[:5] == "ammo_":
-                            print "PY ------- found ammo"
+                            if DEBUG_OUTPUT: print "PY ------- found ammo"
                             uid = self.objects[ammo]
                             self.setPosition(objid=uid, position = (i,-10,0), orientation = (0,0,0,1),
                                  velocity = (0,0,0), axis=(0,1,0), angular_speed=0)

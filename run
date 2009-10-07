@@ -1,12 +1,41 @@
 #!/usr/bin/python
 import sys, os, time
 
+fullscreen=True
+debug=False
+width = 1360
+height = 768
+try:
+    f=open("bornholm.ini")
+    s=f.readline()
+    while s:
+        w = s.strip().split("=")
+        if w[0]=="fullscreen":
+            if w[1]!="true":
+                fullscreen=False
+        if w[0]=="debug":
+            if w[1]=="true":
+                debug=True
+        if w[0]=="resolution":
+            ww=w[1].split(",")
+            width=int(ww[0])
+            height=int(ww[1])
+        s=f.readline()
+except:
+    pass
+
+print "fullscreen:", fullscreen, "width:", width, "height:", height, "debug:", debug
+
 if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru"):
     cmd = "./run scenes/" + sys.argv[1] + ".csv scenes/" + sys.argv[1] + "_env.csv"
     if sys.argv[1] in ("curator", "funmode", "critic"):
         cmd += " scenes/" + sys.argv[1] + "_art.csv"
     f = open("build/cmake/mode.txt", "w")
-    f.write(sys.argv[1] + "\n")
+    f.write("mode=" + sys.argv[1] + "\n")
+    f.write("fullscreen=" + str(fullscreen) + "\n")
+    f.write("width=" + str(width) + "\n");
+    f.write("height=" + str(height) + "\n");
+    f.write("debug=" + str(debug) + "\n")
     f.close()
     os.system(cmd)
     exit()

@@ -65,7 +65,7 @@ static WebViewCoord InputCoordToWebViewCoord(EventPtrType evt, float x, float y)
 static unsigned int InputKeyToAwesomiumKey(SDL_scancode scancode, bool& numpad);
 static int InputModifiersToAwesomiumModifiers(Modifier mod, bool numpad);
 
-
+extern String gMode;
 
 WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* inputMgr, const std::string &baseDirectory)
     : webCore(0), focusedWebView(0), tooltipParent(0),
@@ -75,7 +75,8 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
           zOrderCounter(5),
       lastTooltip(0), tooltipShowTime(0), isDraggingFocusedWebView(0),
           mInputManager(inputMgr)
-{
+{   
+    /*
     FILE* f=fopen("mode.txt", "r");
     char mode[20];
     if(f) {
@@ -85,6 +86,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     else {
         strcpy(mode, "dev");
     }
+    */
     tooltipWebView = 0;
 #ifdef HAVE_AWESOMIUM
     webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
@@ -109,7 +111,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
   //      ss << "ui/index.html?mode=" << mode << std::endl;
     //    std::cout << "dbm debug calling chromeWebView:" << ss.str() << std::endl;
         char s[100];
-        sprintf(s, "ui/index.html?mode=%s", mode);
+        sprintf(s, "ui/index.html?mode=%s", gMode.c_str());
 //        std::cout << "dbm debug calling chromeWebView:" << s << std::endl;
 //        chromeWebView->loadFile(ss.str());
         chromeWebView->loadFile(s);
