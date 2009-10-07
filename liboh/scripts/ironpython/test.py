@@ -321,9 +321,15 @@ class exampleclass:
 
             elif tok[0]=="flythru":
                 if tok[1]=="animation":
+                    door = "b7_firedoor_door"
                     if tok[2]=="doors_open_start":
                         print "PY: Doors open start"
+                        if door in self.objects:
+                            print "    -- got the door!", self.objects[door]
+                            self.setPosition(objid=self.objects[door], velocity = (0,0,1.0/float(tok[3])))
                     elif tok[2]=="doors_open_finish":
+                        if door in self.objects:
+                            self.setPosition(objid=self.objects[door], velocity = (0,0,0))
                         print "PY: Doors open finish"
 
             else:
