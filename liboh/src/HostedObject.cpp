@@ -319,7 +319,7 @@ struct HostedObject::PrivateCallbacks {
             } else {
                 if (realThis->hasProperty(name)) {
                     // Cached property--respond immediately.
-                    SILOG(cppoh,debug,"Cached GetProp: "<<name<<" = "<<realThis->getProperty(name));
+                    //SILOG(cppoh,debug,"Cached GetProp: "<<name<<" = "<<realThis->getProperty(name));
                     IStorageElement el = immedResponse.add_reads();
                     if (immedIndex != rwsIndex) {
                         el.set_index(rwsIndex);
@@ -330,7 +330,7 @@ struct HostedObject::PrivateCallbacks {
                     }
                     el.set_data(realThis->getProperty(name));
                 } else {
-                    SILOG(cppoh,debug,"Forward GetProp: "<<name<<" to Persistence");
+                    //SILOG(cppoh,debug,"Forward GetProp: "<<name<<" to Persistence");
                     IStorageElement el = outMessage.add_reads();
                     if (outIndex != rwsIndex) {
                         el.set_index(rwsIndex);

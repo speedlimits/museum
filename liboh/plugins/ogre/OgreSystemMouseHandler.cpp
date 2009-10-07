@@ -84,7 +84,7 @@ using namespace std;
 #endif // _WIN32
 
 /// developer mode?
-#define DEV false
+#define DEV true
 
 String getMode() {
     static String themode;
@@ -1533,6 +1533,7 @@ private:
             Vector3d pos;
             Quaternion orient;
             static String oldmsg;
+            static String oldAnim;
             String msg, animation;
             int tx, ty;
             bool success = mCameraPath.evaluate(mCameraPathTime, &pos, &orient, msg, &tx, &ty, animation);
@@ -1545,9 +1546,19 @@ private:
             }
             oldmsg=msg;
 
-            if (animation != "") {
+            if (animation != oldAnim && animation != "") {
                 std::cout << "dbm debug animate: " << animation << std::endl;
+                ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+                assert(cam);
+                RoutableMessageBody msg;
+                ostringstream ss;
+                ss << "flythru animation " << animation;
+                msg.add_message("JavascriptMessage", ss.str());
+                String smsg;
+                msg.SerializeToString(&smsg);
+                cam->sendMessage(MemoryReference(smsg));
             }
+            oldAnim=animation;
             if (!success) {
             /// That was fun! Let's do it again!
                 std::cout << "dbm debug: flythru again" << std::endl;

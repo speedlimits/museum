@@ -17,7 +17,7 @@ import time
 
 import blog
 
-DEBUG_OUTPUT=False
+DEBUG_OUTPUT=True
 DEG2RAD = 0.0174532925
 
 #picture placement for fun mode (get it from critic output)
@@ -318,6 +318,13 @@ class exampleclass:
                 if self.mode=="critic":
                     if DEBUG_OUTPUT: print "PY: curator reset"
                     self.reset_critic()
+
+            elif tok[0]=="flythru":
+                if tok[1]=="animation":
+                    if tok[2]=="doors_open_start":
+                        print "PY: Doors open start"
+                    elif tok[2]=="doors_open_finish":
+                        print "PY: Doors open finish"
 
             else:
                 print "PY: unknown JavascriptMessage:", tok
