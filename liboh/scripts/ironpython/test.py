@@ -326,7 +326,9 @@ class exampleclass:
                         print "PY: Doors open start"
                         if door in self.objects:
                             print "    -- got the door!", self.objects[door]
-                            self.setPosition(objid=self.objects[door], velocity = (0,0,1.0/float(tok[3])))
+                            zmove = 1.0/float(tok[3])
+                            xmove = zmove * -.08
+                            self.setPosition(objid=self.objects[door], velocity = (xmove,0,zmove))
                     elif tok[2]=="doors_open_finish":
                         if door in self.objects:
                             self.setPosition(objid=self.objects[door], velocity = (0,0,0))
