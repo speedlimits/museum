@@ -28,8 +28,8 @@ print "fullscreen:", fullscreen, "width:", width, "height:", height, "debug:", d
 
 if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru"):
     cmd = "./run scenes/" + sys.argv[1] + ".csv scenes/" + sys.argv[1] + "_env.csv"
-    if sys.argv[1] in ("curator", "funmode", "critic"):
-        cmd += " scenes/" + sys.argv[1] + "_art.csv"
+##    if sys.argv[1] in ("curator", "funmode", "critic"):
+    cmd += " scenes/" + sys.argv[1] + "_art.csv"
     f = open("build/cmake/mode.txt", "w")
     f.write("mode=" + sys.argv[1] + "\n")
     f.write("fullscreen=" + str(fullscreen) + "\n")
