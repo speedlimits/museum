@@ -67,7 +67,8 @@ inline Ogre::ColourValue toOgreRGB(const Sirikata::Color &rgb) {
 }
 
 inline Ogre::ColourValue toOgreRGBA(const Sirikata::Color &rgb, float32 alpha) {
-    return rgb.convert<Ogre::ColourValue>();
+    return Ogre::ColourValue(rgb[0], rgb[1], rgb[2], alpha);
+//    return rgb.convert<Ogre::ColourValue>();
 }
 
 
