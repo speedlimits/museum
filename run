@@ -1,6 +1,33 @@
 #!/usr/bin/python
 import sys, os, time
 
+def check_for_proc(proc):
+    sin, sout = os.popen2("ps ax")
+    s = sout.read()
+    procs = s.split("\n")
+    running=0
+    for p in procs:
+        w = p.split()
+        for ww in w:
+            if proc in ww.split("/"):
+                running=int(w[0])
+##    print "check_for_proc on", proc, "returns:", running
+    return running
+
+f=open("run_bornholm.log", "w")
+if check_for_proc("cppoh") or check_for_proc("cppoh_d"):
+    #note this logic will not work if the script is run too frequently -- need time for cppoh to start
+    print "some variant of augmented museum appears to be running, so I will not"
+    f.write(time.ctime() + " -- cppoh detected, not run\n")
+    f.close()
+    exit()
+
+print "run test -- would run here",
+f.write("pwd: " + os.path.abspath(".") + " ")
+f.write(time.ctime() + " -- run!\n")
+f.close()
+##exit()
+
 fullscreen=True
 debug=False
 width = 1360
@@ -40,19 +67,6 @@ if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru
     os.system(cmd)
     exit()
 
-def check_for_proc(proc):
-    sin, sout = os.popen2("ps ax")
-    s = sout.read()
-##    print s
-    procs = s.split("\n")
-    running=0
-    for p in procs:
-        w = p.split()
-        if proc in w:
-            running=int(w[0])
-##    print "check_for_proc", proc, "returns:", running
-    return running
-
 #
 # run local HTTP server
 #
@@ -83,7 +97,7 @@ else:
 
 for proc, delay in (proxserver, 4.5), (spaceserver, .5):
 
-    if not check_for_proc("./"+proc):
+    if not check_for_proc(proc):
         cmd = 'xterm -e "cd build/cmake; ./' + proc + '" &'
         print cmd
         os.system(cmd)
