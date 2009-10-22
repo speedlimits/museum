@@ -3151,14 +3151,14 @@ public:
         mInputResponses["genericMessage"] = new StringInputResponse(std::tr1::bind(&MouseHandler::genericStringMessage, this, WebViewManager::NavigateCommand, _1));
 
         // Movement
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W), mInputResponses["moveForward"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S), mInputResponses["moveBackward"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_D), mInputResponses["moveRight"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_A), mInputResponses["moveLeft"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_PAGEUP), mInputResponses["moveUp"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_PAGEDOWN), mInputResponses["moveDown"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP, Input::MOD_SHIFT), mInputResponses["rotateXPos"]);
-        mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN, Input::MOD_SHIFT), mInputResponses["rotateXNeg"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_W), mInputResponses["moveForward"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_S), mInputResponses["moveBackward"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_D), mInputResponses["moveRight"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_A), mInputResponses["moveLeft"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_PAGEUP), mInputResponses["moveUp"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_PAGEDOWN), mInputResponses["moveDown"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP, Input::MOD_SHIFT), mInputResponses["rotateXPos"]);
+        if(gDebug) mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN, Input::MOD_SHIFT), mInputResponses["rotateXNeg"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_UP), mInputResponses["moveForward"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_DOWN), mInputResponses["moveBackward"]);
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_LEFT), mInputResponses["stableRotatePos"]);
