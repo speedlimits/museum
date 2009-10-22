@@ -287,7 +287,7 @@ class exampleclass:
                     x += ox*offset
                     y += oy*offset
                     z += oz*offset
-                    vel = 4.0                                   ## initial ammo velocity
+                    vel = 7.0                                   ## initial ammo velocity
                     vx = -zx*vel
                     vy = -zy*vel
                     vz = -zz*vel

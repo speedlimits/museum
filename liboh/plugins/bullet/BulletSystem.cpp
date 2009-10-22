@@ -562,6 +562,18 @@ bool BulletSystem::tick() {
                             collide.SerializeToString(body->add_message("BegCol"));
                             cout << "   begin collision msg: " << b0->mName << " --> " << b1->mName
                             << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
+                    	    if (b0->mName.size() >= 8 && b0->mName.substr(0,8)=="artwork_") {
+                                b0->mGravity=Vector3f(0,-1,0);
+                                b0->mBulletBodyPtr->setGravity(
+                                    btVector3(b0->mGravity.x, b0->mGravity.y, b0->mGravity.z));
+                                cout << "dbm debug gravity set on" << b0->mName << endl;
+                            }
+                            if (b1->mName.size() >= 8 && b1->mName.substr(0,8)=="artwork_") {
+                                b1->mGravity=Vector3f(0,-1,0);
+                                b1->mBulletBodyPtr->setGravity(
+                                    btVector3(b1->mGravity.x, b1->mGravity.y, b1->mGravity.z));
+                                cout << "dbm debug gravity set on" << b1->mName << endl;
+                            }
                         }
                         if (b0->colMsg & b1->colMask) {
                             RoutableMessageBody *body=&mBeginCollisionMessagesToSend[b0id];
@@ -577,6 +589,18 @@ bool BulletSystem::tick() {
 
                             }
                             collide.SerializeToString(body->add_message("BegCol"));
+                            if (b0->mName.size() >= 8 && b0->mName.substr(0,8)=="artwork_") {
+                                b0->mGravity=Vector3f(0,-1,0);
+                                b0->mBulletBodyPtr->setGravity(
+                                    btVector3(b0->mGravity.x, b0->mGravity.y, b0->mGravity.z));
+                                cout << "dbm debug gravity set on" << b0->mName << endl;
+                            }
+                            if (b1->mName.size() >= 8 && b1->mName.substr(0,8)=="artwork_") {
+                                b1->mGravity=Vector3f(0,-1,0);
+                                b1->mBulletBodyPtr->setGravity(
+                                    btVector3(b1->mGravity.x, b1->mGravity.y, b1->mGravity.z));
+                                cout << "dbm debug gravity set on" << b1->mName << endl;
+                            }
                             cout << "   begin collision msg: " << b1->mName << " --> " << b0->mName
                             << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
                         }

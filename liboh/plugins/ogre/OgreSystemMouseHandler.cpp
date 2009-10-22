@@ -2384,10 +2384,10 @@ private:
         mPointLightMoods[2].setLightDiffuseColor(Color(.4,.3,.2)).setLightRange(20.).setLightFalloff(1.,-.05,.08).setLightType(LightInfo::POINT).setLightPower(1);
         mPointLightMoods[3].setLightDiffuseColor(Color(.5,.5,.5)).setLightRange(20.).setLightFalloff(1.,-.10,.05).setLightType(LightInfo::POINT).setLightPower(1);
 
-        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.05,.04,.03)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
-        mDirectionalLightMoods[1].setLightDiffuseColor(Color(.10,.08,.06)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
-        mDirectionalLightMoods[2].setLightDiffuseColor(Color(.15,.14,.13)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
-        mDirectionalLightMoods[3].setLightDiffuseColor(Color(.20,.20,.20)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[0].setLightDiffuseColor(Color(.25,.15,.13)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[1].setLightDiffuseColor(Color(.40,.38,.36)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[2].setLightDiffuseColor(Color(.65,.64,.63)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
+        mDirectionalLightMoods[3].setLightDiffuseColor(Color(.90,.90,.90)).setLightType(LightInfo::DIRECTIONAL).setLightPower(1);
 
         mMoodLightsInited = true;
     }
