@@ -475,9 +475,9 @@ private:
         if (!camera) {
             return;
         }
-#if 0
-        /// we don't want all these fancy selection modes
-        if (mParent->mInputManager->isModifierDown(Input::MOD_SHIFT)) {
+        
+        /// we don't want all these fancy selection modes for non-debug mode
+        if (gDebug && mParent->mInputManager->isModifierDown(Input::MOD_SHIFT)) {
             // add object.
             int numObjectsUnderCursor=0;
             Entity *mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &numObjectsUnderCursor, mWhichRayObject);
@@ -524,13 +524,18 @@ private:
                 // Fire deselected event.
             }
         }
+        /*
+        /// this screws things up
         else if (mParent->mInputManager->isModifierDown(Input::MOD_CTRL)) {
             SILOG(input,info,"Cleared selection");
             clearSelection();
             mLastShiftSelected = SpaceObjectReference::null();
         }
+        */
         else
-#endif // 0
+        
+#if 0
+        /// this never really worked all that well
         if (mParent->mInputManager->isModifierDown(Input::MOD_CTRL)) {   // click to go
             // Look for an object intersected by the ray.
             const Entity *obj = NULL;
@@ -556,6 +561,7 @@ private:
             return;     // Since this is not a selection, do not do the selection epilogue.
         }
         else
+#endif
         {
             // reset selection.
             clearSelection();
