@@ -306,7 +306,13 @@ class OgreSystem::MouseHandler {
 
         double dist;
         Vector3f normal;
-        Entity *mouseOverEntity = mParent->rayTrace(location.getPosition(), dir, *hitCount, dist, normal, which);
+        Vector3d klugepos = location.getPosition();
+        
+                            /// this deserves an explanation.  Unfortunately, a good one is not forthcoming
+        klugepos.y -= .35; /// we need to do this when camera != avatar, for some unknown reason.  Magnitude is affected by camera/avatar Y offset 
+                          /// (approximately but not exactly half the offset) -- otherwise, selection is off
+
+        Entity *mouseOverEntity = mParent->rayTrace(klugepos, dir, *hitCount, dist, normal, which);
         if (mouseOverEntity) {
             while (!(mouseOverEntity->getProxy().getParent() == mCurrentGroup)) {
                 mouseOverEntity = mParent->getEntity(mouseOverEntity->getProxy().getParent());
@@ -472,6 +478,7 @@ private:
     //--------------------------------------------------------------------------
     void selectObjectAction(Vector2f p, int direction) {
         CameraEntity *camera = mParent->mPrimaryCamera;
+//        ProxyObjectPtr camera = getTopLevelParent(mParent->mPrimaryCamera->getProxyPtr());
         if (!camera) {
             return;
         }
