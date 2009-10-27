@@ -57,6 +57,8 @@
 #include "resourceManager/UploadTool.hpp"
 #include "meruCompat/EventSource.hpp"
 #include "meruCompat/SequentialWorkQueue.hpp"
+#include "Ogre_Sirikata.pbj.hpp"
+#include "util/RoutableMessageBody.hpp"
 using Meru::GraphicsResourceManager;
 using Meru::ResourceManager;
 using Meru::CDNArchivePlugin;
@@ -1012,8 +1014,26 @@ bool OgreSystem::renderOneFrame(Task::LocalTime curFrameTime, Duration deltaTime
 
     return continueRendering;
 }
+
+/*
+    //--------------------------------------------------------------------------
+    void timerAction() {
+        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
+        assert(cam);
+        RoutableMessageBody msg;
+        ostringstream ss;
+        ss << "funmode timer";
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        cam->sendMessage(MemoryReference(smsg));
+    }
+
+*/
+
 //static Task::LocalTime debugStartTime = Task::LocalTime::now();
 bool OgreSystem::tick(){
+    static int pyTickCnt=0;
     GraphicsResourceManager::getSingleton().computeLoadedSet();
     Task::LocalTime curFrameTime(Task::LocalTime::now());
     Task::LocalTime finishTime(curFrameTime + desiredTickRate()); // arbitrary
@@ -1031,6 +1051,17 @@ bool OgreSystem::tick(){
 
     Meru::SequentialWorkQueue::getSingleton().dequeuePoll();
     Meru::SequentialWorkQueue::getSingleton().dequeueUntil(finishTime);
+
+    if (pyTickCnt++ == 10) {
+        pyTickCnt=0;
+        RoutableMessageBody msg;
+        std::ostringstream ss;
+        ss << "funmode timer";
+        msg.add_message("JavascriptMessage", ss.str());
+        String smsg;
+        msg.SerializeToString(&smsg);
+        if (mPrimaryCamera) if (mPrimaryCamera->getProxyPtr()) mPrimaryCamera->getProxyPtr()->sendMessage(MemoryReference(smsg));
+    }
 
     if (quitRequest) continueRendering=false;
     return continueRendering;

@@ -195,7 +195,7 @@ public class PythonObject {
             _scope.SetVariable("name",name);
             _scope.SetVariable("args",args);
             _scope.SetVariable("retval",_pythonObject);
-            Console.WriteLine("Processing RPC "+name);
+            //Console.WriteLine("Processing RPC "+name);
             return _processRPCSource.Execute<Array>(_scope);
         }
         public virtual void tick(System.DateTime time) {

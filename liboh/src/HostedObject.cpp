@@ -57,6 +57,9 @@
 
 namespace Sirikata {
 
+/// you can shut up now
+#define SILOG(a,b,c)
+
 typedef SentMessageBody<RoutableMessageBody> RPCMessage;
 
 class HostedObject::PerSpaceData {
@@ -992,7 +995,7 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
     }
     else if (name == "SetLoc") {
         ObjLoc setloc;
-//        printstr<<"Someone wants to set my position: ";
+        printstr<<"Someone wants to set my position: ";
         setloc.ParseFromArray(args.data(), args.length());
         if (thisObj) {
             printstr<<setloc.position();

@@ -227,7 +227,6 @@ public:
 //        String temp = s;
         if (s != "") {// && s != oldMsg) {
 //        mDumbMsg=temp;
-            std::cout << "dumbMsg Ogre: " << s << std::endl;
             WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
             oldMsg=s;
         }

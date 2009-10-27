@@ -129,21 +129,13 @@ class exampleclass:
     def reset_funmode(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_funmode objects length:", len(self.objects)
         self.gamenum += 0.5     #please don't ask
+        self.timestart=time.time()
+        self.lasttime=0.0
         #reposition avatar
         if "Avatar_fun" in self.objects:
             if DEBUG_OUTPUT: print "PY dbm debug reset_funmode Avatar_fun"
             self.setPosition(objid=self.objects["Avatar_fun"], position = (-13.16,-1.4,-4.22), orientation = (0,-.86,0.0,.51),
                      velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
-        #initialize Jscript
-        body = pbSiri.MessageBody()
-        body.message_names.append("EvaluateJavascript")
-        if len(self.arthits) > self.oldhits:
-            msg = 'popUpMessage("score: 0", 10, 10);'
-            body.message_arguments.append(msg)
-            header = pbHead.Header()
-            header.destination_space = util.tupleFromUUID(self.spaceid)
-            header.destination_object = util.tupleFromUUID(self.objid)
-            HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def reset_curator(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_curator objects length:", len(self.objects)
@@ -172,6 +164,16 @@ class exampleclass:
         self.setPosition(objid=self.objects["b7_firedoor_door"], position = (-14.9, -1.16, -4.41))
         self.setPosition(objid=self.objects["entry_door_01"], orientation = (0,0,0,1))
         self.setPosition(objid=self.objects["entry_door_02"], orientation = (0,0,0,1))
+
+    def popUpMsg(self, s):
+        body = pbSiri.MessageBody()
+        body.message_names.append("EvaluateJavascript")
+        msg = 'popUpMessage("' + s  + '", 10, 10);'
+        body.message_arguments.append(msg)
+        header = pbHead.Header()
+        header.destination_space = util.tupleFromUUID(self.spaceid)
+        header.destination_object = util.tupleFromUUID(self.objid)
+        HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
         if DEBUG_OUTPUT: print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
@@ -294,6 +296,12 @@ class exampleclass:
                     if DEBUG_OUTPUT: print "PY: rot:", qx, qy, qz, qw, "axis:", zx, zy, zz, "pos+off:", x, y, z, "vel:", vx, vy, vz
                     self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
                                      velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
+                elif tok[1]=="timer":
+                    t = time.time()-self.timestart
+                    if t > self.lasttime+1.0:
+                        self.lasttime+=1.0
+                        if DEBUG_OUTPUT: print "PY: timer tick, time now:", self.lasttime
+                        self.popUpMsg("time: " + str(self.lasttime))
 
             elif tok[0]=="reset":
                 if self.mode=="funmode" or self.mode=="flythru":
@@ -392,15 +400,8 @@ class exampleclass:
                     if oname[:8]=="artwork_":
                         self.arthits.add(other)
                         print "hit another painting! score now", len(self.arthits), id(self)
-                        body = pbSiri.MessageBody()
-                        body.message_names.append("EvaluateJavascript")
                         if len(self.arthits) > self.oldhits:
-                            msg = 'popUpMessage("game: ' + str(int(self.gamenum)) + ' score: ' + str(len(self.arthits)) + '", 10, 10);'
-                            body.message_arguments.append(msg)
-                            header = pbHead.Header()
-                            header.destination_space = util.tupleFromUUID(self.spaceid)
-                            header.destination_object = util.tupleFromUUID(self.objid)
-                            HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+                            self.popUpMsg('game: ' + str(int(self.gamenum)) + ' score: ' + str(len(self.arthits)) )
                             self.oldhits=len(self.arthits)
                 else:
                     print "PY debug: unknown object:", other
