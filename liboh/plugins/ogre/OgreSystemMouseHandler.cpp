@@ -1582,7 +1582,8 @@ private:
         msg.add_message("JavascriptMessage", ss.str());
         String smsg;
         msg.SerializeToString(&smsg);
-        cam->sendMessage(MemoryReference(smsg));
+//        cam->sendMessage(MemoryReference(smsg));
+        avatar->sendMessage(MemoryReference(smsg));
     }
 
     //--------------------------------------------------------------------------
