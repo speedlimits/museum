@@ -108,6 +108,7 @@ class exampleclass:
         self.ammoMod=6
         self.arthits=set()
         self.oldhits=0
+        self.score=0
         f=open("mode.txt")
         while 1:
             s = f.readline().strip()
@@ -169,11 +170,16 @@ class exampleclass:
         body = pbSiri.MessageBody()
         body.message_names.append("EvaluateJavascript")
         msg = 'popUpMessage("' + s  + '", 10, 10);'
+        if DEBUG_OUTPUT: print "PY:", msg
         body.message_arguments.append(msg)
         header = pbHead.Header()
         header.destination_space = util.tupleFromUUID(self.spaceid)
         header.destination_object = util.tupleFromUUID(self.objid)
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
+
+    def updateBanner(self):
+        s = "time: " + str(self.lasttime) + " score: " + str(self.score) + " ID: " + str(id(self))  + " test.py"
+        self.popUpMsg(s)
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
         if DEBUG_OUTPUT: print "PY: Got an RPC named",name, "pid:", os.getpid(), "id:", id(self)
@@ -267,7 +273,7 @@ class exampleclass:
 
             elif tok[0]=="funmode" and self.mode=="funmode":
                 if tok[1]=="fire":
-                    if DEBUG_OUTPUT: print "PY: fire the cannon!", s
+                    if DEBUG_OUTPUT: print "PY: fire the cannon!", s, "id:", id(self)
                     ammo = tok[2] + "_" + str(self.ammoNum)
                     self.ammoNum = (self.ammoNum+1) % self.ammoMod
                     retire = tok[2] + "_" + str(self.ammoNum)
@@ -301,7 +307,7 @@ class exampleclass:
                     if t > self.lasttime+1.0:
                         self.lasttime+=1.0
                         if DEBUG_OUTPUT: print "PY: timer tick, time now:", self.lasttime
-                        self.popUpMsg("time: " + str(self.lasttime))
+                        self.updateBanner()
 
             elif tok[0]=="reset":
                 if self.mode=="funmode" or self.mode=="flythru":
@@ -401,8 +407,10 @@ class exampleclass:
                         self.arthits.add(other)
                         print "hit another painting! score now", len(self.arthits), id(self)
                         if len(self.arthits) > self.oldhits:
-                            self.popUpMsg('game: ' + str(int(self.gamenum)) + ' score: ' + str(len(self.arthits)) )
+                            self.score = len(self.arthits)
+##                            self.popUpMsg('game: ' + str(int(self.gamenum)) + ' score: ' + str(len(self.arthits)) )
                             self.oldhits=len(self.arthits)
+                            self.updateBanner()
                 else:
                     print "PY debug: unknown object:", other
 

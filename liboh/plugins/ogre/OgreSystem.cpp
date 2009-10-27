@@ -105,8 +105,8 @@ static std::string getResourcesDir() {
 
     static std::string search_dir = "plugins/ogre";
 
-    for(uint32 offset = 0; offset < nsearch_offsets; offset++) {
-        for(uint32 spath = 0; spath < nsearch_paths; spath++) {
+    for (uint32 offset = 0; offset < nsearch_offsets; offset++) {
+        for (uint32 spath = 0; spath < nsearch_paths; spath++) {
             path full = search_offsets[offset] / search_paths[spath];
             if (exists(full) && is_directory(full))
                 return full.string();
@@ -130,8 +130,7 @@ Ogre::RenderTarget* OgreSystem::sRenderTarget=NULL;
 Ogre::Plugin*OgreSystem::sCDNArchivePlugin=NULL;
 std::list<OgreSystem*> OgreSystem::sActiveOgreScenes;
 uint32 OgreSystem::sNumOgreSystems=0;
-OgreSystem::OgreSystem():mLastFrameTime(Task::LocalTime::now()),mFloatingPointOffset(0,0,0),mPrimaryCamera(NULL)
-{
+OgreSystem::OgreSystem():mLastFrameTime(Task::LocalTime::now()),mFloatingPointOffset(0,0,0),mPrimaryCamera(NULL) {
     increfcount();
     mCubeMap=NULL;
     mInputManager=NULL;
@@ -143,7 +142,8 @@ OgreSystem::OgreSystem():mLastFrameTime(Task::LocalTime::now()),mFloatingPointOf
     quitRequest=false;
 }
 namespace {
-class FrequencyType{public:
+class FrequencyType {
+public:
     static Any lexical_cast(const std::string&value) {
         double val=60;
         std::istringstream ss(value);
@@ -153,65 +153,67 @@ class FrequencyType{public:
         return Duration::seconds(1./val);
     }
 };
-class ShadowType{public:
-        static bool caseq(const std::string&a, const std::string&b){
-            if (a.length()!=b.length())
+class ShadowType {
+public:
+    static bool caseq(const std::string&a, const std::string&b) {
+        if (a.length()!=b.length())
+            return false;
+        for (std::string::const_iterator ia=a.begin(),iae=a.end(),ib=b.begin();
+                ia!=iae;
+                ++ia,++ib) {
+            using namespace std;
+            if (toupper(*ia)!=toupper(*ib))
                 return false;
-            for (std::string::const_iterator ia=a.begin(),iae=a.end(),ib=b.begin();
-                 ia!=iae;
-                 ++ia,++ib) {
-                using namespace std;
-                if (toupper(*ia)!=toupper(*ib))
-                    return false;
-            }
-            return true;
         }
-        static Any lexical_cast(const std::string&value) {
-            Ogre::ShadowTechnique st=Ogre::SHADOWTYPE_NONE;
-            if (caseq(value,"textureadditive"))
-                return st=Ogre::SHADOWTYPE_TEXTURE_ADDITIVE;
-            if (caseq(value,"texturemodulative"))
-                return st=Ogre::SHADOWTYPE_TEXTURE_MODULATIVE;
-            if (caseq(value,"textureadditiveintegrated"))
-                return st=Ogre::SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED;
-            if (caseq(value,"texturemodulativeintegrated"))
-                return st=Ogre::SHADOWTYPE_TEXTURE_MODULATIVE_INTEGRATED;
-            if (caseq(value,"stenciladditive"))
-                return st=Ogre::SHADOWTYPE_TEXTURE_ADDITIVE;
-            if (caseq(value,"stencilmodulative"))
-                return st=Ogre::SHADOWTYPE_TEXTURE_MODULATIVE;
-            if (caseq(value,"none"))
-                return st=Ogre::SHADOWTYPE_NONE;
+        return true;
+    }
+    static Any lexical_cast(const std::string&value) {
+        Ogre::ShadowTechnique st=Ogre::SHADOWTYPE_NONE;
+        if (caseq(value,"textureadditive"))
+            return st=Ogre::SHADOWTYPE_TEXTURE_ADDITIVE;
+        if (caseq(value,"texturemodulative"))
+            return st=Ogre::SHADOWTYPE_TEXTURE_MODULATIVE;
+        if (caseq(value,"textureadditiveintegrated"))
+            return st=Ogre::SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED;
+        if (caseq(value,"texturemodulativeintegrated"))
+            return st=Ogre::SHADOWTYPE_TEXTURE_MODULATIVE_INTEGRATED;
+        if (caseq(value,"stenciladditive"))
+            return st=Ogre::SHADOWTYPE_TEXTURE_ADDITIVE;
+        if (caseq(value,"stencilmodulative"))
+            return st=Ogre::SHADOWTYPE_TEXTURE_MODULATIVE;
+        if (caseq(value,"none"))
             return st=Ogre::SHADOWTYPE_NONE;
-        }
+        return st=Ogre::SHADOWTYPE_NONE;
+    }
 };
-class OgrePixelFormatParser{public:
-        static Any lexical_cast(const std::string&value) {
-            Ogre::PixelFormat fmt=Ogre::PF_A8B8G8R8;
-            if (value=="16")
-                return fmt=Ogre::PF_FLOAT16_RGBA;
-            if (value=="32")
-                return fmt=Ogre::PF_FLOAT32_RGBA;
-            if (value=="dxt1"||value=="DXT1")
-                return fmt=Ogre::PF_DXT1;
-            if (value=="dxt3"||value=="DXT3")
-                return fmt=Ogre::PF_DXT3;
-            if (value=="dxt5"||value=="DXT5")
-                return fmt=Ogre::PF_DXT5;
-            if (value=="8")
-                return fmt=Ogre::PF_R8G8B8;
-            if (value=="8a")
-                return fmt=Ogre::PF_A8R8G8B8;
-            return fmt;
-        }
+class OgrePixelFormatParser {
+public:
+    static Any lexical_cast(const std::string&value) {
+        Ogre::PixelFormat fmt=Ogre::PF_A8B8G8R8;
+        if (value=="16")
+            return fmt=Ogre::PF_FLOAT16_RGBA;
+        if (value=="32")
+            return fmt=Ogre::PF_FLOAT32_RGBA;
+        if (value=="dxt1"||value=="DXT1")
+            return fmt=Ogre::PF_DXT1;
+        if (value=="dxt3"||value=="DXT3")
+            return fmt=Ogre::PF_DXT3;
+        if (value=="dxt5"||value=="DXT5")
+            return fmt=Ogre::PF_DXT5;
+        if (value=="8")
+            return fmt=Ogre::PF_R8G8B8;
+        if (value=="8a")
+            return fmt=Ogre::PF_A8R8G8B8;
+        return fmt;
+    }
 };
-class BugfixRenderTexture:public Ogre::RenderTexture{
+class BugfixRenderTexture:public Ogre::RenderTexture {
     Ogre::HardwarePixelBufferSharedPtr mHardwarePixelBuffer;
 public:
     BugfixRenderTexture(Ogre::HardwarePixelBufferSharedPtr hpbp):Ogre::RenderTexture(&*hpbp,0),mHardwarePixelBuffer(hpbp) {
 
     }
-    virtual bool requiresTextureFlipping() const{
+    virtual bool requiresTextureFlipping() const {
         if (&Ogre::RenderTexture::requiresTextureFlipping) {
             return this->Ogre::RenderTexture::requiresTextureFlipping();
         }
@@ -241,24 +243,27 @@ Ogre::RenderTarget*OgreSystem::createRenderTarget(String name, uint32 width, uin
 Ogre::RenderTarget*OgreSystem::createRenderTarget(const String&name, uint32 width, uint32 height, bool automipmap, Ogre::PixelFormat pf) {
     if (mRenderTarget&&mRenderTarget->getName()==name) {
         return mRenderTarget;
-    }else if (sRenderTarget&&sRenderTarget->getName()==name) {
+    }
+    else if (sRenderTarget&&sRenderTarget->getName()==name) {
         return sRenderTarget;
-    }else {
+    }
+    else {
         Ogre::TexturePtr texptr=Ogre::TextureManager::getSingleton().getByName(name);
         if (texptr.isNull()) {
             texptr=Ogre::TextureManager::getSingleton().createManual(name,
-                                                                     "Sirikata",
-                                                                     Ogre::TEX_TYPE_2D,
-                                                                     width,
-                                                                     height,
-                                                                     1,
-                                                                     automipmap?Ogre::MIP_DEFAULT:1,
-                                                                     pf,
-                                                                     automipmap?(Ogre::TU_RENDERTARGET|Ogre::TU_AUTOMIPMAP|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY):(Ogre::TU_RENDERTARGET|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY));
+                    "Sirikata",
+                    Ogre::TEX_TYPE_2D,
+                    width,
+                    height,
+                    1,
+                    automipmap?Ogre::MIP_DEFAULT:1,
+                    pf,
+                    automipmap?(Ogre::TU_RENDERTARGET|Ogre::TU_AUTOMIPMAP|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY):(Ogre::TU_RENDERTARGET|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY));
         }
         try {
             return texptr->getBuffer()->getRenderTarget();
-        }catch (Ogre::Exception &e) {
+        }
+        catch (Ogre::Exception &e) {
             if (e.getNumber()==Ogre::Exception::ERR_RENDERINGAPI_ERROR) {
                 width=texptr->getWidth();
                 height=texptr->getHeight();
@@ -267,20 +272,21 @@ Ogre::RenderTarget*OgreSystem::createRenderTarget(const String&name, uint32 widt
                 Ogre::ResourcePtr resourceTexPtr=texptr;
                 Ogre::TextureManager::getSingleton().remove(resourceTexPtr);
                 texptr=Ogre::TextureManager::getSingleton().createManual(name,
-                                                                         "Sirikata",
-                                                                         Ogre::TEX_TYPE_2D,
-                                                                         width,
-                                                                         height,
-                                                                         1,
-                                                                         automipmap?Ogre::MIP_DEFAULT:1,
-                                                                         pf,
-                                                                         automipmap?(Ogre::TU_RENDERTARGET|Ogre::TU_AUTOMIPMAP|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY):(Ogre::TU_RENDERTARGET|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY));
+                        "Sirikata",
+                        Ogre::TEX_TYPE_2D,
+                        width,
+                        height,
+                        1,
+                        automipmap?Ogre::MIP_DEFAULT:1,
+                        pf,
+                        automipmap?(Ogre::TU_RENDERTARGET|Ogre::TU_AUTOMIPMAP|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY):(Ogre::TU_RENDERTARGET|Ogre::TU_DYNAMIC|Ogre::TU_WRITE_ONLY));
                 return texptr->getBuffer()->getRenderTarget();
-            }else throw;
+            }
+            else throw;
         }
     }
 }
-void    setupResources(const String &filename){
+void    setupResources(const String &filename) {
     using namespace Ogre;
     ConfigFile cf;
     cf.load(filename);    // Go through all sections & settings in the file
@@ -291,8 +297,7 @@ void    setupResources(const String &filename){
         secName = seci.peekNextKey();
         ConfigFile::SettingsMultiMap *settings = seci.getNext();
         ConfigFile::SettingsMultiMap::iterator i;
-        for (i = settings->begin(); i != settings->end(); ++i)
-        {
+        for (i = settings->begin(); i != settings->end(); ++i) {
             typeName = i->first;
             archName = i->second;
 
@@ -322,7 +327,8 @@ std::list<CameraEntity*>::iterator OgreSystem::attachCamera(const String &render
         cubeMapNearPlanes.push_back(0.1);
         try {
             mCubeMap=new CubeMap(this,cubeMapNames,512,cubeMapOffsets, cubeMapNearPlanes);
-        }catch (std::bad_alloc&) {
+        }
+        catch (std::bad_alloc&) {
             mCubeMap=NULL;
         }
 
@@ -373,7 +379,7 @@ void initBornholm() {
             }
         }
         std::cout << "dbm debug getMode init width " << gWidth <<" height "<<gHeight<<
-                " full "<<gFullscreen<<" debug "<<gDebug<< " mode " << gMode<<std::endl;
+        " full "<<gFullscreen<<" debug "<<gDebug<< " mode " << gMode<<std::endl;
     }
 }
 
@@ -490,8 +496,9 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
                                                   mFullScreen->as<bool>(),
                                                   mWindowDepth->as<Ogre::PixelFormat>(),
                                                   grabCursor->as<bool>(),
-                          						  hWnd);
-            }else {
+                                                  hWnd);
+            }
+            else {
                 mInputManager=new SDLInputManager(mWindowWidth->as<uint32>(),
                                                   mWindowHeight->as<uint32>(),
                                                   mFullScreen->as<bool>(),
@@ -516,13 +523,15 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
             }
             sRenderTarget=mRenderTarget=rw;
 
-        } else if (createWindow->as<bool>()) {
+        }
+        else if (createWindow->as<bool>()) {
             Ogre::RenderWindow *rw;
             mRenderTarget=rw=sRoot->createRenderWindow(windowTitle->as<String>(),mWindowWidth->as<uint32>(),mWindowHeight->as<uint32>(),mFullScreen->as<bool>());
             rw->setVisible(true);
             if (sRenderTarget==NULL)
                 sRenderTarget=mRenderTarget;
-        }else {
+        }
+        else {
             mRenderTarget=createRenderTarget(windowTitle->as<String>(),
                                              mWindowWidth->as<uint32>(),
                                              mWindowHeight->as<uint32>(),
@@ -535,15 +544,17 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
     }
     try {
         mSceneManager=getRoot()->createSceneManager(ogreSceneManager->as<String>());
-    }catch (Ogre::Exception &e) {
+    }
+    catch (Ogre::Exception &e) {
         if (e.getNumber()==Ogre::Exception::ERR_ITEM_NOT_FOUND) {
             SILOG(ogre,warning,"Cannot find ogre scene manager: "<<ogreSceneManager->as<String>());
             getRoot()->createSceneManager(0);
-        } else
+        }
+        else
             throw e;
     }
-            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(); /// Although t    //just to test if the cam is setup ok ==>
-                                                                                      /// setupResources("/home/daniel/clipmapterrain/trunk/resources.cfg");
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups(); /// Although t    //just to test if the cam is setup ok ==>
+    /// setupResources("/home/daniel/clipmapterrain/trunk/resources.cfg");
 
     mInputManager->subscribe(
         Input::DragAndDropEvent::getId(),
@@ -556,11 +567,11 @@ bool OgreSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const
     allocMouseHandler();
     new WebViewManager(0, mInputManager, getAwesomiumResourcesDir()); ///// FIXME: Initializing singleton class
 
-/*  // Test web view
-    WebView* view = WebViewManager::getSingleton().createWebView(UUID::random().rawHexData(), 400, 300, OverlayPosition());
-    //view->setProxyObject(webviewpxy);
-    view->loadURL("http://www.google.com");
-*/
+    /*  // Test web view
+        WebView* view = WebViewManager::getSingleton().createWebView(UUID::random().rawHexData(), 400, 300, OverlayPosition());
+        //view->setProxyObject(webviewpxy);
+        view->loadURL("http://www.google.com");
+    */
 
     return true;
 }
@@ -578,13 +589,14 @@ bool ogreLoadPlugin(String root, const String&filename, bool recursive=true) {
 #else
         true
 #endif
-        ) {
+    ) {
 #ifndef __APPLE__
         fclose(fp);
 #endif
         Ogre::Root::getSingleton().loadPlugin(root);
         return true;
-    }else {
+    }
+    else {
         if (recursive)  {
             if (ogreLoadPlugin("../../dependencies/ogre-1.6.1/lib",filename,false))
                 return true;
@@ -634,37 +646,38 @@ bool OgreSystem::loadBuiltinPlugins () {
     retval = ogreLoadPlugin(String(),"Plugin_CgProgramManager") && retval;
     retval = ogreLoadPlugin(String(),"Plugin_ParticleFX") && retval;
     retval = ogreLoadPlugin(String(),"Plugin_OctreeSceneManager") && retval;
-	if (!retval) {
-		SILOG(ogre,error,"The required ogre plugins failed to load. Check that all .dylib files named RenderSystem_* and Plugin_* are copied to the current directory.");
-	}
+    if (!retval) {
+        SILOG(ogre,error,"The required ogre plugins failed to load. Check that all .dylib files named RenderSystem_* and Plugin_* are copied to the current directory.");
+    }
 #else
 #ifdef _WIN32
 #ifdef NDEBUG
-   #define OGRE_DEBUG_MACRO ".dll"
+#define OGRE_DEBUG_MACRO ".dll"
 #else
-   #define OGRE_DEBUG_MACRO "_d.dll"
+#define OGRE_DEBUG_MACRO "_d.dll"
 #endif
 #else
 #ifdef NDEBUG
-   #define OGRE_DEBUG_MACRO ".so"
+#define OGRE_DEBUG_MACRO ".so"
 #else
-   #define OGRE_DEBUG_MACRO ".so"
+#define OGRE_DEBUG_MACRO ".so"
 #endif
 #endif
-	retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"RenderSystem_GL" OGRE_DEBUG_MACRO);
+    retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"RenderSystem_GL" OGRE_DEBUG_MACRO);
 #ifdef _WIN32
-	try {
-	    retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"RenderSystem_Direct3D9" OGRE_DEBUG_MACRO) || retval;
-	} catch (Ogre::InternalErrorException) {
-		SILOG(ogre,warn,"Received an Internal Error when loading the Direct3D9 plugin, falling back to OpenGL. Check that you have the latest version of DirectX installed from microsoft.com/directx");
-	}
+    try {
+        retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"RenderSystem_Direct3D9" OGRE_DEBUG_MACRO) || retval;
+    }
+    catch (Ogre::InternalErrorException) {
+        SILOG(ogre,warn,"Received an Internal Error when loading the Direct3D9 plugin, falling back to OpenGL. Check that you have the latest version of DirectX installed from microsoft.com/directx");
+    }
 #endif
     retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"Plugin_CgProgramManager" OGRE_DEBUG_MACRO) && retval;
     retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"Plugin_ParticleFX" OGRE_DEBUG_MACRO) && retval;
     retval=ogreLoadPlugin(mOgreRootDir->as<String>(),"Plugin_OctreeSceneManager" OGRE_DEBUG_MACRO) && retval;
-	if (!retval) {
-		SILOG(ogre,error,"The required ogre plugins failed to load. Check that all DLLs named RenderSystem_* and Plugin_* are copied to the current directory.");
-	}
+    if (!retval) {
+        SILOG(ogre,error,"The required ogre plugins failed to load. Check that all DLLs named RenderSystem_* and Plugin_* are copied to the current directory.");
+    }
 #undef OGRE_DEBUG_MACRO
 #endif
     return retval;
@@ -673,7 +686,7 @@ bool OgreSystem::loadBuiltinPlugins () {
     getRoot()->installPlugin(&*sCDNArchivePlugin);
     */
 }
-Ogre::SceneManager* OgreSystem::getSceneManager(){
+Ogre::SceneManager* OgreSystem::getSceneManager() {
     return mSceneManager;
 }
 Ogre::Root*OgreSystem::getRoot() {
@@ -697,11 +710,12 @@ OgreSystem::~OgreSystem() {
     }
     decrefcount();
     for (std::list<OgreSystem*>::iterator iter=sActiveOgreScenes.begin()
-             ;iter!=sActiveOgreScenes.end();) {
+            ;iter!=sActiveOgreScenes.end();) {
         if (*iter==this) {
             sActiveOgreScenes.erase(iter++);
             break;
-        }else ++iter;
+        }
+        else ++iter;
         assert(iter!=sActiveOgreScenes.end());
     }
     --sNumOgreSystems;
@@ -720,7 +734,7 @@ static void KillWebView(ProxyObjectPtr p) {
     p->getProxyManager()->destroyObject(p);
 }
 
-void OgreSystem::createProxy(ProxyObjectPtr p){
+void OgreSystem::createProxy(ProxyObjectPtr p) {
     bool created = false;
     {
         std::tr1::shared_ptr<ProxyCameraObject> camera=std::tr1::dynamic_pointer_cast<ProxyCameraObject>(p);
@@ -765,14 +779,18 @@ void OgreSystem::createProxy(ProxyObjectPtr p){
     }
 
 }
-void OgreSystem::destroyProxy(ProxyObjectPtr p){
+void OgreSystem::destroyProxy(ProxyObjectPtr p) {
 
 }
 struct RayTraceResult {
     Ogre::Real mDistance;
     Ogre::MovableObject *mMovableObject;
     Vector3f mNormal;
-    RayTraceResult() { mDistance=3.0e38f;mMovableObject=NULL;mNormal=Vector3f(0,0,0);}
+    RayTraceResult() {
+        mDistance=3.0e38f;
+        mMovableObject=NULL;
+        mNormal=Vector3f(0,0,0);
+    }
     RayTraceResult(Ogre::Real distance,
                    Ogre::MovableObject *moveableObject,
                    Vector3f normal) {
@@ -796,14 +814,14 @@ Entity* OgreSystem::rayTrace(const Vector3d &position,
                              int&resultCount,
                              double &returnResult,
                              Vector3f&returnNormal,
-                             int which) const{
+                             int which) const {
     return internalRayTrace(position,direction,false,resultCount,returnResult,returnNormal, which);
 }
 Entity* OgreSystem::rayTraceAABB(const Vector3d &position,
-                     const Vector3f &direction,
-                     int&resultCount,
-                     double &returnResult,
-                     int which) const{
+                                 const Vector3f &direction,
+                                 int&resultCount,
+                                 double &returnResult,
+                                 int which) const {
     Vector3f normal;
     return internalRayTrace(position,direction,true,resultCount,returnResult,normal,which);
 }
@@ -836,7 +854,7 @@ Entity *OgreSystem::internalRayTrace(const Vector3d &position, const Vector3f &d
     int count = 0;
     std::vector<RayTraceResult> fineGrainedResults;
     for (Ogre::RaySceneQueryResult::const_iterator iter  = resultList.begin();
-         iter != resultList.end(); ++iter) {
+            iter != resultList.end(); ++iter) {
         const Ogre::RaySceneQueryResultEntry &result = (*iter);
         Ogre::Entity *foundEntity = dynamic_cast<Ogre::Entity*>(result.movable);
         Entity *ourEntity = Entity::fromMovableObject(result.movable);
@@ -873,7 +891,7 @@ Entity *OgreSystem::internalRayTrace(const Vector3d &position, const Vector3f &d
             which += count;
         }
         for (std::vector<RayTraceResult>::const_iterator iter  = fineGrainedResults.begin()+which,iterEnd=fineGrainedResults.end();
-             iter != iterEnd; ++iter) {
+                iter != iterEnd; ++iter) {
             const RayTraceResult &result = (*iter);
             Entity *foundEntity = Entity::fromMovableObject(result.mMovableObject);
             if (foundEntity) {
@@ -920,7 +938,8 @@ void OgreSystem::uploadFinished(UploadStatusMap &uploadStatus)
                 selectObject(getEntity(newMeshObject));
                 nummesh++;
             }
-        } else {
+        }
+        else {
             SILOG(ogre,warn,"Failed to upload " << (*iter).first.mID <<  " (hash "<<(*iter).first.mHash << "). Status = "<<(int)((*iter).second));
         }
     }
@@ -935,9 +954,9 @@ struct UploadRequest {
         std::vector<Meru::ResourceFileUpload> allDeps =
             Meru::ProcessOgreMeshMaterialDependencies(filenames, opts);
         Meru::UploadFilesAndConfirmReplacement(mTransferManager,
-                                           allDeps,
-                                           opts.uploadHashContext,
-                                           std::tr1::bind(&OgreSystem::uploadFinished,parent,_1));
+                                               allDeps,
+                                               opts.uploadHashContext,
+                                               std::tr1::bind(&OgreSystem::uploadFinished,parent,_1));
         delete this;
     }
 };
@@ -949,24 +968,24 @@ Task::EventResponse OgreSystem::performUpload(Task::EventPtr ev) {
     uploadreq->opts.uploadHashContext = Transfer::URIContext("mhash:///");
     uploadreq->opts.uploadNameContext = Transfer::URIContext("meru:///");
     for (std::vector<std::string>::const_iterator iter = dndev->mFilenames.begin(); iter != dndev->mFilenames.end(); ++iter) {
-		std::string filename = *iter;
-		struct stat st;
-		if (stat((*iter).c_str(), &st)==0) {
-			if (filename.length()>2 && ((st.st_mode & S_IFDIR)==S_IFDIR)) {
-				// if directory, look in dirname/models/dirname.mesh
-				std::string::size_type lastslash = filename.rfind('/',filename.length()-2);
-				if (lastslash != std::string::npos) {
-					std::string meshname = filename.substr(lastslash+1);
-					std::string::size_type endslash = meshname.find('/');
-					if (endslash != std::string::npos) {
-						meshname = meshname.substr(0, endslash);
-					}
-					filename += "/models/"+meshname+".mesh";
-				}
-			}
-		}
-		uploadreq->filenames.push_back(Meru::DiskFile::makediskfile(filename));
-	}
+        std::string filename = *iter;
+        struct stat st;
+        if (stat((*iter).c_str(), &st)==0) {
+            if (filename.length()>2 && ((st.st_mode & S_IFDIR)==S_IFDIR)) {
+                // if directory, look in dirname/models/dirname.mesh
+                std::string::size_type lastslash = filename.rfind('/',filename.length()-2);
+                if (lastslash != std::string::npos) {
+                    std::string meshname = filename.substr(lastslash+1);
+                    std::string::size_type endslash = meshname.find('/');
+                    if (endslash != std::string::npos) {
+                        meshname = meshname.substr(0, endslash);
+                    }
+                    filename += "/models/"+meshname+".mesh";
+                }
+            }
+        }
+        uploadreq->filenames.push_back(Meru::DiskFile::makediskfile(filename));
+    }
     uploadreq->parent = this;
     uploadreq->mTransferManager = mTransferManager;
     boost::thread th(std::tr1::bind(&UploadRequest::perform, uploadreq));
@@ -974,8 +993,16 @@ Task::EventResponse OgreSystem::performUpload(Task::EventPtr ev) {
     return Task::EventResponse::nop();
 }
 
-Duration OgreSystem::desiredTickRate()const{
+Duration OgreSystem::desiredTickRate()const {
     return mFrameDuration->as<Duration>();
+}
+
+ProxyObjectPtr getTopLevelParent(ProxyObjectPtr camProxy) {
+    ProxyObjectPtr parentProxy;
+    while ((parentProxy=camProxy->getParentProxy())) {
+        camProxy=parentProxy;
+    }
+    return camProxy;
 }
 
 bool OgreSystem::renderOneFrame(Task::LocalTime curFrameTime, Duration deltaTime) {
@@ -996,11 +1023,10 @@ bool OgreSystem::renderOneFrame(Task::LocalTime curFrameTime, Duration deltaTime
     static int counter=0;
     counter++;
 
-    if(WebViewManager::getSingletonPtr())
-    {
+    if (WebViewManager::getSingletonPtr()) {
         // HACK: WebViewManager is static, but points to a RenderTarget! If OgreSystem dies, we will crash.
         static bool webViewInitialized = false;
-        if(!webViewInitialized) {
+        if (!webViewInitialized) {
             if (mPrimaryCamera) {
                 WebViewManager::getSingleton().setDefaultViewport(mPrimaryCamera->getViewport());
                 webViewInitialized = true;
@@ -1015,24 +1041,8 @@ bool OgreSystem::renderOneFrame(Task::LocalTime curFrameTime, Duration deltaTime
     return continueRendering;
 }
 
-/*
-    //--------------------------------------------------------------------------
-    void timerAction() {
-        ProxyObjectPtr cam = mParent->mPrimaryCamera->getProxyPtr();
-        assert(cam);
-        RoutableMessageBody msg;
-        ostringstream ss;
-        ss << "funmode timer";
-        msg.add_message("JavascriptMessage", ss.str());
-        String smsg;
-        msg.SerializeToString(&smsg);
-        cam->sendMessage(MemoryReference(smsg));
-    }
-
-*/
-
 //static Task::LocalTime debugStartTime = Task::LocalTime::now();
-bool OgreSystem::tick(){
+bool OgreSystem::tick() {
     static int pyTickCnt=0;
     GraphicsResourceManager::getSingleton().computeLoadedSet();
     Task::LocalTime curFrameTime(Task::LocalTime::now());
@@ -1052,15 +1062,22 @@ bool OgreSystem::tick(){
     Meru::SequentialWorkQueue::getSingleton().dequeuePoll();
     Meru::SequentialWorkQueue::getSingleton().dequeueUntil(finishTime);
 
+    /// poke the monkey every few ticks
     if (pyTickCnt++ == 10) {
-        pyTickCnt=0;
-        RoutableMessageBody msg;
-        std::ostringstream ss;
-        ss << "funmode timer";
-        msg.add_message("JavascriptMessage", ss.str());
-        String smsg;
-        msg.SerializeToString(&smsg);
-        if (mPrimaryCamera) if (mPrimaryCamera->getProxyPtr()) mPrimaryCamera->getProxyPtr()->sendMessage(MemoryReference(smsg));
+        if (mPrimaryCamera) {
+            if (mPrimaryCamera->getProxyPtr()) {
+                if (getTopLevelParent(mPrimaryCamera->getProxyPtr())) {
+                    pyTickCnt=0;
+                    RoutableMessageBody msg;
+                    std::ostringstream ss;
+                    ss << "funmode timer";
+                    msg.add_message("JavascriptMessage", ss.str());
+                    String smsg;
+                    msg.SerializeToString(&smsg);
+                    getTopLevelParent(mPrimaryCamera->getProxyPtr())->sendMessage(MemoryReference(smsg));
+                }
+            }
+        }
     }
 
     if (quitRequest) continueRendering=false;
