@@ -54,6 +54,12 @@ static int core_plugin_refcount = 0;
 
 #define DEBUG_ALWAYS(x) x
 
+std::string gWidth="1360";
+std::string gHeight="768";
+std::string gFullscreen="true";
+std::string gMode="";
+bool gDebug=false;
+
 SIRIKATA_PLUGIN_EXPORT_C void init() {
     using namespace Sirikata;
     DEBUG_OUTPUT(cout << "dbm: plugin init" << endl;)
@@ -442,26 +448,26 @@ bool BulletSystem::tick() {
         delta = now-lasttime;
         if (delta.toSeconds() > 0.05) delta = delta.seconds(0.05);           /// avoid big time intervals, they are trubble
         lasttime = now;
-        if ((now-mStartTime) > Duration::seconds(30.0)) {
+        if ((now-mStartTime) > Duration::seconds(gDebug? 12.0:30.0)) {                   /// wait for it
 
             /// main object loop
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     Location loc=objects[i]->mMeshptr->getLastLocation();
-                    
+
                     /// if object has been moved, reset bullet position accordingly
                     if (objects[i]->mMeshptr->getPosition() != objects[i]->getBulletState().p ||
                             objects[i]->mMeshptr->getOrientation() != objects[i]->getBulletState().o) {
                         DEBUG_OUTPUT(cout << "dbm debug: object, " << objects[i]->mName << " moved" << endl
-                                          << "    debug meshpos: " << objects[i]->mMeshptr->getPosition() << endl
-                                          << "    debug bulletpos before reset: " << objects[i]->getBulletState().p << endl
-                                          << "    debug set vel " << loc.getVelocity() << endl);
+                                     << "    debug meshpos: " << objects[i]->mMeshptr->getPosition() << endl
+                                     << "    debug bulletpos before reset: " << objects[i]->getBulletState().p << endl
+                                     << "    debug set vel " << loc.getVelocity() << endl);
                         objects[i]->setBulletState(
                             positionOrientation (
                                 loc.getPosition(),
                                 loc.getOrientation()),
-                                loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
-                            );
+                            loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
+                        );
                         DEBUG_OUTPUT(cout << "    debug new pos: " << objects[i]->getBulletState().p << endl);
                     }
 
@@ -469,11 +475,11 @@ bool BulletSystem::tick() {
                     if (objects[i]->mPIDControlEnabled) {
 
                         /// this is not yet a real PID controller!  YMMV
-                        DEBUG_OUTPUT(cout << "dbm debug PID vel: " << 
-                                objects[i]->mDesiredLinearVelocity.x() <<
-                                objects[i]->mDesiredLinearVelocity.y() <<
-                                objects[i]->mDesiredLinearVelocity.z()
-                                << endl);
+                        DEBUG_OUTPUT(cout << "dbm debug PID vel: " <<
+                                     objects[i]->mDesiredLinearVelocity.x() <<
+                                     objects[i]->mDesiredLinearVelocity.y() <<
+                                     objects[i]->mDesiredLinearVelocity.z()
+                                     << endl);
                         objects[i]->mBulletBodyPtr->setLinearVelocity(objects[i]->mDesiredLinearVelocity);
                         objects[i]->mBulletBodyPtr->setAngularVelocity(objects[i]->mDesiredAngularVelocity);
                         objects[i]->mBulletBodyPtr->activate(true);
@@ -491,7 +497,7 @@ bool BulletSystem::tick() {
             }
 //            dynamicsWorld->stepSimulation(delta.toSeconds(),Duration::seconds(10).toSeconds());
             dynamicsWorld->stepSimulation(delta.toSeconds(),20, 1.0/300.0);
-            
+
             for (unsigned int i=0; i<objects.size(); i++) {
                 if (objects[i]->mActive) {
                     po = objects[i]->getBulletState();
@@ -518,7 +524,7 @@ bool BulletSystem::tick() {
                     objects[i]->mMeshptr->setLocation(remoteNow, loc);
                 }
             }
-            
+
             /// test queryRay
             /*
             ProxyMeshObjectPtr bugObj;
@@ -562,7 +568,7 @@ bool BulletSystem::tick() {
                             collide.SerializeToString(body->add_message("BegCol"));
                             cout << "   begin collision msg: " << b0->mName << " --> " << b1->mName
                             << " time: " << (Task::LocalTime::now()-mStartTime).toSeconds() << endl;
-                    	    if (b0->mName.size() >= 8 && b0->mName.substr(0,8)=="artwork_") {
+                            if (b0->mName.size() >= 8 && b0->mName.substr(0,8)=="artwork_") {
                                 b0->mGravity=Vector3f(0,-1,0);
                                 b0->mBulletBodyPtr->setGravity(
                                     btVector3(b0->mGravity.x, b0->mGravity.y, b0->mGravity.z));
@@ -727,8 +733,41 @@ void customNearCallback(btBroadphasePair& collisionPair, btCollisionDispatcher& 
     }
 }
 
+void initBornholm() {
+    std::cout << "dbm debug INIT BORNHOLM!!!" << std::endl;
+    std::string temp;
+    if (gMode=="") {
+        std::ifstream ifs( "mode.txt" );
+        while (getline(ifs, temp)) {
+            int delim = temp.find("=");
+            std::string cmd = temp.substr(0,delim);
+            std::string val = temp.substr(delim+1,temp.size()-delim-1);
+            if (cmd=="mode") {
+                gMode=val;
+            }
+            if (cmd=="width") {
+                gWidth=val;
+            }
+            if (cmd=="height") {
+                gHeight=val;
+            }
+            if (cmd=="fullscreen") {
+                if (val=="False") gFullscreen="false";
+            }
+            if (cmd=="debug") {
+                if (val=="True") gDebug=true;
+            }
+        }
+        std::cout << "dbm debug bullet initBornholm width " << gWidth <<" height "<<gHeight<<
+                " full "<<gFullscreen<<" debug "<<gDebug<< " mode " << gMode<<std::endl;
+    }
+}
+
 bool BulletSystem::initialize(Provider<ProxyCreationListener*>*proxyManager, const String&options) {
     DEBUG_OUTPUT(cout << "dbm: BulletSystem::initialize options: " << options << endl);
+
+    initBornholm();
+
     /// HelloWorld from Bullet/Demos
     mTempTferManager = new OptionValue("transfermanager","0", OptionValueType<void*>(),"dummy");
     mWorkQueue = new OptionValue("workqueue","0",OptionValueType<void*>(),"Memory address of the WorkQueue");
@@ -780,6 +819,7 @@ BulletSystem::BulletSystem() :
         mGravity(0, GRAVITY, 0),
         mStartTime(Task::LocalTime::now()) {
     DEBUG_OUTPUT(cout << "dbm: I am the BulletSystem constructor!" << endl);
+
 }
 
 BulletSystem::~BulletSystem() {

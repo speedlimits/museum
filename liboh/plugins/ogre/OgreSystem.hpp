@@ -225,7 +225,7 @@ public:
     String oldMsg;
     virtual void exchangeDumbMsg(String& s) {
 //        String temp = s;
-        if (s != "" && s != oldMsg) {
+        if (s != "") {// && s != oldMsg) {
 //        mDumbMsg=temp;
             std::cout << "dumbMsg Ogre: " << s << std::endl;
             WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
