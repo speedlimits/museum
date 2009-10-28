@@ -3058,6 +3058,7 @@ public:
                               std::tr1::bind(&MouseHandler::deviceListener, this, _1)));
 
         mDragAction[1] = DragActionRegistry::get("moveObjectOnWall");       /// let this be the default for all time
+        if (gMode=="critic") mDragAction[1]=0;
         mDragAction[2] = DragActionRegistry::get("zoomCamera");
         mDragAction[3] = DragActionRegistry::get("panCamera");
         mDragAction[4] = DragActionRegistry::get("rotateCamera");
