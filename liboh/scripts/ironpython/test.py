@@ -185,8 +185,8 @@ class exampleclass:
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def updateBanner(self):
-        t = int(65-self.lasttime)
-        if t>60:
+        t = int(50-self.lasttime)
+        if t>45:
             s = "<h1>ER DU KLAR???</h1>"
         elif t<=0:
             s = "<h1>DU RAMTE " + str(self.score) + " AF 28 MALERIER!</h1>"
