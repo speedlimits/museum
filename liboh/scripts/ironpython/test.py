@@ -131,11 +131,13 @@ class exampleclass:
             self.reset_curator()
 
     gamenum=0.0
+    gameon=0
     def reset_funmode(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_funmode objects length:", len(self.objects)
         self.gamenum += 0.5     #please don't ask
         self.timestart=time.time()
         self.lasttime=0.0
+        self.gameon=0
         #reposition avatar
         if "Avatar_fun" in self.objects:
             if DEBUG_OUTPUT: print "PY dbm debug reset_funmode Avatar_fun"
@@ -182,7 +184,16 @@ class exampleclass:
         HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
     def updateBanner(self):
-        s = "time: " + str(self.lasttime) + " score: " + str(self.score) + " ID: " + str(id(self))  + " test.py"
+        t = int(65-self.lasttime)
+        if t>60:
+            s = "<h1>ER DU KLAR???</h1>"
+        elif t<=0:
+            s = "<h1>GAME OVER. DIN SCORE VAR " + str(self.score) + "</h1>"
+            self.gameon=0
+        else:
+            self.gameon=1
+            s = "<h1>TID " + str(t) + " - SCORE " + str(self.score) + "</h1>"
+        #+ " ID: " + str(id(self))  + " test.py"
         self.popUpMsg(s)
 
     def reallyProcessRPC(self,serialheader,name,serialarg):
@@ -278,6 +289,8 @@ class exampleclass:
 
             elif tok[0]=="funmode" and self.mode=="funmode":
                 if tok[1]=="fire":
+                    if not self.gameon:
+                        return
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s, "id:", id(self)
                     ammo = tok[2] + "_" + str(self.ammoNum)
                     self.ammoNum = (self.ammoNum+1) % self.ammoMod

@@ -980,7 +980,7 @@ private:
 
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
-        rloc.set_angular_speed(dir*amount*sqrt(mCamSpeed));
+        rloc.set_angular_speed(dir*amount*sqrt(gMode=="funmode"? mCamSpeed*2:mCamSpeed));
         cam->requestLocation(now, rloc);
     }
 
