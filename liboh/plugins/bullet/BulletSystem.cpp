@@ -469,6 +469,14 @@ bool BulletSystem::tick() {
                             loc.getVelocity(), Vector3f(0,0,0)  /// FIXME: should properly calcualte & set ang vel
                         );
                         DEBUG_OUTPUT(cout << "    debug new pos: " << objects[i]->getBulletState().p << endl);
+                        if (gMode=="funmode")
+                            /// fun hack: set painting gravity to zero on reset
+                            if (objects[i]->mName.size()>7 && objects[i]->mName.substr(0,8)=="artwork_") {
+                                objects[i]->mGravity=Vector3f(0,0,0);
+                                objects[i]->mBulletBodyPtr->setGravity(
+                                    btVector3(objects[i]->mGravity.x, objects[i]->mGravity.y, objects[i]->mGravity.z));
+                                cout << "dbm debug gravity set on" << objects[i]->mName << endl;
+                            }
                     }
 
                     /// if object under PID control, control it
@@ -759,7 +767,7 @@ void initBornholm() {
             }
         }
         std::cout << "dbm debug bullet initBornholm width " << gWidth <<" height "<<gHeight<<
-                " full "<<gFullscreen<<" debug "<<gDebug<< " mode " << gMode<<std::endl;
+        " full "<<gFullscreen<<" debug "<<gDebug<< " mode " << gMode<<std::endl;
     }
 }
 
