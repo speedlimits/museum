@@ -53,7 +53,6 @@
 #include "oh/ObjectScript.hpp"
 #include "oh/ObjectScriptManagerFactory.hpp"
 #include <util/KnownServices.hpp>
-//#include "WebViewManager.hpp"
 
 namespace Sirikata {
 
@@ -1154,9 +1153,12 @@ void HostedObject::processRPC(const RoutableMessageHeader &msg, const std::strin
         }
     }
     else if (name == "EvaluateJavascript") {
-        printstr << "Message from Python to Javascript: " << (char*)args.data();
+        std::cout << "Message from Python to Javascript: " << (char*)args.data() << std::endl;
         mObjectHost->mDumbMsg = (char*)args.data();
-//        WebViewManager::getSingleton().evaluateJavaScript("__chrome", (char*)args.data());
+    } 
+    else if (name == "SetLightMood") {
+        std::cout << "received SetLightMood-->" << (char*)args.data() << std::endl;
+        mObjectHost->mDumbMsg = (char*)args.data();
     } 
     else {
         printstr<<"Message to be handled in script: "<<name;

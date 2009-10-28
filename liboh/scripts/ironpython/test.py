@@ -55,11 +55,12 @@ def pbj2Quat(q):
     w = wsq**0.5 * sign
     return x, y, z, w
 
-def tokenize(s):
+def tokenize(s, last=99999):
+    #last == last token; returns remainder of string after
     toks = []
     quoting=False
     t = ""
-    for i in s:
+    for n, i in enumerate(s):
         if quoting:
             if i=='"':
                 quoting=False
@@ -73,6 +74,9 @@ def tokenize(s):
                 t = ""
             else:
                 t += i
+        if len(toks) == last:
+            toks.append(s[n+1:])
+            return toks
     toks.append(t)
     return toks
 
@@ -231,9 +235,10 @@ class exampleclass:
                     self.setPosition(objid=self.objects[painting], position = (x, y, z), orientation = (qx, qy, qz, qw) )
 
                 elif tok[1]=="saveState":
+                    tok = tokenize(s,4)
                     filename = tok[2]
                     description = tok[3]
-                    moodstring = tok[4]
+                    moodstring = tok[4]             #this will be remainder of string, not a token
                     print "PY: saveState", filename, "description:", description, "mood:", moodstring
                     self.saveStateArt={}
                     for art, uid in self.objects.items():
@@ -260,11 +265,11 @@ class exampleclass:
                             self.setPosition(objid=uid, position = pos, orientation = rot,
                                  velocity = (0,0,0), axis=(0,1,0), angular_speed=0)
                         else:
-                            mood = art[-1]
+                            mood = arts[-1]
                     body = pbSiri.MessageBody()
-                    body.message_names.append("EvaluateJavascript")
-#                    msg = 'setLightMood(' +'"'+mood+'");'
-                    msg = 'Client.event("navmessage", "light setmood "'+mood+'");'
+                    body.message_names.append("SetLightMood")
+                    msg = mood
+                    if DEBUG_OUTPUT: print "PY: loadState set lighting mood-->" + mood + "<--", " len:", len(mood)
                     body.message_arguments.append(msg)
                     header = pbHead.Header()
                     header.destination_space = util.tupleFromUUID(self.spaceid)

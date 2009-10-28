@@ -223,11 +223,19 @@ public:
     virtual void destroyProxy(ProxyObjectPtr p);
     //String mDumbMsg;
     String oldMsg;
+    void setLightsFromString(String s);
     virtual void exchangeDumbMsg(String& s) {
-//        String temp = s;
+    //        String temp = s;
         if (s != "") {// && s != oldMsg) {
-//        mDumbMsg=temp;
-            WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
+    //        mDumbMsg=temp;
+            if (s.size() >= 10 && s.substr(0,10) == "lightmood ") {
+                std::cout << "dbm debug set lights==>" << s << std::endl;
+                setLightsFromString(s);
+            }
+            else {
+                std::cout << "dbm debug Py->JS: " << s << std::endl;
+                WebViewManager::getSingleton().evaluateJavaScript("__chrome", s);
+            }
             oldMsg=s;
         }
     };

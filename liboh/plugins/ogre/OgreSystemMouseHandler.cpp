@@ -1682,7 +1682,7 @@ private:
             orientation.x <<" "<< orientation.y <<" "<< orientation.z <<" "<< orientation.w;
         }
         else if (tok=="saveState") {
-            fullmsg << arg << " " << getMoodStringForSaving();
+            fullmsg << arg << " lightmood " << mLastMoodSelected; //getMoodStringForSaving();
         }
         else if (tok=="loadState") {
             fullmsg << arg;
@@ -2373,6 +2373,7 @@ private:
     //--------------------------------------------------------------------------
 
     void initLightMoods() {
+        std::cout << "dbm debug: initLightMoods" << std::endl;
         if (mMoodLightsInited)
             return;
 
@@ -2530,7 +2531,6 @@ private:
     //     light set { 'id':'<id>' ... }
     //     light set [ { 'id':'<id>' ... }, ... { 'id':'<id>' ... } ]
     //--------------------------------------------------------------------------
-
     void lightSet(const String& arg, size_t argCaret) {
         String params;
         argCaret += strspn(arg.c_str() + argCaret, mWhiteSpace);
@@ -2559,13 +2559,13 @@ private:
         light->update(li);
     }
 
-
     //--------------------------------------------------------------------------
     // Select the lighting mood. Choose from { 0, 1, 2, 3 }
     // Invoked as
     //     light selectmood <level>
     //--------------------------------------------------------------------------
-
+    int mLastMoodSelected;
+  public:       /// yes I did
     void lightSelectMood(const String& arg, size_t argCaret) {
         long mood;
         if (!getNextTokenAsLong(arg, &argCaret, &mood)) {
@@ -2576,7 +2576,8 @@ private:
             SILOG(input, error, "lightSelectMood: mood level out of range");
             return;
         }
-
+        mLastMoodSelected=mood;
+        std::cout << "dbm debug lightSelectMood setting mood: " << mood << std::endl;
         for (OgreSystem::SceneEntitiesMap::const_iterator iter = mParent->mSceneEntities.begin();
             iter != mParent->mSceneEntities.end(); ++iter
         ) {
@@ -2588,7 +2589,7 @@ private:
             light->update(li);
         }
     }
-
+  private:
 
     //--------------------------------------------------------------------------
     // Get the lighting mood as a string. Choose from { 0, 1, 2, 3 }
@@ -2705,7 +2706,6 @@ private:
         setLightInfoFromString(params, &li);
         setMoodLightInfo(mood, li);
     }
-
 
     //--------------------------------------------------------------------------
     // Place a spotlight on the selected object.
@@ -3034,8 +3034,11 @@ public:
      : mParent(parent),
        mCurrentGroup(SpaceObjectReference::null()),
        mLastCameraTime(Task::LocalTime::now()),
-       mWhichRayObject(0)
+       mWhichRayObject(0),
+       mLastMoodSelected(3)
     {
+        initLightMoods();
+        lightSelectMood("3", 0);
         mCamSpeed = 0.3;
         if (gMode=="funmode") {
             mCamSpeed = 1.0;
@@ -3309,6 +3312,10 @@ void OgreSystem::selectObject(Entity *obj, bool replace) {
         mMouseHandler->addToSelection(obj->getProxyPtr());
         obj->setSelected(true);
     }
+}
+
+void OgreSystem::setLightsFromString(String s) {
+    mMouseHandler->lightSelectMood(s.substr(10,1), 0);
 }
 
 void OgreSystem::tickInputHandler(const Task::LocalTime& t) const {
