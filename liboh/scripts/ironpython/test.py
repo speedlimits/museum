@@ -132,6 +132,7 @@ class exampleclass:
 
     gamenum=0.0
     gameon=0
+    lastfire=0
     def reset_funmode(self):
         if DEBUG_OUTPUT: print "PY dbm debug: reset_funmode objects length:", len(self.objects)
         self.gamenum += 0.5     #please don't ask
@@ -188,7 +189,7 @@ class exampleclass:
         if t>60:
             s = "<h1>ER DU KLAR???</h1>"
         elif t<=0:
-            s = "<h1>GAME OVER. DIN SCORE VAR " + str(self.score) + "</h1>"
+            s = "<h1>DU RAMTE " + str(self.score) + " AF 18 MALERIER!</h1>"
             self.gameon=0
         else:
             self.gameon=1
@@ -291,6 +292,10 @@ class exampleclass:
                 if tok[1]=="fire":
                     if not self.gameon:
                         return
+                    t = time.time()
+                    if t - self.lastfire < 0.5:
+                        return
+                    self.lastfire=t
                     if DEBUG_OUTPUT: print "PY: fire the cannon!", s, "id:", id(self)
                     ammo = tok[2] + "_" + str(self.ammoNum)
                     self.ammoNum = (self.ammoNum+1) % self.ammoMod
