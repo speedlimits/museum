@@ -574,7 +574,7 @@ private:
             mouseOver = hoverEntity(camera, SpaceTimeOffsetManager::getSingleton().now(camera->getProxy().getObjectReference().space()), p.x, p.y, &mLastHitCount, mWhichRayObject=0);
 //            }
             if (mouseOver) {
-                if (isArtWork(mouseOver) && (gMode != "funmode")) {
+                if (gMode=="dev" || (isArtWork(mouseOver) && (gMode != "funmode"))) {
                     mSelectedObjects.insert(mouseOver->getProxyPtr());
                     mouseOver->setSelected(true);
                     SILOG(input,info,"Replaced selection with " << mouseOver->id());
