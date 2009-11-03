@@ -1,3 +1,7 @@
 "objtype","subtype","name","parent","script","scriptparams","pos_x","pos_y","pos_z","orient_x","orient_y","orient_z","orient_w","scale_x","scale_y","scale_z","hull_x","hull_y","hull_z","density","friction","bounce","colMask","colMsg","meshURI","diffuse_x","diffuse_y","diffuse_z","ambient","specular_x","specular_y","specular_z","shadowpower","range","constfall","linearfall","quadfall","cone_in","cone_out","power","cone_fall","shadow"
 "camera",,,,"monoscript","Assembly=Sirikata.Runtime&Class=PythonObject&Namespace=Sirikata.Runtime&PythonModule=test&PythonClass=exampleclass",-6.53,-0.89,3.62,0,-71.05,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-"light","point",,,,,-6.53,-0.89,3.62,0,-71.05,0,,,,,,,,,,,,,,0.22,0.22,0.22,0.6,0.4,0.4,0.4,0.11,200000,0.5,0,0,30,40,0.9,1,0
+"light","point",,"light1",,,-36.57,16.67,-15.5,0,1,0,0,,,,,,,,,,,,,0.22,0.22,0.22,0.67,0.4,0.4,0.4,0.14,200000,1,0.1,0,30,40,3.6,1,1
+"#","graphiconly","light1",,,,-36.57,16.67,-15.5,0,1,0,0,1,1,1,,,,,,,,,"meru:///cube.mesh",,,,,,,,,,,,,,,,,
+"light","point",,"light2",,,33.1,15.3,0.08,0.03,-0.86,0.04,0.51,,,,,,,,,,,,,0.22,0.22,0.22,0.5,0.4,0.4,0.4,0.23,200000,1,0.2,0,30,40,5,1,1
+"#","graphiconly","light2",,,,33.1,15.3,0.08,0.03,-0.86,0.04,0.51,1,1,1,,,,,,,,,"meru:///cube.mesh",,,,,,,,,,,,,,,,,
+"light","point",,,,,-10.83,0.6,-2.15,0,0,0,1,,,,,,,,,,,,,1,1,1,0.5,0,0,0,0,200,1,0.25,0.07,30,40,1,1,1
