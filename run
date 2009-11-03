@@ -30,6 +30,7 @@ f.close()
 
 fullscreen=True
 debug=False
+dev=False
 width = 1360
 height = 768
 try:
@@ -40,6 +41,9 @@ try:
         if w[0]=="fullscreen":
             if w[1]!="true":
                 fullscreen=False
+        if w[0]=="dev":
+            if w[1]=="true":
+                dev=True
         if w[0]=="debug":
             if w[1]=="true":
                 debug=True
@@ -58,7 +62,7 @@ if len(sys.argv)==2 and sys.argv[1] in ("curator", "critic", "funmode", "flythru
 ##    if sys.argv[1] in ("curator", "funmode", "critic"):
     cmd += " scenes/" + sys.argv[1] + "_art.csv"
     f = open("build/cmake/mode.txt", "w")
-    f.write("mode=" + sys.argv[1] + "\n")
+    f.write("mode=" + (sys.argv[1] if (not dev) else "dev") + "\n")
     f.write("fullscreen=" + str(fullscreen) + "\n")
     f.write("width=" + str(width) + "\n");
     f.write("height=" + str(height) + "\n");
