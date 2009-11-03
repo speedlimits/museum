@@ -288,49 +288,50 @@ class exampleclass:
                     header.destination_object = util.tupleFromUUID(self.objid)
                     HostedObject.SendMessage(util.toByteArray(header.SerializeToString()+body.SerializeToString()))
 
-            elif tok[0]=="funmode" and self.mode=="funmode":
-                if tok[1]=="fire":
-                    if not self.gameon:
-                        return
-                    t = time.time()
-                    if t - self.lastfire < 0.5:
-                        return
-                    self.lastfire=t
-                    if DEBUG_OUTPUT: print "PY: fire the cannon!", s, "id:", id(self)
-                    ammo = tok[2] + "_" + str(self.ammoNum)
-                    self.ammoNum = (self.ammoNum+1) % self.ammoMod
-                    retire = tok[2] + "_" + str(self.ammoNum)
-                    self.setPosition(objid=self.objects[retire], position = (0, -10, 0), orientation = (0, 0, 0, 1),
-                                     velocity = (0, 0, 0), axis=(0,1,0), angular_speed=0)
-                    x = float(tok[3])
-                    y = float(tok[4])
-                    z = float(tok[5])
-                    qx = float(tok[6])
-                    qy = float(tok[7])
-                    qz = float(tok[8])
-                    qw = float(tok[9])
-                    zx = float(tok[10])                          ## we fire down -Z axis (camera view direction)
-                    zy = float(tok[11])
-                    zz = float(tok[12])
-##                    ox=-zx; oy=-zy; oz=-zz
-                    ox=0; oy=1; oz=0
-                    offset = 0.5                                 ## move ammo out from inside avatar
-                    x += ox*offset
-                    y += oy*offset
-                    z += oz*offset
-                    vel = 7.0                                   ## initial ammo velocity
-                    vx = -zx*vel
-                    vy = -zy*vel
-                    vz = -zz*vel
-                    if DEBUG_OUTPUT: print "PY: rot:", qx, qy, qz, qw, "axis:", zx, zy, zz, "pos+off:", x, y, z, "vel:", vx, vy, vz
-                    self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
-                                     velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
-                elif tok[1]=="timer":
-                    t = time.time()-self.timestart
-                    if t > self.lasttime+1.0:
-                        self.lasttime+=1.0
-                        if DEBUG_OUTPUT: print "PY: timer tick, time now:", self.lasttime
-                        self.updateBanner()
+            elif tok[0]=="funmode":
+                if self.mode=="funmode":            #else silently ignore
+                    if tok[1]=="fire":
+                        if not self.gameon:
+                            return
+                        t = time.time()
+                        if t - self.lastfire < 0.5:
+                            return
+                        self.lastfire=t
+                        if DEBUG_OUTPUT: print "PY: fire the cannon!", s, "id:", id(self)
+                        ammo = tok[2] + "_" + str(self.ammoNum)
+                        self.ammoNum = (self.ammoNum+1) % self.ammoMod
+                        retire = tok[2] + "_" + str(self.ammoNum)
+                        self.setPosition(objid=self.objects[retire], position = (0, -10, 0), orientation = (0, 0, 0, 1),
+                                         velocity = (0, 0, 0), axis=(0,1,0), angular_speed=0)
+                        x = float(tok[3])
+                        y = float(tok[4])
+                        z = float(tok[5])
+                        qx = float(tok[6])
+                        qy = float(tok[7])
+                        qz = float(tok[8])
+                        qw = float(tok[9])
+                        zx = float(tok[10])                          ## we fire down -Z axis (camera view direction)
+                        zy = float(tok[11])
+                        zz = float(tok[12])
+    ##                    ox=-zx; oy=-zy; oz=-zz
+                        ox=0; oy=1; oz=0
+                        offset = 0.5                                 ## move ammo out from inside avatar
+                        x += ox*offset
+                        y += oy*offset
+                        z += oz*offset
+                        vel = 7.0                                   ## initial ammo velocity
+                        vx = -zx*vel
+                        vy = -zy*vel
+                        vz = -zz*vel
+                        if DEBUG_OUTPUT: print "PY: rot:", qx, qy, qz, qw, "axis:", zx, zy, zz, "pos+off:", x, y, z, "vel:", vx, vy, vz
+                        self.setPosition(objid=self.objects[ammo], position = (x, y, z), orientation = (qx, qy, qz, qw),
+                                         velocity = (vx, vy, vz), axis=(0,1,0), angular_speed=0)
+                    elif tok[1]=="timer":
+                        t = time.time()-self.timestart
+                        if t > self.lasttime+1.0:
+                            self.lasttime+=1.0
+                            if DEBUG_OUTPUT: print "PY: timer tick, time now:", self.lasttime
+                            self.updateBanner()
 
             elif tok[0]=="reset":
                 if self.mode=="funmode" or self.mode=="flythru":
@@ -418,7 +419,7 @@ class exampleclass:
                             self.setPosition(objid=self.objects[right], axis = (0,1,0), angular_speed=0)
 
             else:
-                print "PY: unknown JavascriptMessage:", tok
+                if DEBUG_OUTPUT: print "PY: unknown JavascriptMessage:", tok
 
         elif name == "BegCol":
             collision = pbPhy.CollisionBegin()
