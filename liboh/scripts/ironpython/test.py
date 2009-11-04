@@ -123,6 +123,7 @@ class exampleclass:
                 self.mode = w[1]
             if w[0]=="debug":
                 DEBUG_OUTPUT=True if w[1]=="True" else False
+                DEBUG_OUTPUT=False
         print "PY: mode=",self.mode
         f.close()
         if self.mode=="funmode":
@@ -139,6 +140,7 @@ class exampleclass:
         self.timestart=time.time()
         self.lasttime=0.0
         self.gameon=0
+        self.score=0
         #reposition avatar
         if "Avatar_fun" in self.objects:
             if DEBUG_OUTPUT: print "PY dbm debug reset_funmode Avatar_fun"
