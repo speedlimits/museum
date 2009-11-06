@@ -49,7 +49,7 @@ using namespace std;
 using std::tr1::placeholders::_1;
 static int core_plugin_refcount = 0;
 
-//#define DEBUG_OUTPUT(x) x
+    //#define DEBUG_OUTPUT(x) x
 #define DEBUG_OUTPUT(x)
 
 #define DEBUG_ALWAYS(x) x
@@ -516,7 +516,8 @@ bool BulletSystem::tick() {
                     if (    (po.p.x <= 100000. && po.p.x >= -100000.)==false ||
                             (po.p.y <= 100000. && po.p.y >= -100000.)==false ||
                             (po.p.z <= 100000. && po.p.z >= -100000.)==false ) {
-                        cout << "dbm debug BAD POSITION!" << objects[i]->mName << " pos: " << po.p << endl;
+                        cout << "dbm debug BAD POSITION! (won't try to recover)" << objects[i]->mName << " pos: " << po.p << endl;
+                        /*
                         Location lastKnown=objects[i]->mMeshptr->extrapolateLocation(remoteNow);
                         po.p.x=lastKnown.getPosition().x+.1*(rand()/(float)RAND_MAX);
                         po.p.y=lastKnown.getPosition().y+.1*(rand()/(float)RAND_MAX);
@@ -526,6 +527,7 @@ bool BulletSystem::tick() {
                         loc.setVelocity(lastKnown.getVelocity());
                         loc.setAxisOfRotation(lastKnown.getAxisOfRotation());
                         loc.setAngularSpeed(lastKnown.getAngularSpeed());
+                        */
                     }
                     loc.setPosition(po.p);
                     loc.setOrientation(po.o);
