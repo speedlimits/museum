@@ -3,11 +3,6 @@ import sys, os, time
 
 KILL_ALL=True
 
-if KILL_ALL:
-    cmd = "killall cppoh_d xterm"
-    os.system(cmd)
-    time.sleep(2)
-
 def check_for_proc(proc):
     sin, sout = os.popen2("ps ax")
     s = sout.read()
@@ -28,6 +23,11 @@ if check_for_proc("cppoh") or check_for_proc("cppoh_d"):
     f.write(time.ctime() + " -- cppoh detected, not run\n")
     f.close()
     exit()
+
+if KILL_ALL:
+    cmd = "killall cppoh_d xterm"
+    os.system(cmd)
+    time.sleep(2)
 
 print "run test -- would run here",
 f.write("pwd: " + os.path.abspath(".") + " ")
