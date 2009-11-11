@@ -14,6 +14,8 @@
 #include <fstream>
 #include <vector>
 
+//int atoi ( const char * str );
+
 std::string osc_targets[10][2];
 std::vector<std::string> osc_ips;
 std::vector<std::string> osc_ports;
@@ -33,6 +35,7 @@ namespace oscplugin {
 #define OUTPUT_BUFFER_SIZE 2048
 	
 	void init() {
+#if 0
 		
 		// ADD CALL TO INIT in BulletSystem::initialize
 		using namespace std;
@@ -70,6 +73,7 @@ namespace oscplugin {
         if (osc_ips[0] != "0.0.0.0") {
             enabled = 1;
         }
+#endif
     }
 	
 	int isActive() {
@@ -77,6 +81,7 @@ namespace oscplugin {
 	}
 	
     void sendOSCmessage(mito_data data) {
+#if 0
         using namespace std;
         if (enabled) {
         	
@@ -129,6 +134,7 @@ namespace oscplugin {
             }
         }
         // }
+#endif
     }
 	
 	/*
