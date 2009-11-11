@@ -671,7 +671,7 @@ private:
 
         Protocol::ObjLoc rloc;
         rloc.set_rotational_axis(raxis);
-        rloc.set_angular_speed(dir*amount);
+        rloc.set_angular_speed(dir*amount*.4);
         //std::cout << "dbm debug: stableRotateAction: " << raxis << ", " << dir*amount << std::endl;
         cam->requestLocation(now, rloc);
     }

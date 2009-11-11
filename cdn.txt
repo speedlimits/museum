@@ -20,9 +20,9 @@ cache=(
 
 namelookup=(
     meru:/// = (
-      0 = http://www.sirikata.com/content/names
-       2 = file:///./Staging/names.txt
-      1 = http://graphics.stanford.edu/~danielrh/dns/names/global
+      0 = http://localhost:8000/names
+      1 = http://www.sirikata.com/namesbackup/2009-09-09.06
+      2 = http://graphics.stanford.edu/~danielrh/dns/names/global
     )
     meru://cplatz@/ = (
        1 = http://graphics.stanford.edu/~danielrh/dns/names/global/cplatz
@@ -30,7 +30,6 @@ namelookup=(
     )
     meru://daniel@/ = (
        1 = http://graphics.stanford.edu/~danielrh/dns/names/global/daniel
-       2 = file:///./Staging/names-daniel.txt
     )
     meru://meru@/ = http://graphics.stanford.edu/~danielrh/dns/names/global/meru
 )
@@ -60,7 +59,7 @@ upload=(
 #   )
 #)
 #
-#upload=(mhash:// = 
+#upload=(mhash:// =
 #    http://graphics.stanford.edu/~danielrh/uploadsystem/index.php (
 #     field:file=uploadFile0
 #     value:uploadNeed=1)
