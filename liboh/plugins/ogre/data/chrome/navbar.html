@@ -92,13 +92,14 @@
 
       function goAddress() {
         var url=document.getElementById('addresstext').value;
-        chrome.send("event",["navgo", url])
+        chrome.send("event",["executefocusjs", "this.location.href='"+url+"'"])
       }
-      function goBack() { chrome.send("event",["navback"]); }
-      function goForward() { chrome.send("event",["navforward"]); }
-      function goRefresh() { chrome.send("event",["navrefresh"]); }
+
+      function goBack() { chrome.send("event",["executefocusjs", "history.go(-1)"]); }
+      function goForward() { chrome.send("event",["executefocusjs", "history.go(1)"]); }
+      function goRefresh() { chrome.send("event",["executefocusjs", "history.go(0)"]); }
       function goNewTab() { chrome.send("event",["navnewtab"]); }
-      function goCloseTab() { chrome.send("event",["navdel"]); }
+      function goCloseTab() { chrome.send("event",["navdeltab"]); }
     </script>
   </head>
   <body onLoad="initButtons()">

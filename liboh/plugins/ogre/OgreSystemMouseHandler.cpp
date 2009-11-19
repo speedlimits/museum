@@ -1309,6 +1309,7 @@ public:
         mInputResponses["webDelete"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateDelete));
 
         mInputResponses["webCommand"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateCommand, _1));
+        mInputResponses["webExecuteFocusJS"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::ExecuteFocusJS, _1));
 
         // Session
         mInputBinding.add(InputBindingEvent::Key(SDL_SCANCODE_Q), mInputResponses["quit"]);
@@ -1371,12 +1372,13 @@ public:
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navrefresh"), mInputResponses["webRefresh"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navhome"), mInputResponses["webHome"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navgo", 1), mInputResponses["webGo"]);
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navdel"), mInputResponses["webDelete"]);
+        mInputBinding.add(InputBindingEvent::Web("__chrome", "navdeltab"), mInputResponses["webDelete"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navmoveforward", 1), mInputResponses["moveForward"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnleft", 1), mInputResponses["rotateYPos"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnright", 1), mInputResponses["rotateYNeg"]);
 
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navcommand", 1), mInputResponses["webCommand"]);
+        mInputBinding.add(InputBindingEvent::Web("__chrome", "executefocusjs", 1), mInputResponses["webExecuteFocusJS"]);
     }
 
     ~MouseHandler() {

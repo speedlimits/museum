@@ -257,7 +257,8 @@ public:
         NavigateGo,
         NavigateCommand,
         NavigateHelp,
-        NavigateDelete
+        NavigateDelete,
+        ExecuteFocusJS          /// not strictly navigation eh
     };
     void navigate(NavigationAction action);
     void navigate(NavigationAction action, const String& arg);

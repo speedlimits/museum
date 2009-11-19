@@ -739,6 +739,9 @@ void WebViewManager::navigate(NavigationAction action, const String& arg) {
         SILOG(ogre, info, "NavigateCommand: " + arg);
         NavigateCommandDispatcher(arg);
         break;
+      case ExecuteFocusJS:
+        if(focusedNonChromeWebView) focusedNonChromeWebView->evaluateJS(arg);
+        break;
       default:
         SILOG(ogre, error, "Unknown navigation action from navigate(action, arg).");
         break;
