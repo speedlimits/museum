@@ -120,7 +120,7 @@ namespace Graphics {
 
 		void setViewport(Ogre::Viewport* newViewport);
 
-		void setTransparent(bool isTransparent);
+        void setTransparent(bool isTransparent);
 
 		/**
 		* Normally, mouse movement is only injected into a specific WebView from WebViewManager if the mouse is within the boundaries of

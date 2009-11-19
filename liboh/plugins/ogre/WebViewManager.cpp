@@ -408,16 +408,20 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 	WebView* webViewToFocus = selection? selection : getTopWebView(x, y);
 
     /// user focus visual cue (navbar (navbar) is ignored)
-    String focusName = webViewToFocus->getName();
-    if (focusName != "navbar") {
-        WebViewMap::iterator iter;
-        for (iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++) {
-            if (iter->second->getName() != "navbar") {
-                if (iter->second->getName() == focusName) {
-                    iter->second->setOpacity(1.0);
-                }
-                else {
-                    iter->second->setOpacity(0.4);
+    if (webViewToFocus) {
+        String focusName = webViewToFocus->getName();
+        if (focusName != "navbar") {
+            WebViewMap::iterator iter;
+            for (iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++) {
+                if (iter->second) {
+                    if (iter->second->getName() != "navbar") {
+                        if (iter->second->getName() == focusName) {
+                            iter->second->setOpacity(1);
+                        }
+                        else {
+                            iter->second->setOpacity(0.4);
+                        }
+                    }
                 }
             }
         }
