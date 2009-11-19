@@ -46,13 +46,9 @@
 #include "berkelium/WindowDelegate.hpp"
 #endif
 
-#ifdef HAVE_AWESOMIUM
-#include "WebCore.h"
-#else
 namespace Awesomium {
   struct WebCore;
 }
-#endif
 
 namespace Sirikata {
 

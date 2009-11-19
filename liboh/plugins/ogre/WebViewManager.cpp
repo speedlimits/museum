@@ -91,56 +91,12 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
         setenv("LD_LIBRARY_PATH",ldLibraryPath.c_str(),1);
     }
 #endif
-#ifdef HAVE_AWESOMIUM
-	webCore = new Awesomium::WebCore(Awesomium::LOG_VERBOSE);
-	webCore->setBaseDirectory(getCurrentWorkingDirectory() + baseDirectory + "\\");
-#endif
 #ifdef HAVE_BERKELIUM
     Berkelium::init();
 #endif
-#if defined(HAVE_AWESOMIUM)
-	tooltipWebView = createWebView("__tooltip", 250, 50, OverlayPosition(0, 0), false, 70, TIER_FRONT);
-	tooltipWebView->hide();
-	tooltipWebView->setTransparent(false);
-	tooltipWebView->loadFile("tooltip.html");
-	tooltipWebView->bind("resizeTooltip", std::tr1::bind(&WebViewManager::onResizeTooltip, this, _1, _2));
-	//tooltipWebView->setIgnoresMouse();
-
-        chromeWebView = createWebView("__chrome", 400, 36, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
-        chromeWebView->loadFile("navbar.html");
-        chromeWebView->setTransparent(true);
-#endif
 #ifdef HAVE_BERKELIUM
-/*
-        // flash test
-        WebView *mychromeWebView = createWebView("yahoo", 800, 600, OverlayPosition(RP_TOPLEFT), false, 70);
-        mychromeWebView->loadURL("http://yahoo.com/");
-
-        // <video> tag test
-        mychromeWebView = createWebView("videotag", 800, 600, OverlayPosition(RP_TOPLEFT), false, 70);
-        mychromeWebView->loadURL("http://people.xiph.org/~maikmerten/demos/bigbuckbunny-videoonly.html");
-        // flash video test
-        mychromeWebView = createWebView("youtube", 800, 600, OverlayPosition(RP_TOPRIGHT), false, 70);
-        mychromeWebView->loadURL("http://www.youtube.com/watch?v=oHg5SJYRHA0");
-        mychromeWebView->setTransparent(true);
-*/
         chromeWebView = createWebView("__chrome", 410, 40, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
         chromeWebView->loadFile("../../../liboh/plugins/ogre/data/chrome/navbar.html");
-        
-        /*
-        WebView *mychromeWebView = createWebView("google", 400, 300, OverlayPosition(RP_BOTTOMLEFT), false, 70);
-        mychromeWebView->loadURL("http://google.com/");
-        mychromeWebView->setTransparent(true);
-        mychromeWebView->focus();
-        */
-/*
-        mychromeWebView = createWebView("xahoo", 800, 600, OverlayPosition(RP_TOPRIGHT), false, 70);
-        mychromeWebView->loadURL("http://www.adobe.com/aboutadobe/contact.html");
-        mychromeWebView->setTransparent(true);
-        mychromeWebView = createWebView("GoOGLE", 800, 600, OverlayPosition(RP_TOPRIGHT), false, 70);
-        mychromeWebView->loadURL(http://dunnbypaul.net/js_mouse/");
-        mychromeWebView->setTransparent(false);
-*/
 #endif
 }
 
@@ -154,10 +110,6 @@ WebViewManager::~WebViewManager()
 	}
 #ifdef HAVE_BERKELIUM
     Berkelium::destroy();
-#endif
-#ifdef HAVE_AWESOMIUM
-	if(webCore)
-		delete webCore;
 #endif
 }
 
@@ -180,9 +132,6 @@ void WebViewManager::Update()
 {
 #ifdef HAVE_BERKELIUM
     Berkelium::update();
-#endif
-#ifdef HAVE_AWESOMIUM
-	webCore->update();
 #endif
 	WebViewMap::iterator end, iter;
 	end = activeWebViews.end();
@@ -498,7 +447,7 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 	}
 
 	focusedWebView = webViewToFocus;
-#if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
+#if defined(HAVE_BERKELIUM)
 	focusedWebView->focus();
 #endif
 
@@ -532,21 +481,10 @@ WebView* WebViewManager::getTopWebView(int x, int y)
 void WebViewManager::deFocusAllWebViews()
 {
 	WebViewMap::iterator iter;
-#if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
+#if defined(HAVE_BERKELIUM)
 	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
 		iter->second->unfocus();
 #endif
-	/*
-	astralMgr->defocusAll();
-
-	hiddenWin->focus();
-	hiddenWin->injectMouseMove(50, 50);
-	hiddenWin->injectMouseDown(50, 50);
-	hiddenWin->injectMouseUp(50, 50);
-
-	focusedWebView = 0;
-	*/
-
 	focusedWebView = NULL;
 	isDraggingFocusedWebView = false;
 }
@@ -640,32 +578,6 @@ void WebViewManager::navigate(NavigationAction action) {
         return;
 
     switch (action) {
-/// cruft
-/*
-#if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
-    case NavigateBack:
-        focusedNonChromeWebView->evaluateJS("history.go(-1)");
-        break;
-    case NavigateForward:
-        focusedNonChromeWebView->evaluateJS("history.go(1)");
-        break;
-#endif
-#if (!defined(WIN32) && !defined(__APPLE__) && defined(HAVE_AWESOMIUM))
-    case NavigateRefresh:
-        focusedNonChromeWebView->webView->refresh();
-#elif defined(HAVE_AWESOMIUM)
-    case NavigateRefresh:
-        SILOG(ogre,error,"FIXME: refresh() is disabled...");
-        focusedNonChromeWebView->webView->goToHistoryOffset(0);
-#elif defined(HAVE_BERKELIUM)
-    case NavigateRefresh:
-        focusedNonChromeWebView->webView->refresh();
-#endif
-        break;
-    case NavigateHome:
-        focusedNonChromeWebView->loadURL("http://www.google.com");
-        break;
-*/
     case NavigateDelete:
 //        delete focusedNonChromeWebView;
         /// this is bull -- delete is crashing
@@ -732,16 +644,8 @@ static void NavigateCommandDispatcher(const String& str) {
 
 
 void WebViewManager::navigate(NavigationAction action, const String& arg) {
-#if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
+#if defined(HAVE_BERKELIUM)
     switch (action) {
-//      case NavigateGo:
-//        if (focusedNonChromeWebView)
-//            focusedNonChromeWebView->loadURL(arg);
-//        break;
-//      case NavigateCommand:
-//        SILOG(ogre, info, "NavigateCommand: " + arg);
-//        NavigateCommandDispatcher(arg);
-//        break;
       case ExecuteFocusJS:
         if(focusedNonChromeWebView) focusedNonChromeWebView->evaluateJS(arg);
         break;
@@ -749,11 +653,11 @@ void WebViewManager::navigate(NavigationAction action, const String& arg) {
         SILOG(ogre, error, "Unknown navigation action from navigate(action, arg).");
         break;
     }
-#endif //HAVE_AWESOMIUM
+#endif
 }
 
 void WebViewManager::onRaiseWebViewEvent(WebView* webview, const JSArguments& args) {
-#if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
+#if defined(HAVE_BERKELIUM)
     if (args.size() < 1) {
         SILOG(ogre,error,"event() must be called with at least one argument.  It should take the form event(name, other, args, follow)");
         return;
@@ -1054,13 +958,10 @@ static unsigned int InputKeyToAwesomiumKey(SDL_scancode scancode, bool& numpad)
 
 static int InputModifiersToAwesomiumModifiers(Modifier modifiers, bool numpad) {
     int awemods = 0;
-#ifdef HAVE_AWESOMIUM
-    using namespace Awesomium;
-#endif
 #ifdef HAVE_BERKELIUM
     using namespace Berkelium;
 #endif
-#if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
+#if defined(HAVE_BERKELIUM)
     if (modifiers &Input::MOD_SHIFT)
         awemods |= SHIFT_MOD;
     if (modifiers &Input::MOD_CTRL)

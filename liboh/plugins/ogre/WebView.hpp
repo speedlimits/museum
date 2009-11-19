@@ -40,7 +40,6 @@
 #include <oh/WebViewListener.hpp>
 #include <oh/ProxyWebViewObject.hpp>
 
-#ifndef HAVE_AWESOMIUM
 namespace Awesomium {
   typedef Sirikata::JSArguments JSArguments;
   struct JSValue;
@@ -51,7 +50,7 @@ namespace Awesomium {
   class WebView {};
 #endif
 }
-#endif
+
 #ifndef HAVE_BERKELIUM
 namespace Berkelium {
   struct Rect {};
@@ -116,11 +115,6 @@ namespace Graphics {
 		*/
 		void evaluateJS(const std::string& javascript);
 
-#if 0
-		void evaluateJS(const std::string& javascript, const JSArguments& args);
-
-		Awesomium::FutureJSValue evaluateJSWithResult(const std::string& javascript);
-#endif
 		/**
 		* Sets a global 'Client' callback that can be invoked via Javascript from
 		* within all pages loaded into this WebView.
