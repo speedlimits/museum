@@ -92,7 +92,7 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     }
 #endif
     Berkelium::init();
-        chromeWebView = createWebView("__chrome", 440, 40, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
+        chromeWebView = createWebView("navbar", 440, 40, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
         chromeWebView->loadFile("../../../liboh/plugins/ogre/data/chrome/navbar.html");
 //        chromeWebView->setTransparent(true);
 }
@@ -407,12 +407,12 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 	deFocusAllWebViews();
 	WebView* webViewToFocus = selection? selection : getTopWebView(x, y);
 
-    /// user focus visual cue (navbar (__chrome) is ignored)
+    /// user focus visual cue (navbar (navbar) is ignored)
     String focusName = webViewToFocus->getName();
-    if (focusName != "__chrome") {
+    if (focusName != "navbar") {
         WebViewMap::iterator iter;
         for (iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++) {
-            if (iter->second->getName() != "__chrome") {
+            if (iter->second->getName() != "navbar") {
                 if (iter->second->getName() == focusName) {
                     iter->second->setOpacity(1.0);
                 }

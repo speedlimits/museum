@@ -1366,19 +1366,19 @@ public:
         //mInputBinding.add(InputBindingEvent::Key(), mInputResponses["cameraPathSlowDown"]);
 
         // WebView Chrome
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navnewtab"), mInputResponses["webNewTab"]);
-//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navback"), mInputResponses["webBack"]);
-//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navforward"), mInputResponses["webForward"]);
-//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navrefresh"), mInputResponses["webRefresh"]);
-//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navhome"), mInputResponses["webHome"]);
-//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navgo", 1), mInputResponses["webGo"]);
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navdeltab"), mInputResponses["webDelete"]);
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navmoveforward", 1), mInputResponses["moveForward"]);
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnleft", 1), mInputResponses["rotateYPos"]);
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnright", 1), mInputResponses["rotateYNeg"]);
+        mInputBinding.add(InputBindingEvent::Web("navbar", "navnewtab"), mInputResponses["webNewTab"]);
+//        mInputBinding.add(InputBindingEvent::Web("navbar", "navback"), mInputResponses["webBack"]);
+//        mInputBinding.add(InputBindingEvent::Web("navbar", "navforward"), mInputResponses["webForward"]);
+//        mInputBinding.add(InputBindingEvent::Web("navbar", "navrefresh"), mInputResponses["webRefresh"]);
+//        mInputBinding.add(InputBindingEvent::Web("navbar", "navhome"), mInputResponses["webHome"]);
+//        mInputBinding.add(InputBindingEvent::Web("navbar", "navgo", 1), mInputResponses["webGo"]);
+        mInputBinding.add(InputBindingEvent::Web("navbar", "navdeltab"), mInputResponses["webDelete"]);
+        mInputBinding.add(InputBindingEvent::Web("navbar", "navmoveforward", 1), mInputResponses["moveForward"]);
+        mInputBinding.add(InputBindingEvent::Web("navbar", "navturnleft", 1), mInputResponses["rotateYPos"]);
+        mInputBinding.add(InputBindingEvent::Web("navbar", "navturnright", 1), mInputResponses["rotateYNeg"]);
 
-//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navcommand", 1), mInputResponses["webCommand"]);
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "executefocusjs", 1), mInputResponses["webExecuteFocusJS"]);
+//        mInputBinding.add(InputBindingEvent::Web("navbar", "navcommand", 1), mInputResponses["webCommand"]);
+        mInputBinding.add(InputBindingEvent::Web("navbar", "executefocusjs", 1), mInputResponses["webExecuteFocusJS"]);
     }
 
     ~MouseHandler() {
