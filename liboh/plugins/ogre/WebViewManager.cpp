@@ -92,8 +92,9 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
     }
 #endif
     Berkelium::init();
-        chromeWebView = createWebView("__chrome", 410, 40, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
+        chromeWebView = createWebView("__chrome", 440, 40, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
         chromeWebView->loadFile("../../../liboh/plugins/ogre/data/chrome/navbar.html");
+//        chromeWebView->setTransparent(true);
 }
 
 WebViewManager::~WebViewManager()
@@ -406,6 +407,22 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 	deFocusAllWebViews();
 	WebView* webViewToFocus = selection? selection : getTopWebView(x, y);
 
+    /// user focus visual cue (navbar (__chrome) is ignored)
+    String focusName = webViewToFocus->getName();
+    if (focusName != "__chrome") {
+        WebViewMap::iterator iter;
+        for (iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++) {
+            if (iter->second->getName() != "__chrome") {
+                if (iter->second->getName() == focusName) {
+                    iter->second->setOpacity(1.0);
+                }
+                else {
+                    iter->second->setOpacity(0.4);
+                }
+            }
+        }
+    }
+
 	if(!webViewToFocus) {
             focusedNonChromeWebView = NULL;
             return false;
@@ -440,6 +457,8 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 
 	focusedWebView = webViewToFocus;
 	focusedWebView->focus();
+//    focusedWebView->evaluateJS("document.bgColor='green'");
+    focusedWebView->setOpacity(1.0);
 
         if (focusedWebView != chromeWebView)
             focusedNonChromeWebView = focusedWebView;
@@ -471,9 +490,10 @@ WebView* WebViewManager::getTopWebView(int x, int y)
 void WebViewManager::deFocusAllWebViews()
 {
 	WebViewMap::iterator iter;
-	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
+	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++) {
 		iter->second->unfocus();
-	focusedWebView = NULL;
+    }
+    focusedWebView = NULL;
 	isDraggingFocusedWebView = false;
 }
 
@@ -555,8 +575,8 @@ void WebViewManager::navigate(NavigationAction action) {
         char buffer[256];
         sprintf(buffer, "spawned_%d", unique_id++);
         String unique_name(buffer);
-        WebView* newwebview = createWebView(unique_name, 320, 240, OverlayPosition(RP_CENTER), false, 70, TIER_MIDDLE);
-        newwebview->loadURL("http://sirikata.com/");
+        WebView* newwebview = createWebView(unique_name, 400, 300, OverlayPosition(RP_CENTER), false, 70, TIER_MIDDLE);
+        newwebview->loadURL("http://google.com/");
 //        newwebview->setTransparent(true);
         focusedNonChromeWebView = newwebview;
         return;

@@ -161,6 +161,7 @@ void WebView::createMaterial()
 {
 	if(opacity > 1) opacity = 1;
 	else if(opacity < 0) opacity = 0;
+//    opacity = 0.5;
 
 	if(!Bitwise::isPO2(viewWidth) || !Bitwise::isPO2(viewHeight))
 	{
@@ -466,9 +467,7 @@ void WebView::focus()
 
 void WebView::unfocus()
 {
-#if defined(HAVE_BERKELIUM)
     webView->unfocus();
-#endif
 }
 
 void WebView::raise()
