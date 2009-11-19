@@ -39,12 +39,10 @@
 #include "input/InputManager.hpp"
 #include <task/EventManager.hpp>
 
-#ifdef HAVE_BERKELIUM
 #include "berkelium/Berkelium.hpp"
 #include "berkelium/Widget.hpp"
 #include "berkelium/Window.hpp"
 #include "berkelium/WindowDelegate.hpp"
-#endif
 
 namespace Awesomium {
   struct WebCore;

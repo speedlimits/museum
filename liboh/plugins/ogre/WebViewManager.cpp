@@ -91,13 +91,9 @@ WebViewManager::WebViewManager(Ogre::Viewport* defaultViewport, InputManager* in
         setenv("LD_LIBRARY_PATH",ldLibraryPath.c_str(),1);
     }
 #endif
-#ifdef HAVE_BERKELIUM
     Berkelium::init();
-#endif
-#ifdef HAVE_BERKELIUM
         chromeWebView = createWebView("__chrome", 410, 40, OverlayPosition(RP_TOPCENTER), false, 70, TIER_FRONT);
         chromeWebView->loadFile("../../../liboh/plugins/ogre/data/chrome/navbar.html");
-#endif
 }
 
 WebViewManager::~WebViewManager()
@@ -108,9 +104,7 @@ WebViewManager::~WebViewManager()
 		WebView* toDelete = iter->second;
 		delete toDelete;
 	}
-#ifdef HAVE_BERKELIUM
     Berkelium::destroy();
-#endif
 }
 
 WebViewManager& WebViewManager::getSingleton()
@@ -130,9 +124,7 @@ WebViewManager* WebViewManager::getSingletonPtr()
 
 void WebViewManager::Update()
 {
-#ifdef HAVE_BERKELIUM
     Berkelium::update();
-#endif
 	WebViewMap::iterator end, iter;
 	end = activeWebViews.end();
 	iter = activeWebViews.begin();
@@ -447,9 +439,7 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
 	}
 
 	focusedWebView = webViewToFocus;
-#if defined(HAVE_BERKELIUM)
 	focusedWebView->focus();
-#endif
 
         if (focusedWebView != chromeWebView)
             focusedNonChromeWebView = focusedWebView;
@@ -481,10 +471,8 @@ WebView* WebViewManager::getTopWebView(int x, int y)
 void WebViewManager::deFocusAllWebViews()
 {
 	WebViewMap::iterator iter;
-#if defined(HAVE_BERKELIUM)
 	for(iter = activeWebViews.begin(); iter != activeWebViews.end(); iter++)
 		iter->second->unfocus();
-#endif
 	focusedWebView = NULL;
 	isDraggingFocusedWebView = false;
 }
@@ -644,7 +632,6 @@ static void NavigateCommandDispatcher(const String& str) {
 
 
 void WebViewManager::navigate(NavigationAction action, const String& arg) {
-#if defined(HAVE_BERKELIUM)
     switch (action) {
       case ExecuteFocusJS:
         if(focusedNonChromeWebView) focusedNonChromeWebView->evaluateJS(arg);
@@ -653,11 +640,9 @@ void WebViewManager::navigate(NavigationAction action, const String& arg) {
         SILOG(ogre, error, "Unknown navigation action from navigate(action, arg).");
         break;
     }
-#endif
 }
 
 void WebViewManager::onRaiseWebViewEvent(WebView* webview, const JSArguments& args) {
-#if defined(HAVE_BERKELIUM)
     if (args.size() < 1) {
         SILOG(ogre,error,"event() must be called with at least one argument.  It should take the form event(name, other, args, follow)");
         return;
@@ -672,7 +657,6 @@ void WebViewManager::onRaiseWebViewEvent(WebView* webview, const JSArguments& ar
     event_args.insert(event_args.begin(), args.begin() + 1, args.end());
 
     mInputManager->fire(Task::EventPtr( new WebViewEvent(webview->getName(), args) ));
-#endif
 }
 
 Sirikata::Task::EventResponse WebViewManager::onMouseMove(Sirikata::Task::EventPtr evt)
@@ -958,10 +942,7 @@ static unsigned int InputKeyToAwesomiumKey(SDL_scancode scancode, bool& numpad)
 
 static int InputModifiersToAwesomiumModifiers(Modifier modifiers, bool numpad) {
     int awemods = 0;
-#ifdef HAVE_BERKELIUM
     using namespace Berkelium;
-#endif
-#if defined(HAVE_BERKELIUM)
     if (modifiers &Input::MOD_SHIFT)
         awemods |= SHIFT_MOD;
     if (modifiers &Input::MOD_CTRL)
@@ -972,7 +953,6 @@ static int InputModifiersToAwesomiumModifiers(Modifier modifiers, bool numpad) {
         awemods |= META_MOD;
     if (numpad)
         awemods |= KEYPAD_KEY;
-#endif
     return awemods;
 }
 

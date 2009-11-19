@@ -45,22 +45,7 @@ namespace Awesomium {
   struct JSValue;
   struct JSDelegate;
   typedef int FutureJSValue;
-#if !defined(HAVE_BERKELIUM)
-  class WebViewListener {};
-  class WebView {};
-#endif
 }
-
-#ifndef HAVE_BERKELIUM
-namespace Berkelium {
-  struct Rect {};
-  struct Window;
-  struct Widget;
-  struct WindowDelegate {
-    struct Data { char *message; int length; };
-  };
-}
-#endif
 
 namespace Sirikata {
 namespace Graphics {
@@ -75,11 +60,7 @@ namespace Graphics {
 	*/
 	class WebView
         : public Ogre::ManualResourceLoader,
-#ifdef HAVE_BERKELIUM
           public Berkelium::WindowDelegate,
-#else
-          public Awesomium::WebViewListener,
-#endif
           public Sirikata::WebViewListener,
           public Sirikata::ProxyObjectListener
 	{
@@ -379,15 +360,11 @@ namespace Graphics {
 		void resize(int width, int height);
 
 	protected:
-#ifdef HAVE_BERKELIUM
 		Berkelium::Window* webView;
         Berkelium::Rect blitNewImage(Ogre::HardwarePixelBufferSharedPtr pixelBuffer,
                                               const unsigned char*srcBuffer, const Berkelium::Rect&rect,
                                               int dx, int dy, const Berkelium::Rect&clipRect);
         void compositeWidgets(Berkelium::Window*);
-#else
-		Awesomium::WebView* webView;
-#endif
 		std::string viewName;
 		unsigned short viewWidth;
 		unsigned short viewHeight;

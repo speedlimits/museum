@@ -118,9 +118,7 @@ WebView::~WebView()
 {
 	if(alphaCache)
 		delete[] alphaCache;
-#ifdef HAVE_BERKELIUM
     delete webView;
-#endif
 	if(overlay)
 		delete overlay;
 
@@ -154,11 +152,9 @@ void WebView::setProxyObject(const std::tr1::shared_ptr<ProxyWebViewObject>& pro
 
 void WebView::createWebView(bool asyncRender, int maxAsyncRenderRate)
 {
-#ifdef HAVE_BERKELIUM
     webView = Berkelium::Window::create();
     webView->setDelegate(this);
     webView->resize(viewWidth, viewHeight);
-#endif
 }
 
 void WebView::createMaterial()
@@ -188,7 +184,7 @@ void WebView::createMaterial()
 
 
 	// Create the texture
-#if defined(HAVE_BERKELIUM) || !defined(__APPLE__)
+#if !defined(__APPLE__)
 	TexturePtr texture = TextureManager::getSingleton().createManual(
 		getViewTextureName(), ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 		TEX_TYPE_2D, texWidth, texHeight, 0, PF_BYTE_BGRA,
@@ -297,14 +293,11 @@ bool WebView::isPointOverMe(int x, int y)
 
 void WebView::loadURL(const std::string& url)
 {
-#if defined(HAVE_BERKELIUM)
     webView->navigateTo(url.data(),url.length());
-#endif
 }
 
 void WebView::loadFile(const std::string& file)
 {
-#if defined(HAVE_BERKELIUM)
     std::string url = file;
     if (file.length() == 0) {
         url = "about:blank";
@@ -314,29 +307,24 @@ void WebView::loadFile(const std::string& file)
         url = "file://"+WebViewManager::getSingleton().getBaseDir()+"/"+file;
     }
     webView->navigateTo(url.data(),url.length());
-#endif
 }
 static std::string htmlPrepend("data:text/html;charset=utf-8,");
 void WebView::loadHTML(const std::string& html)
 {
-#if defined(HAVE_BERKELIUM)
     char * data= new char[htmlPrepend.length()+html.length()+1];
     memcpy(data,htmlPrepend.data(),htmlPrepend.length());
     memcpy(data+htmlPrepend.length(),html.data(),html.length());
     data[htmlPrepend.length()+html.length()]=0;
     webView->navigateTo(data,htmlPrepend.length()+html.length());
     delete[] data;
-#endif
 }
 
 void WebView::evaluateJS(const std::string& utf8js)
 {
-#if defined(HAVE_BERKELIUM)
 	wchar_t *outchars = new wchar_t[utf8js.size()+1];
 	size_t len = mbstowcs(outchars, utf8js.c_str(), utf8js.size());
     webView->executeJavascript(outchars,len);
     delete []outchars;
-#endif
 }
 
 void WebView::bind(const std::string& name, JSDelegate callback)
@@ -374,9 +362,7 @@ void WebView::setTransparent(bool isTransparent)
 		}
 	}
 
-#if defined(HAVE_BERKELIUM)
 	webView->setTransparent(isTransparent);
-#endif
 	isWebViewTransparent = isTransparent;
 }
 
@@ -475,9 +461,7 @@ void WebView::show(bool fade, unsigned short fadeDurationMS)
 
 void WebView::focus()
 {
-#if defined(HAVE_BERKELIUM)
     webView->focus();
-#endif
 }
 
 void WebView::unfocus()
@@ -582,47 +566,35 @@ void WebView::getDerivedUV(Ogre::Real& u1, Ogre::Real& v1, Ogre::Real& u2, Ogre:
 
 void WebView::injectMouseMove(int xPos, int yPos)
 {
-#if defined(HAVE_BERKELIUM)
 	webView->mouseMoved(xPos, yPos);
-#endif
 }
 
 void WebView::injectMouseWheel(int relScrollX, int relScrollY)
 {
-#if defined(HAVE_BERKELIUM)
     webView->mouseWheel(relScrollX, relScrollY);
-#endif
 }
 
 void WebView::injectMouseDown(int xPos, int yPos)
 {
-#if defined(HAVE_BERKELIUM)
     webView->mouseMoved(xPos, yPos);
     webView->mouseButton(0, true);
-#endif
 }
 
 void WebView::injectMouseUp(int xPos, int yPos)
 {
-#if defined(HAVE_BERKELIUM)
     webView->mouseMoved(xPos, yPos);
 	webView->mouseButton(0, false);
-#endif
 }
 
 void WebView::injectKeyEvent(bool press, int modifiers, int vk_code, int scancode) {
-#if defined(HAVE_BERKELIUM)
 	webView->keyEvent(press, modifiers, vk_code, scancode);
-#endif
 }
 
 void WebView::injectTextEvent(std::string utf8) {
-#if defined(HAVE_BERKELIUM)
 	wchar_t *outchars = new wchar_t[utf8.size()+1];
 	size_t len = mbstowcs(outchars, utf8.c_str(), utf8.size());
 	webView->textEvent(outchars,len);    
     delete []outchars;
-#endif
 }
 
 void WebView::captureImage(const std::string& filename)
@@ -657,9 +629,7 @@ void WebView::resize(int width, int height)
 	}
 
 	overlay->resize(viewWidth, viewHeight);
-#if defined(HAVE_BERKELIUM)
 	webView->resize(viewWidth, viewHeight);
-#endif
 
     uint16 oldTexWidth = texWidth;
     uint16 oldTexHeight = texHeight;
@@ -678,7 +648,6 @@ void WebView::resize(int width, int height)
 
 	matPass->removeAllTextureUnitStates();
 	maskTexUnit = 0;
-#if defined(HAVE_BERKELIUM)
 
 	if (!this->viewTexture.isNull()) {
         ResourcePtr res(this->viewTexture);
@@ -715,8 +684,6 @@ void WebView::resize(int width, int height)
             TEX_TYPE_2D, texWidth, texHeight, 0, PF_BYTE_BGRA,
             TU_DYNAMIC, this);
     }
-
-#endif
 
 	baseTexUnit = matPass->createTextureUnitState(viewTexture->getName());
 
@@ -859,7 +826,6 @@ Berkelium::Rect WebView::blitNewImage(HardwarePixelBufferSharedPtr pixelBuffer,
 void WebView::onPaint(Berkelium::Window*win,
                       const unsigned char*srcBuffer, const Berkelium::Rect&rect,
                       int dx, int dy, const Berkelium::Rect&clipRect) {
-#ifdef HAVE_BERKELIUM
     TexturePtr texture = backingTexture.isNull()?viewTexture:backingTexture;
 
     HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
@@ -878,7 +844,6 @@ void WebView::onPaint(Berkelium::Window*win,
             }
         }
       }
-#endif
 }
 void WebView::onBeforeUnload(Berkelium::Window*, bool*) {
     SILOG(webview,debug,"onBeforeUnload");
@@ -1022,7 +987,6 @@ void WebView::onWidgetPaint(
 }
 
 void WebView::onChromeSend(Berkelium::Window *win, const WindowDelegate::Data name, const WindowDelegate::Data*args, size_t numArgs) {
-#ifdef HAVE_BERKELIUM
     std::string nameStr(name.message,name.length);
 	std::map<std::string, JSDelegate>::iterator i = delegateMap.find(nameStr);
 
@@ -1033,7 +997,6 @@ void WebView::onChromeSend(Berkelium::Window *win, const WindowDelegate::Data na
         }
 		i->second(this, argVector);
 	}
-#endif
 }
 
 
