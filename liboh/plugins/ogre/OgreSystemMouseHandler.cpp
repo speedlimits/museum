@@ -1308,7 +1308,7 @@ public:
 //        mInputResponses["webGo"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateGo, _1));
         mInputResponses["webDelete"] = new SimpleInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateAction, this, WebViewManager::NavigateDelete));
 
-        mInputResponses["webCommand"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateCommand, _1));
+//        mInputResponses["webCommand"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::NavigateCommand, _1));
         mInputResponses["webExecuteFocusJS"] = new StringInputResponse(std::tr1::bind(&MouseHandler::webViewNavigateStringAction, this, WebViewManager::ExecuteFocusJS, _1));
 
         // Session
@@ -1377,7 +1377,7 @@ public:
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnleft", 1), mInputResponses["rotateYPos"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "navturnright", 1), mInputResponses["rotateYNeg"]);
 
-        mInputBinding.add(InputBindingEvent::Web("__chrome", "navcommand", 1), mInputResponses["webCommand"]);
+//        mInputBinding.add(InputBindingEvent::Web("__chrome", "navcommand", 1), mInputResponses["webCommand"]);
         mInputBinding.add(InputBindingEvent::Web("__chrome", "executefocusjs", 1), mInputResponses["webExecuteFocusJS"]);
     }
 

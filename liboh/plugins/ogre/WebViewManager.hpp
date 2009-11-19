@@ -250,13 +250,13 @@ public:
 
     enum NavigationAction {
         NavigateNewTab,
-        NavigateBack,
-        NavigateForward,
-        NavigateRefresh,
-        NavigateHome,
-        NavigateGo,
-        NavigateCommand,
-        NavigateHelp,
+//        NavigateBack,
+//        NavigateForward,
+//        NavigateRefresh,
+//        NavigateHome,
+//        NavigateGo,
+//        NavigateCommand,
+//        NavigateHelp,
         NavigateDelete,
         ExecuteFocusJS          /// not strictly navigation eh
     };

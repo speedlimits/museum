@@ -640,6 +640,8 @@ void WebViewManager::navigate(NavigationAction action) {
         return;
 
     switch (action) {
+/// cruft
+/*
 #if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
     case NavigateBack:
         focusedNonChromeWebView->evaluateJS("history.go(-1)");
@@ -663,6 +665,7 @@ void WebViewManager::navigate(NavigationAction action) {
     case NavigateHome:
         focusedNonChromeWebView->loadURL("http://www.google.com");
         break;
+*/
     case NavigateDelete:
 //        delete focusedNonChromeWebView;
         /// this is bull -- delete is crashing
@@ -731,14 +734,14 @@ static void NavigateCommandDispatcher(const String& str) {
 void WebViewManager::navigate(NavigationAction action, const String& arg) {
 #if defined(HAVE_AWESOMIUM) || defined(HAVE_BERKELIUM)
     switch (action) {
-      case NavigateGo:
-        if (focusedNonChromeWebView)
-            focusedNonChromeWebView->loadURL(arg);
-        break;
-      case NavigateCommand:
-        SILOG(ogre, info, "NavigateCommand: " + arg);
-        NavigateCommandDispatcher(arg);
-        break;
+//      case NavigateGo:
+//        if (focusedNonChromeWebView)
+//            focusedNonChromeWebView->loadURL(arg);
+//        break;
+//      case NavigateCommand:
+//        SILOG(ogre, info, "NavigateCommand: " + arg);
+//        NavigateCommandDispatcher(arg);
+//        break;
       case ExecuteFocusJS:
         if(focusedNonChromeWebView) focusedNonChromeWebView->evaluateJS(arg);
         break;
