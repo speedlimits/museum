@@ -358,6 +358,11 @@ namespace Graphics {
 		void onChangeTargetURL(const std::string& url);
 
 		void resize(int width, int height);
+        
+        void drawBorder();
+        
+        Vector3<int> mBorderColor;
+        void setBorderColor(int r, int g, int b);
 
 	protected:
 		Berkelium::Window* webView;

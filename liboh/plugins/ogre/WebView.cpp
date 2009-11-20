@@ -826,6 +826,7 @@ void WebView::onPaint(Berkelium::Window*win,
                       const unsigned char*srcBuffer, const Berkelium::Rect&rect,
                       int dx, int dy, const Berkelium::Rect&clipRect) {
     TexturePtr texture = backingTexture.isNull()?viewTexture:backingTexture;
+    std::cout << "dbm debug onPaint isNull " << backingTexture.isNull() << "|" << getName() << std::endl;
 
     HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
     Berkelium::Rect pixelBufferRect=blitNewImage(pixelBuffer,srcBuffer,rect,dx,dy,clipRect);
@@ -833,17 +834,54 @@ void WebView::onPaint(Berkelium::Window*win,
     if (!backingTexture.isNull()) {
         compositeWidgets(win);
     }
-    if(isWebViewTransparent && !usingMask && ignoringTrans)
-    {
+    if (isWebViewTransparent && !usingMask && ignoringTrans) {
         int top = pixelBufferRect.top();
         int left = pixelBufferRect.left();
-        for(int row = 0; row < pixelBufferRect.height(); row++) {
-            for(int col = 0; col < pixelBufferRect.width(); col++) {
+        for (int row = 0; row < pixelBufferRect.height(); row++) {
+            for (int col = 0; col < pixelBufferRect.width(); col++) {
                 alphaCache[(top+row) * alphaCachePitch + (left+col)] = srcBuffer[(row * pixelBufferRect.width() + col)*4 + 3];
             }
         }
-      }
+    }
+    drawBorder();
 }
+
+void WebView::setBorderColor(int r, int g, int b) {
+    mBorderColor=Vector3<int>(r, g, b);
+    drawBorder();
+}
+
+void WebView::drawBorder() {
+    if (viewTexture.isNull()) return;
+    if (getName()=="navbar") return;
+    unsigned char buffer[64];
+    for (int i=0; i<64; i+=4) {
+        buffer[i]=mBorderColor[2];
+        buffer[i+1]=mBorderColor[1];
+        buffer[i+2]=mBorderColor[0];
+        buffer[i+3]=255;
+    }
+    Berkelium::Rect rect;
+    rect.mTop=0;
+    rect.mLeft=0;
+    rect.mWidth=4;
+    rect.mHeight=3;
+    Berkelium::Rect clipRect;
+    clipRect.mTop=0;
+    clipRect.mLeft=0;
+    clipRect.mWidth=0;
+    clipRect.mHeight=0;
+    HardwarePixelBufferSharedPtr pixelBuffer = viewTexture->getBuffer();
+    std::cout << "dbm debug drawBorder pixelBuffer width: " << pixelBuffer->getWidth() << " height: " << pixelBuffer->getHeight() << std::endl;
+    for (unsigned int i=0; i<pixelBuffer->getWidth(); i+=4) {
+        rect.mTop=0;
+        rect.mLeft=i;
+        blitNewImage(pixelBuffer,buffer,rect,1,1,clipRect);
+        rect.mTop=3;
+        blitNewImage(pixelBuffer,buffer,rect,1,1,clipRect);
+    }
+}
+
 void WebView::onBeforeUnload(Berkelium::Window*, bool*) {
     SILOG(webview,debug,"onBeforeUnload");
 }

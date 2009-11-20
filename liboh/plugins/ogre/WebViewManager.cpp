@@ -416,10 +416,12 @@ bool WebViewManager::focusWebView(int x, int y, WebView* selection)
                 if (iter->second) {
                     if (iter->second->getName() != "navbar") {
                         if (iter->second->getName() == focusName) {
-                            iter->second->setOpacity(1);
+//                            iter->second->setOpacity(1);
+                            iter->second->setBorderColor(0,255,255);
                         }
                         else {
-                            iter->second->setOpacity(0.4);
+//                            iter->second->setOpacity(0.4);
+                            iter->second->setBorderColor(128,128,128);
                         }
                     }
                 }
@@ -583,6 +585,7 @@ void WebViewManager::navigate(NavigationAction action) {
         newwebview->loadURL("http://google.com/");
 //        newwebview->setTransparent(true);
         focusedNonChromeWebView = newwebview;
+        newwebview->setBorderColor(128,128,128);
         return;
     }
 
