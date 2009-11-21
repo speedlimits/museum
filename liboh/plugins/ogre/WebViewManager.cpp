@@ -596,8 +596,8 @@ void WebViewManager::navigate(NavigationAction action) {
     case NavigateDelete:
 //        delete focusedNonChromeWebView;
         /// this is bull -- delete is crashing
-        focusedNonChromeWebView->loadURL("");
         focusedNonChromeWebView->setTransparent(true);
+        focusedNonChromeWebView->loadURL("");
         focusedNonChromeWebView=0;
         break;
     default:

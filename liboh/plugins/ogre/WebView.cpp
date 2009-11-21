@@ -854,6 +854,7 @@ void WebView::setBorderColor(int r, int g, int b) {
 void WebView::drawBorder() {
     if (viewTexture.isNull()) return;
     if (getName()=="navbar") return;
+    if (isWebViewTransparent) return;
     unsigned char buffer[64];
     for (int i=0; i<64; i+=4) {
         buffer[i]=mBorderColor[2];
