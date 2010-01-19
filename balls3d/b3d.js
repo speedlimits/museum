@@ -135,6 +135,7 @@ b3d.world = function (gravity, timestep, ground) {
 					for (var k=j+1; k<this.dynamics.length; k++) {
 						b2 = this.dynamics[k]
 						if (n = obj.touchesBall(b2)) {
+							console.log ("collision between " + obj.name + " and " + b2.name)
 							var v1, v2
 							/// here comes that momentous exchange I've been blogging about
 							v1 = obj.vel
@@ -180,7 +181,8 @@ b3d.world = function (gravity, timestep, ground) {
 	}
 
 	this.addDBall = function(size, pos, ori, nom, bounce) {
-		if (nom===undefined) nom="ball" + this.statics.length
+		if (nom===undefined) nom="ball" + this.dynamics.length
+		console.log ("naming ball: " + nom)
 		this.dynamics.push(new b3d.dBall(size, pos, ori, nom, bounce)) 
 	}
 
