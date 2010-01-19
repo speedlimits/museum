@@ -82,8 +82,8 @@
 
 	function makeBall(ctx){
 		radius = Math.pow(2,.5)
-		lats =4
-		longs = 5
+		lats = 4
+		longs = 4
 		var geometryData = [];
 		var normalData = [];
 		var texCoordData = [];
@@ -145,6 +145,7 @@
 		ctx.bindBuffer(ctx.ARRAY_BUFFER, retval.vertexObject);
 		ctx.bufferData(ctx.ARRAY_BUFFER, new WebGLFloatArray(geometryData), ctx.STATIC_DRAW);
 		
+		retval.numVertices = geometryData.length
 		retval.numIndices = indexData.length;
 		debug("numIndices: "+retval.numIndices)
 		retval.indexObject = ctx.createBuffer();
@@ -179,22 +180,18 @@
 
         // Set up the array of colors for the cube's faces
 //        var colors = new WebGLUnsignedByteArray(
-        var colors = new WebGLFloatArray(
-            [  
-			1, .5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1,
-			.5, 1, .5, 1, .5, 1, .5, 1, .5, 1, .5, 1, .5, 1, .5, 1, 
-			.5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1, 1, 
-			1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 
-			.4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, 
-			1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1,
-			1, .5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1,
-			.5, 1, .5, 1, .5, 1, .5, 1, .5, 1, .5, 1, .5, 1, .5, 1, 
-			.5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1, 1, .5, .5, 1, 1, 
-			1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 
-			.4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, 
-			1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1, 1, .4, 1, 1,
-			]);
 
+
+		var temp = []
+		equator = 5
+		for (var i=0; i<gl.box.numIndices; i++) {
+			rgb = [.8,.8,.9]
+			if (i>=equator) rgb = [1,.1,.1]
+			temp.push(rgb[0], rgb[1], rgb[2], 1)
+		}
+		debug("temp: " + temp.length + " equator: " + equator)
+		debug("numVertices: " + gl.box.numVertices)
+		var colors = new WebGLFloatArray(temp)
         // Set up the vertex buffer for the colors
         gl.box.colorObject = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.colorObject);
@@ -258,7 +255,7 @@
 
         // Make a model/view matrix.
         gl.mvMatrix.makeIdentity();
-        gl.mvMatrix.rotate(currentAngle, 1,0,0);
+        gl.mvMatrix.rotate(currentAngle, 0,1,0);
         gl.mvMatrix.rotate(20, 1,0,0);
 
         // Construct the normal matrix from the model-view matrix and pass it in
