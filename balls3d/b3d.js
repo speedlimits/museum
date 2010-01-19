@@ -12,6 +12,10 @@ API:
     ///etc
 */
 
+console_log = function (v) {
+//	console.log(v)
+}
+
 var b3d = b3d || {};
 var V3 = V3 || {}
 
@@ -135,31 +139,31 @@ b3d.world = function (gravity, timestep, ground) {
 					for (var k=j+1; k<this.dynamics.length; k++) {
 						b2 = this.dynamics[k]
 						if (n = obj.touchesBall(b2)) {
-							console.log ("collision between " + obj.name + " and " + b2.name)
+							console_log ("collision between " + obj.name + " and " + b2.name)
 							var v1, v2
 							/// here comes that momentous exchange I've been blogging about
 							v1 = obj.vel
 							v2 = b2.vel
 							va = V3.avg(v1, v2) // this is the mutual ref frame
-							console.log("v1," + v1 + ",v2," + v2 + ",va," + va + ",norm," + n)
+							console_log("v1," + v1 + ",v2," + v2 + ",va," + va + ",norm," + n)
 							
 							v1 = V3.sub(v1, va) // v1 in mututal frame (yes subtract)
 							v2 = V3.sub(v2, va) // v2 likewise
 							c = V3.cos(v1, n) // cos of angle between our trajectory and normal
 							d = V3.dist(v1, v2) // mutual velocity
 							e = V3.mul(n, c * d) // yup -- e==exchange vector
-							console.log("v1," + v1 + ",v2," + v2 +",c," + c + ",d," + d + ",e," + e)
+							console_log("v1," + v1 + ",v2," + v2 +",c," + c + ",d," + d + ",e," + e)
 
 							v1 = V3.sub(v1, e) // bounce off plane perp to normal
 							v2 = V3.add(v2, e) // and vice versa
-							console.log("v1," + v1 + ",v2," + v2)
+							console_log("v1," + v1 + ",v2," + v2)
 							
 							v1 = V3.add(v1, va) // revert to zero ref frame
 							v2 = V3.add(v2, va) // ditto
-							console.log("v1," + v1 + ",v2," + v2)
+							console_log("v1," + v1 + ",v2," + v2)
 							obj.vel = v1
 							b2.vel = v2
-							console.log("-------")
+							console_log("-------")
 							collision = true
 							break
 						}
@@ -169,7 +173,7 @@ b3d.world = function (gravity, timestep, ground) {
 						obj.vel[1] += this.gravity
 					}
 				}
-//				console.log("tick,"+this.tick+",pos,"+obj.pos[1]+",vel,"+obj.vel[1]+",next,"+(obj.vel[1]+this.gravity))
+//				console_log("tick,"+this.tick+",pos,"+obj.pos[1]+",vel,"+obj.vel[1]+",next,"+(obj.vel[1]+this.gravity))
 			}
 			this.tick++
 		}
@@ -182,7 +186,7 @@ b3d.world = function (gravity, timestep, ground) {
 
 	this.addDBall = function(size, pos, ori, nom, bounce) {
 		if (nom===undefined) nom="ball" + this.dynamics.length
-		console.log ("naming ball: " + nom)
+		console_log ("naming ball: " + nom)
 		this.dynamics.push(new b3d.dBall(size, pos, ori, nom, bounce)) 
 	}
 
