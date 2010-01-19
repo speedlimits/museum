@@ -82,8 +82,8 @@
 
 	function makeBall(ctx){
 		radius = Math.pow(2,.5)
-		lats = 4
-		longs = 4
+		lats = 13
+		longs = 17
 		var geometryData = [];
 		var normalData = [];
 		var texCoordData = [];
@@ -145,7 +145,7 @@
 		ctx.bindBuffer(ctx.ARRAY_BUFFER, retval.vertexObject);
 		ctx.bufferData(ctx.ARRAY_BUFFER, new WebGLFloatArray(geometryData), ctx.STATIC_DRAW);
 		
-		retval.numVertices = geometryData.length
+		retval.numVertices = geometryData.length / 3
 		retval.numIndices = indexData.length;
 		debug("numIndices: "+retval.numIndices)
 		retval.indexObject = ctx.createBuffer();
@@ -183,12 +183,14 @@
 
 
 		var temp = []
-		equator = 5
-		for (var i=0; i<gl.box.numIndices; i++) {
+		equator = Math.floor(gl.box.numVertices/2)
+		for (var i=0; i<gl.box.numVertices; i++) {
 			rgb = [.8,.8,.9]
-			if (i>=equator) rgb = [1,.1,.1]
+//			if (i>=equator) rgb = [1,.1,.1]
 			temp.push(rgb[0], rgb[1], rgb[2], 1)
 		}
+		temp[equator*4] = 0			/// something to see it spin
+		
 		debug("temp: " + temp.length + " equator: " + equator)
 		debug("numVertices: " + gl.box.numVertices)
 		var colors = new WebGLFloatArray(temp)
@@ -296,7 +298,7 @@
 
         var gl = init();
         currentAngle = 0;
-        incAngle = 0.5*5;
+        incAngle = 0.5*1;
         framerate = new Framerate("framerate");
         setInterval(function() { drawPicture(gl) }, 10);
     }
