@@ -1,29 +1,6 @@
 <!DOCTYPE html>
 <!--
-/*
- * Copyright (C) 2009 Apple Inc. All Rights Reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
- */
+attempt to compose multiple objects
  -->
 <html>
 <head>
@@ -80,10 +57,10 @@
 		return n
 	}
 
-	function makeBall(ctx){
+	function makeBall(ctx, lats, longs){
 		radius = Math.pow(2,.5)
-		lats = 13
-		longs = 17
+		if (lats===undefined) lats = 13
+		if (longs==undefined) longs = 17
 		var geometryData = [];
 		var normalData = [];
 		var texCoordData = [];
@@ -176,7 +153,7 @@
         // Create a box. On return 'gl' contains a 'box' property with
         // the BufferObjects containing the arrays for vertices,
         // normals, texture coords, and indices.
-        gl.box = makeBall(gl);
+        gl.box = makeBall(gl,4,4);
 
         // Set up the array of colors for the cube's faces
 //        var colors = new WebGLUnsignedByteArray(
@@ -208,22 +185,36 @@
         gl.mvpMatrix = new CanvasMatrix4();
 
         // Enable all of the vertex attribute arrays.
-        gl.enableVertexAttribArray(0);
+        gl.enableVertexAttribArray(0);											/// enable 3 arrays
         gl.enableVertexAttribArray(1);
         gl.enableVertexAttribArray(2);
+        gl.enableVertexAttribArray(3);											/// enable 3 arrays
+        gl.enableVertexAttribArray(4);
+        gl.enableVertexAttribArray(5);
 
         // Set up all the vertex attributes for vertices, normals and colors
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.vertexObject);
-        gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.vertexObject);					/// make ARRAY = our geom vertex array
+        gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 0, 0);					///	geom index=2; 3 floats per vertex
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.normalObject);
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.normalObject);					///	make ARRAY = normals
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);					///	normal index=0; 3 floats per normal
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.colorObject);
-        gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.colorObject);						///	make ARRAY = colors
+        gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);					///	color index=1; 4 floats per color (RGBA?)
+
+
+/// test 2nd object -- switch norm/geom (should make smaller sphere)
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.vertexObject);					/// make ARRAY = our geom vertex array
+        gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 0, 0);					///	geom index=2; 3 floats per vertex
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.normalObject);					///	make ARRAY = normals
+        gl.vertexAttribPointer(5, 3, gl.FLOAT, false, 0, 0);					///	normal index=0; 3 floats per normal
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.colorObject);						///	make ARRAY = colors
+        gl.vertexAttribPointer(4, 4, gl.FLOAT, false, 0, 0);					///	color index=1; 4 floats per color (RGBA?)
 
         // Bind the index array
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.box.indexObject);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.box.indexObject);				///	make ELEMENTS = our index list (shorts!)
 
         return gl;
     }
@@ -247,18 +238,13 @@
         gl.perspectiveMatrix.perspective(30, width/height, 1, 10000);
     }
 
-    function drawPicture(gl)
+    function drawPicture_(gl, objnum)
     {
-        // Make sure the canvas is sized correctly.
-        reshape(gl);
-
-        // Clear the canvas
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
         // Make a model/view matrix.
         gl.mvMatrix.makeIdentity();
         gl.mvMatrix.rotate(currentAngle, 0,1,0);
         gl.mvMatrix.rotate(30, 1,0,0);
+		gl.mvMatrix.translate(objnum*3-1.5,0,0)
 
         // Construct the normal matrix from the model-view matrix and pass it in
         gl.normalMatrix.load(gl.mvMatrix);
@@ -274,7 +260,7 @@
                             gl.mvpMatrix.getAsWebGLFloatArray());
 
         // Draw the cube
-        gl.drawElements(gl.TRIANGLES, gl.box.numIndices, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, gl.box.numIndices, gl.UNSIGNED_SHORT, objnum*0);
 
         // Finish up.
         gl.flush();
@@ -286,6 +272,17 @@
         if (currentAngle > 360)
             currentAngle -= 360;
     }
+	
+	function drawPicture(gl) {
+        // Make sure the canvas is sized correctly.
+        reshape(gl);
+
+        // Clear the canvas
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+		drawPicture_(gl,0)
+		drawPicture_(gl,1)
+	}
 
     function start()
     {
