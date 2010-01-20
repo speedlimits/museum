@@ -188,33 +188,20 @@ attempt to compose multiple objects
         gl.enableVertexAttribArray(0);											/// enable 3 arrays
         gl.enableVertexAttribArray(1);
         gl.enableVertexAttribArray(2);
-        gl.enableVertexAttribArray(3);											/// enable 3 arrays
-        gl.enableVertexAttribArray(4);
-        gl.enableVertexAttribArray(5);
 
+		debug("magic number geom: " + gl.getAttribLocation(gl.program, "vPosition"))
         // Set up all the vertex attributes for vertices, normals and colors
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.vertexObject);					/// make ARRAY = our geom vertex array
         gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 0, 0);					///	geom index=2; 3 floats per vertex
 
+		debug("magic number normals: " + gl.getAttribLocation(gl.program, "vNormal"))
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.normalObject);					///	make ARRAY = normals
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);					///	normal index=0; 3 floats per normal
 
+		debug("magic number color: " + gl.getAttribLocation(gl.program, "vColor"))
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.colorObject);						///	make ARRAY = colors
         gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);					///	color index=1; 4 floats per color (RGBA?)
 
-
-/// test 2nd object -- switch norm/geom (should make smaller sphere)
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.vertexObject);					/// make ARRAY = our geom vertex array
-        gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 0, 0);					///	geom index=2; 3 floats per vertex
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.normalObject);					///	make ARRAY = normals
-        gl.vertexAttribPointer(5, 3, gl.FLOAT, false, 0, 0);					///	normal index=0; 3 floats per normal
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.box.colorObject);						///	make ARRAY = colors
-        gl.vertexAttribPointer(4, 4, gl.FLOAT, false, 0, 0);					///	color index=1; 4 floats per color (RGBA?)
-
-        // Bind the index array
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.box.indexObject);				///	make ELEMENTS = our index list (shorts!)
 
         return gl;
     }
