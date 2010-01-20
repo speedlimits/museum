@@ -172,26 +172,15 @@
     pyramidVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexPositionBuffer);
     var vertices = [
-        // Front face
          0.0,  1.0,  0.0,
         -1.0, -1.0,  1.0,
          1.0, -1.0,  1.0,
-        // Right face
-         0.0,  1.0,  0.0,
-         1.0, -1.0,  1.0,
-         1.0, -1.0, -1.0,
-        // Back face
-         0.0,  1.0,  0.0,
          1.0, -1.0, -1.0,
         -1.0, -1.0, -1.0,
-        // Left face
-         0.0,  1.0,  0.0,
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new WebGLFloatArray(vertices), gl.STATIC_DRAW);
     pyramidVertexPositionBuffer.itemSize = 3;
-    pyramidVertexPositionBuffer.numItems = 12;
+    pyramidVertexPositionBuffer.numItems = vertices.length;
  
     pyramidVertexColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
@@ -221,9 +210,9 @@
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pyramidVertexIndexBuffer);
     var pyramidVertexIndices = [
       0, 1, 2,
-	  3, 4, 5,
-	  6, 7, 8,
-	  9, 10, 11
+	  0, 2, 3,
+	  0, 3, 4,
+	  0, 4, 1
     ]
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(pyramidVertexIndices), gl.STATIC_DRAW);
     pyramidVertexIndexBuffer.itemSize = 1;
