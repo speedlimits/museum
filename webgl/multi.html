@@ -164,6 +164,7 @@
  
   var pyramidVertexPositionBuffer;
   var pyramidVertexColorBuffer;
+  var pyramidVertexIndexBuffer;
   var cubeVertexPositionBuffer;
   var cubeVertexColorBuffer;
   var cubeVertexIndexBuffer;
@@ -216,6 +217,17 @@
     pyramidVertexColorBuffer.itemSize = 4;
     pyramidVertexColorBuffer.numItems = 12;
  
+    pyramidVertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pyramidVertexIndexBuffer);
+    var pyramidVertexIndices = [
+      0, 1, 2,
+	  3, 4, 5,
+	  6, 7, 8,
+	  9, 10, 11
+    ]
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new WebGLUnsignedShortArray(pyramidVertexIndices), gl.STATIC_DRAW);
+    pyramidVertexIndexBuffer.itemSize = 1;
+    pyramidVertexIndexBuffer.numItems = 12;
  
     cubeVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
@@ -315,9 +327,12 @@
  
     gl.bindBuffer(gl.ARRAY_BUFFER, pyramidVertexColorBuffer);
     gl.vertexAttribPointer(vertexColorAttribute, pyramidVertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pyramidVertexIndexBuffer);
  
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, pyramidVertexPositionBuffer.numItems);
+//    gl.drawArrays(gl.TRIANGLES, 0, pyramidVertexPositionBuffer.numItems);
+    gl.drawElements(gl.TRIANGLES, pyramidVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
  
     mvPopMatrix();
  
